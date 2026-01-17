@@ -11,6 +11,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,9 +35,11 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOHardware;
+import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOHardware;
+import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.spindexter.Spindexter;
 import frc.robot.subsystems.spindexter.SpindexterIO;
 import frc.robot.subsystems.spindexter.SpindexterIOHardware;
@@ -47,6 +50,9 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -133,9 +139,10 @@ public class RobotContainer {
 
                 spindexter = new Spindexter(new SpindexterIO() {});
 
-                shooter = new Shooter(new ShooterIO() {});
+                IntakeIOSim iis = new IntakeIOSim(driveSimulation);
+                intake = new Intake(iis);
 
-                intake = new Intake(new IntakeIO() {});
+                shooter = new Shooter(new ShooterIOSim(iis));
 
                 climber = new Climber(new ClimberIO() {});
                 break;
@@ -223,6 +230,9 @@ public class RobotContainer {
                                                 drive.getPose().getTranslation(),
                                                 new Rotation2d())); // zero gyro
         controller.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+
+        controller.a().whileTrue(intake.intakeDown());
+        controller.b().whileTrue(intake.intakeUp());
     }
 
     /**
@@ -232,6 +242,18 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoChooser.get();
+    }
+
+    LoggedMechanism2d mech;
+    LoggedMechanismRoot2d mechRoot;
+    LoggedMechanismLigament2d intakeMech;
+
+    public void simInit() {
+        mech = new LoggedMechanism2d(0, 0);
+        mechRoot = mech.getRoot("Root", Units.inchesToMeters(15), 0);
+        intakeMech =
+                mechRoot.append(
+                        new LoggedMechanismLigament2d("Intake", Units.inchesToMeters(14), 0));
     }
 
     public void resetSimulationField() {
@@ -250,5 +272,9 @@ public class RobotContainer {
         Logger.recordOutput(
                 "FieldSimulation/Fuel",
                 SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
+
+        intakeMech.setAngle(Units.radiansToDegrees(intake.getAngle()));
+
+        Logger.recordOutput("Mech", mech);
     }
 }

@@ -36,7 +36,7 @@ public interface ShooterIO {
 
     public default void wheelPower(double power) {}
 
-    public default void wheelTurret(double power) {}
+    public default void turretPower(double power) {}
 
-    public default void wheelHood(double power) {}
+    public default void hoodPower(double power) {}
 }

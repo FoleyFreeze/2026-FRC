@@ -15,7 +15,7 @@ public interface SpindexterIO {
 
     public default void updateInputs(SpindexterIOInputs inputs) {}
 
-    public default void setSpeed(double speed) {}
+    public default void spinSpeed(double speed) {}
 
-    public default void setPower(double power) {}
+    public default void spinPower(double power) {}
 }

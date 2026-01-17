@@ -17,12 +17,24 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveTuning;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOHardware;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOHardware;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOHardware;
+import frc.robot.subsystems.spindexter.Spindexter;
+import frc.robot.subsystems.spindexter.SpindexterIO;
+import frc.robot.subsystems.spindexter.SpindexterIOHardware;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -39,11 +51,10 @@ public class RobotContainer {
     // Subsystems
     private final Drive drive;
     private final Vision vision;
-    //     private final Spindexter spindexter;
-    //     private final Shooter shooter;
-    //     private final Intake intake;
-    //     private final Climber climber;
-    // TODO: ALL OF THIS
+    private final Spindexter spindexter;
+    private final Shooter shooter;
+    private final Intake intake;
+    private final Climber climber;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -71,6 +82,15 @@ public class RobotContainer {
                                 drive::addVisionMeasurement,
                                 new VisionIOLimelight("camera0Name", drive::getRotation),
                                 new VisionIOLimelight("camera1Name", drive::getRotation));
+
+                spindexter = new Spindexter(new SpindexterIOHardware());
+
+                shooter = new Shooter(new ShooterIOHardware());
+
+                intake = new Intake(new IntakeIOHardware());
+
+                climber = new Climber(new ClimberIOHardware());
+
                 break;
 
             case SIM:
@@ -90,6 +110,14 @@ public class RobotContainer {
                                         "camera0Name", new Transform3d(), drive::getPose),
                                 new VisionIOPhotonVisionSim(
                                         "camera1Name", new Transform3d(), drive::getPose));
+
+                spindexter = new Spindexter(new SpindexterIO() {});
+
+                shooter = new Shooter(new ShooterIO() {});
+
+                intake = new Intake(new IntakeIO() {});
+
+                climber = new Climber(new ClimberIO() {});
                 break;
 
             default:
@@ -106,6 +134,15 @@ public class RobotContainer {
                 vision =
                         new Vision(
                                 drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+
+                spindexter = new Spindexter(new SpindexterIO() {});
+
+                shooter = new Shooter(new ShooterIO() {});
+
+                intake = new Intake(new IntakeIO() {});
+
+                climber = new Climber(new ClimberIO() {});
+
                 break;
         }
 

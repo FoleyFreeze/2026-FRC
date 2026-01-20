@@ -5,19 +5,27 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.spindexter.SpindexterIOSim;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOSim implements ShooterIO {
     private final IntakeIOSim iis;
+    private final SwerveDriveSimulation swerveSim;
+    private final SpindexterIOSim spinSim;
 
     private final FlywheelSim wheel;
     private final SingleJointedArmSim hood;
@@ -39,12 +47,18 @@ public class ShooterIOSim implements ShooterIO {
     private boolean hoodClosedLoop = false;
     private boolean turretClosedLoop = false;
 
-    public ShooterIOSim(IntakeIOSim iis) {
+    // 10 balls per second
+    private final double shotTime = 1 / 5.0;
+    private final Timer shotClock = new Timer();
+
+    public ShooterIOSim(IntakeIOSim iis, SwerveDriveSimulation swerveSim, SpindexterIOSim spinSim) {
         this.iis = iis;
+        this.swerveSim = swerveSim;
+        this.spinSim = spinSim;
 
         wheel =
                 new FlywheelSim(
-                        LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60Foc(1), 0.0005, 1),
+                        LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60Foc(1), 0.001, 1),
                         DCMotor.getKrakenX60Foc(1));
         wheelController = new PIDController(2, 0, 0);
         hoodController = new PIDController(0.2, 0, 0);
@@ -71,6 +85,8 @@ public class ShooterIOSim implements ShooterIO {
                         Units.degreesToRadians(45),
                         false,
                         0);
+
+        shotClock.start();
     }
 
     @Override
@@ -100,18 +116,35 @@ public class ShooterIOSim implements ShooterIO {
         turret.setInputVoltage(turretControlVoltage);
 
         // if indexer is feeding a ball to the shooter
-        if (wheel.getAngularVelocityRadPerSec() > 9000) {
+        if (spinSim.areWeRunning && shotClock.hasElapsed(shotTime)) {
             if (iis.hasBall()) {
+                shotClock.reset();
                 RebuiltFuelOnFly fuel =
                         new RebuiltFuelOnFly(
+                                swerveSim.getSimulatedDriveTrainPose().getTranslation(),
                                 new Translation2d(),
-                                new Translation2d(),
-                                new ChassisSpeeds(),
-                                Rotation2d.fromRadians(turret.getAngleRads()),
+                                swerveSim.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                                Rotation2d.fromRadians(turret.getAngleRads())
+                                        .plus(swerveSim.getSimulatedDriveTrainPose().getRotation()),
                                 Inches.of(18),
                                 MetersPerSecond.of(
-                                        wheel.getAngularVelocityRPM() * 60 * Math.PI * 2),
+                                        wheel.getAngularVelocityRPM()
+                                                / 60
+                                                * Math.PI
+                                                * Units.inchesToMeters(2)),
                                 Radians.of(hood.getAngleRads()));
+                fuel.enableBecomesGamePieceOnFieldAfterTouchGround();
+                fuel.withTargetPosition(() -> new Translation3d());
+                fuel.withTargetTolerance(new Translation3d());
+                fuel.withProjectileTrajectoryDisplayCallBack(
+                        (pose3d) ->
+                                Logger.recordOutput(
+                                        "Sim/SuccessfulShot", pose3d.toArray(Pose3d[]::new)),
+                        (pose3d) ->
+                                Logger.recordOutput(
+                                        "Sim/MissedShot", pose3d.toArray(Pose3d[]::new)));
+
+                SimulatedArena.getInstance().addGamePieceProjectile(fuel);
             }
         }
 

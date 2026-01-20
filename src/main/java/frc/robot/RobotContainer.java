@@ -43,6 +43,7 @@ import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.spindexter.Spindexter;
 import frc.robot.subsystems.spindexter.SpindexterIO;
 import frc.robot.subsystems.spindexter.SpindexterIOHardware;
+import frc.robot.subsystems.spindexter.SpindexterIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -137,12 +138,13 @@ public class RobotContainer {
                                         new Transform3d(),
                                         driveSimulation::getSimulatedDriveTrainPose));
 
-                spindexter = new Spindexter(new SpindexterIO() {});
+                SpindexterIOSim spinSim = new SpindexterIOSim();
+                spindexter = new Spindexter(spinSim);
 
                 IntakeIOSim iis = new IntakeIOSim(driveSimulation);
                 intake = new Intake(iis);
 
-                shooter = new Shooter(new ShooterIOSim(iis));
+                shooter = new Shooter(new ShooterIOSim(iis, driveSimulation, spinSim));
 
                 climber = new Climber(new ClimberIO() {});
                 break;
@@ -231,8 +233,17 @@ public class RobotContainer {
                                                 new Rotation2d())); // zero gyro
         controller.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
 
+        // intake
         controller.a().whileTrue(intake.intakeDown());
         controller.b().whileTrue(intake.intakeUp());
+
+        // shooter wheel
+        controller.leftTrigger().whileTrue(shooter.prime());
+        controller.leftTrigger().whileFalse(shooter.stop());
+
+        // spindexer
+        controller.rightTrigger().whileTrue(spindexter.spin());
+        controller.rightTrigger().whileFalse(spindexter.stop());
     }
 
     /**

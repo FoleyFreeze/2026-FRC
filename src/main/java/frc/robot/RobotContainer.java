@@ -12,14 +12,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
-import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveTuning;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
@@ -64,17 +59,14 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
     // Subsystems
-    private final Drive drive;
-    private final Vision vision;
-    private final Spindexter spindexter;
-    private final Shooter shooter;
-    private final Intake intake;
-    private final Climber climber;
+    public final Drive drive;
+    public final Vision vision;
+    public final Spindexter spindexter;
+    public final Shooter shooter;
+    public final Intake intake;
+    public final Climber climber;
 
     private SwerveDriveSimulation driveSimulation;
-
-    // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -198,52 +190,7 @@ public class RobotContainer {
                 "Drive SysId (Dynamic Reverse)",
                 drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-        configureButtonBindings();
-    }
-
-    /**
-     * Use this method to define your button->command mappings. Buttons can be created by
-     * instantiating a {@link GenericHID} or one of its subclasses ({@link
-     * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-     * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-     */
-    private void configureButtonBindings() {
-        // Default command, normal field-relative drive
-        drive.setDefaultCommand(
-                DriveCommands.joystickDrive(
-                        drive,
-                        () -> -controller.getLeftY(),
-                        () -> -controller.getLeftX(),
-                        () -> -controller.getRightX()));
-
-        // Reset gyro / odometry
-        final Runnable resetGyro =
-                Constants.currentMode == Constants.Mode.SIM
-                        ? () ->
-                                drive.setPose(
-                                        driveSimulation
-                                                .getSimulatedDriveTrainPose()) // reset odometry to
-                        // actual robot pose
-                        // during
-                        // simulation
-                        : () ->
-                                drive.setPose(
-                                        new Pose2d(
-                                                drive.getPose().getTranslation(),
-                                                new Rotation2d())); // zero gyro
-        controller.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
-
-        // intake
-        controller.a().whileTrue(intake.intakeDown());
-        controller.b().whileTrue(intake.intakeUp());
-
-        // shooter wheel
-        controller.leftTrigger().whileTrue(shooter.prime());
-        controller.leftTrigger().whileFalse(shooter.stop());
-
-        // spindexer
-        controller.rightTrigger().whileTrue(spindexter.spin());
-        controller.rightTrigger().whileFalse(spindexter.stop());
+        ConfigButtons.config(this);
     }
 
     /**

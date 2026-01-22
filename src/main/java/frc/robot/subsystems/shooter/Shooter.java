@@ -26,4 +26,5 @@ public class Shooter extends SubsystemBase {
     public Command stop() {
         return new RunCommand(() -> io.wheelPower(0), this); // TODO: change if 0 is wrong
     }
+
 }

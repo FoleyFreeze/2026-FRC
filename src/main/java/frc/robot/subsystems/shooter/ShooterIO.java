@@ -34,6 +34,12 @@ public interface ShooterIO {
 
     public default void setAll(double turretAngle, double hoodAngle, double speed) {}
 
+    public default void setTurretAngle(double turretAngle) {}
+
+    public default void setHoodAngle(double hoodAngle) {}
+
+    public default void setSpeed(double speed) {}
+
     public default void wheelPower(double power) {}
 
     public default void turretPower(double power) {}

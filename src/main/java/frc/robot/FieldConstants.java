@@ -37,6 +37,8 @@ public class FieldConstants {
         public static final double width = Units.inchesToMeters(47);
         public static final double goalWidth = Units.inchesToMeters(41.7);
         public static final double height = Units.inchesToMeters(72);
+        public static final Translation2d center =
+                new Translation2d(HorizontalLines.starting + width / 2, VerticalLines.center);
 
         // consider adding corners (topLeftCorner...)
     }

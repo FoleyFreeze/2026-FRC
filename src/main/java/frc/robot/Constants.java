@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -28,4 +30,9 @@ public final class Constants {
         /** Replaying from a log file. */
         REPLAY
     }
+
+    public static final double robotLength = 32;
+    public static final double robotWidth = 28;
+    public static final Translation2d shooterLocOnBot =
+            new Translation2d(Units.inchesToMeters(-12), Units.inchesToMeters(8));
 }

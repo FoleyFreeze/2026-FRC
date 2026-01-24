@@ -35,4 +35,6 @@ public final class Constants {
     public static final double robotWidth = 28;
     public static final Translation2d shooterLocOnBot =
             new Translation2d(Units.inchesToMeters(-12), Units.inchesToMeters(8));
+    public static final double turretAngleOffset = 0; // TODO: fix if needbe
+    public static final double maximumTurretAngle = 450;
 }

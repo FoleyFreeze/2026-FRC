@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
+import frc.robot.util.Util;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -46,6 +47,32 @@ public class Shooter extends SubsystemBase {
         DataPoint setpoints = lerp.get(goal, bot, botVel);
 
         // 3 use setpoints from lerp to set motors
-        io.setAll(setpoints.angle() - botLoc.getRotation().getDegrees(), 0, 0);
+        manageTurretWrap(setpoints.angle() - botLoc.getRotation().getDegrees());
+        io.setHoodAngle(setpoints.hood());
+        io.setSpeed(setpoints.rpm());
+    }
+
+    public void manageTurretWrap(double angle) {
+        double trueAngle = angle - Constants.turretAngleOffset;
+        double normAngle = Util.floorMod(trueAngle, 360);
+        double delta = normAngle - (inputs.turretPosition % 360);
+
+        double shortDelta;
+        if (delta > 180) {
+            shortDelta = delta - 360;
+        } else if (delta < -180) {
+            shortDelta = delta + 360;
+        } else {
+            shortDelta = delta;
+        }
+
+        double setPoint = shortDelta + (inputs.turretPosition);
+        if (setPoint > Constants.maximumTurretAngle) {
+            setPoint -= 360;
+        } else if (setPoint < 0) {
+            setPoint += 360;
+        }
+
+        io.setTurretAngle(setPoint);
     }
 }

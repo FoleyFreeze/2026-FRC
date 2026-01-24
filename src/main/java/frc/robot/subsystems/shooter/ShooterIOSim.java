@@ -174,16 +174,22 @@ public class ShooterIOSim implements ShooterIO {
         inputs.wheelTemp = 0;
     }
 
+    public void setTurretAngle(double turretAngle) {
+        turretClosedLoop = true;
+        turretController.setSetpoint(turretAngle);
+    }
+
     @Override
-    public void setAll(double turretAngle, double hoodAngle, double speed) {
+    public void setHoodAngle(double hoodAngle) {
+        hoodClosedLoop = true;
+        hoodController.setSetpoint(hoodAngle);
+    }
+
+    @Override
+    public void setSpeed(double speed) {
         wheelClosedLoop = true;
         wheelFeedfwdVoltage = wheelKF * speed;
         wheelController.setSetpoint(speed);
-
-        turretClosedLoop = true;
-        turretController.setSetpoint(turretAngle);
-        hoodClosedLoop = true;
-        hoodController.setSetpoint(hoodAngle);
     }
 
     @Override

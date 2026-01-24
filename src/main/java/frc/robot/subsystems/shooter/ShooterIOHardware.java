@@ -144,9 +144,17 @@ public class ShooterIOHardware implements ShooterIO {
     }
 
     @Override
-    public void setAll(double turretAngle, double hoodAngle, double speed) {
+    public void setTurretAngle(double turretAngle) {
         turret.setControl(positionRequestTurret.withPosition(turretAngle));
+    }
+
+    @Override
+    public void setHoodAngle(double hoodAngle) {
         hood.setControl(positionRequestHood.withPosition(hoodAngle));
+    }
+
+    @Override
+    public void setSpeed(double speed) {
         wheel.setControl(velocityRequestWheel.withVelocity(speed));
     }
 }

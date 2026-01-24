@@ -60,7 +60,11 @@ public class Shooter extends SubsystemBase {
         DataPoint setpoints = lerp.get(goal, bot, botVel);
 
         // 3 use setpoints from lerp to set motors
-        manageTurretWrap(setpoints.angle() - botLoc.getRotation().getDegrees());
+        double angleSetpoint = setpoints.angle() - botLoc.getRotation().getDegrees();
+        Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
+        Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
+        Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
+        manageTurretWrap(angleSetpoint);
         io.setHoodAngle(setpoints.hood());
         io.setSpeed(setpoints.rpm());
     }
@@ -86,6 +90,7 @@ public class Shooter extends SubsystemBase {
             setPoint += 360;
         }
 
+        Logger.recordOutput("Shooter/TurretSetpoint", setPoint);
         io.setTurretAngle(setPoint);
     }
 }

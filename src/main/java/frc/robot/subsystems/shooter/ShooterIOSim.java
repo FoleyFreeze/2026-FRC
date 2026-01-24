@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,10 +13,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.spindexter.SpindexterIOSim;
 import org.ironmaple.simulation.SimulatedArena;
@@ -44,7 +47,10 @@ public class ShooterIOSim implements ShooterIO {
     private double wheelFeedfwdVoltage = 0;
     private double hoodFeedfwdVoltage = 0;
     private double turretFeedfwdVoltage = 0;
-    private final double wheelKF = 5800 / 12.0; // 5800rpm at 12v?
+    private final double wheelKF =
+            1.0
+                    / Units.radiansPerSecondToRotationsPerMinute(
+                            DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt);
     private boolean hoodClosedLoop = false;
     private boolean turretClosedLoop = false;
 
@@ -59,29 +65,30 @@ public class ShooterIOSim implements ShooterIO {
 
         wheel =
                 new FlywheelSim(
-                        LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60Foc(1), 0.001, 1),
+                        LinearSystemId.createFlywheelSystem(
+                                DCMotor.getKrakenX60Foc(1), 0.006, 1.0 / 1.5),
                         DCMotor.getKrakenX60Foc(1));
 
-        wheelController = new PIDController(2, 0, 0); // V/rpm
-        hoodController = new PIDController(0.2, 0, 0); // V/deg
-        turretController = new PIDController(0.2, 0, 0); // V/deg
+        wheelController = new PIDController(0.10, 0, 0.0001); // V/rpm
+        hoodController = new PIDController(0.1, 0, 0.0); // V/deg
+        turretController = new PIDController(0.4, 0, 0.05); // V/deg
 
         hood =
                 new SingleJointedArmSim(
                         DCMotor.getKrakenX60Foc(1),
                         10,
-                        0.01,
+                        0.05,
                         Units.inchesToMeters(2),
-                        Units.degreesToRadians(15),
-                        Units.degreesToRadians(75),
-                        true,
+                        Units.degreesToRadians(0),
+                        Units.degreesToRadians(90),
+                        false,
                         Units.degreesToRadians(45));
 
         turret =
                 new SingleJointedArmSim(
                         DCMotor.getKrakenX60(1),
                         10,
-                        0.1,
+                        0.2,
                         Units.inchesToMeters(4),
                         Units.degreesToRadians(0),
                         Units.degreesToRadians(Constants.maximumTurretAngle),
@@ -114,6 +121,15 @@ public class ShooterIOSim implements ShooterIO {
             turretController.reset();
         }
 
+        hoodControlVoltage = MathUtil.clamp(hoodControlVoltage, -12, 12);
+        wheelControlVoltage = MathUtil.clamp(wheelControlVoltage, -12, 12);
+        turretControlVoltage = MathUtil.clamp(turretControlVoltage, -12, 12);
+        if (DriverStation.isDisabled()) {
+            hoodControlVoltage = 0;
+            wheelControlVoltage = 0;
+            turretControlVoltage = 0;
+        }
+
         hood.setInputVoltage(hoodControlVoltage);
         wheel.setInputVoltage(wheelControlVoltage);
         turret.setInputVoltage(turretControlVoltage);
@@ -122,6 +138,13 @@ public class ShooterIOSim implements ShooterIO {
         if (spinSim.areWeRunning && shotClock.hasElapsed(shotTime)) {
             if (iis.hasBall()) {
                 shotClock.reset();
+
+                // pull energy out of the wheel
+                // do this first as we shoot with the low velocity
+                wheel.setAngularVelocity(
+                        wheel.getAngularVelocityRadPerSec()
+                                - Units.rotationsPerMinuteToRadiansPerSecond(50));
+
                 RebuiltFuelOnFly fuel =
                         new RebuiltFuelOnFly(
                                 swerveSim.getSimulatedDriveTrainPose().getTranslation(),
@@ -134,11 +157,20 @@ public class ShooterIOSim implements ShooterIO {
                                         wheel.getAngularVelocityRPM()
                                                 / 60
                                                 * Math.PI
-                                                * Units.inchesToMeters(2)),
+                                                * Units.inchesToMeters(1.375)),
                                 Radians.of(hood.getAngleRads()));
                 fuel.enableBecomesGamePieceOnFieldAfterTouchGround();
-                fuel.withTargetPosition(() -> new Translation3d());
-                fuel.withTargetTolerance(new Translation3d());
+                fuel.withTargetPosition(
+                        () ->
+                                new Translation3d(
+                                        FieldConstants.Hub.center.getX(),
+                                        FieldConstants.Hub.center.getY(),
+                                        Units.inchesToMeters(72)));
+                fuel.withTargetTolerance(
+                        new Translation3d(
+                                Units.inchesToMeters(41.7 / 2),
+                                Units.inchesToMeters(41.7 / 2),
+                                0.1));
                 fuel.withProjectileTrajectoryDisplayCallBack(
                         (pose3d) ->
                                 Logger.recordOutput(

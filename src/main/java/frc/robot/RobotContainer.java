@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
@@ -203,24 +204,31 @@ public class RobotContainer {
     }
 
     LoggedMechanism2d mech;
-    LoggedMechanismRoot2d mechRoot;
+    LoggedMechanismRoot2d mechRootI;
+    LoggedMechanismRoot2d mechRootT;
     LoggedMechanismLigament2d intakeMech;
-    LoggedMechanismLigament2d turretMech;
+    LoggedMechanismLigament2d turretMechOffset;
     LoggedMechanismLigament2d turretHoodMech;
 
     public void simInit() {
         mech = new LoggedMechanism2d(0, 0);
-        mechRoot = mech.getRoot("Root", Units.inchesToMeters(15), 0);
+        mechRootI = mech.getRoot("IntakeRoot", Units.inchesToMeters(15), 0);
         intakeMech =
-                mechRoot.append(
+                mechRootI.append(
                         new LoggedMechanismLigament2d("Intake", Units.inchesToMeters(14), 0));
 
-        turretMech =
-                mechRoot.append(
-                        new LoggedMechanismLigament2d("Turret", Units.inchesToMeters(6), 0));
+        mechRootT = mech.getRoot("ShootRoot", Constants.shooterLocOnBot.getX(), 0);
+        turretMechOffset =
+                mechRootT.append(
+                        new LoggedMechanismLigament2d(
+                                "TurretOffset",
+                                Units.inchesToMeters(18),
+                                90,
+                                10,
+                                new Color8Bit(110, 110, 110)));
         turretHoodMech =
-                turretMech.append(
-                        new LoggedMechanismLigament2d("Hood", Units.inchesToMeters(6), 45));
+                turretMechOffset.append(
+                        new LoggedMechanismLigament2d("Hood", Units.inchesToMeters(6), -45));
     }
 
     public void resetSimulationField() {
@@ -241,8 +249,7 @@ public class RobotContainer {
                 SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
 
         intakeMech.setAngle(Units.radiansToDegrees(intake.getAngle()));
-        turretMech.setAngle(shooter.getTurretAngle());
-        turretHoodMech.setAngle(shooter.getHoodAngle()); //TODO: change pos and whanot
+        turretHoodMech.setAngle(-shooter.getHoodAngle());
 
         Logger.recordOutput("Mech", mech);
     }

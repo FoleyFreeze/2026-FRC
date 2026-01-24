@@ -8,13 +8,11 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterInterp1d {
     public static record DataPoint(double rpm, double angle, double hood, double time) {}
 
-    private static final double[] distAxis = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    };
+    private static final double[] distAxis = {0, 1.524, 3.048, 4.572, 6.096};
 
-    private static final double[] rpmTable = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    private static final double[] hoodAngleTable = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    private static final double[] timeTable = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private static final double[] rpmTable = {2907, 3494, 4121, 4714, 5274};
+    private static final double[] hoodAngleTable = {73.2, 58.7, 53.4, 50.8, 49.1};
+    private static final double[] timeTable = {0.58, 0.78, 0.96, 1.12, 1.27};
 
     public ShooterInterp1d() {}
 
@@ -53,22 +51,22 @@ public class ShooterInterp1d {
         return time;
     }
 
-    private static final int reps = 3;
+    private static final int reps = 5;
 
     public DataPoint get(Translation2d goal, Translation2d pos, ChassisSpeeds vel) {
         // rep 1
         double dist = goal.minus(pos).getNorm();
         double time = getTime(dist);
         // rep 2 - x
+        Translation2d offset;
         for (int i = 1; i < reps - 1; i++) {
-            Translation2d offset =
+            offset =
                     new Translation2d(-vel.vxMetersPerSecond * time, -vel.vyMetersPerSecond * time);
             dist = goal.plus(offset).minus(pos).getNorm();
             time = getTime(dist);
         }
         // rep x+1
-        Translation2d offset =
-                new Translation2d(-vel.vxMetersPerSecond * time, -vel.vyMetersPerSecond * time);
+        offset = new Translation2d(-vel.vxMetersPerSecond * time, -vel.vyMetersPerSecond * time);
         Translation2d vecToTarget = goal.plus(offset).minus(pos);
         dist = vecToTarget.getNorm();
 

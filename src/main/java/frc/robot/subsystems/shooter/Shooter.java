@@ -10,6 +10,7 @@ import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
 import frc.robot.util.Util;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -28,12 +29,24 @@ public class Shooter extends SubsystemBase {
         Logger.processInputs("Shooter", inputs);
     }
 
+    public double getTurretAngle() {
+        return inputs.turretPosition;
+    }
+
+    public double getHoodAngle() {
+        return inputs.hoodPosition;
+    }
+
     public Command prime() {
         return new RunCommand(() -> io.wheelPower(1), this);
     }
 
     public Command stop() {
         return new RunCommand(() -> io.wheelPower(0), this);
+    }
+
+    public Command cameraShoot(Supplier<Pose2d> botPose, Supplier<ChassisSpeeds> botVel) {
+        return new RunCommand(() -> goalPrime(botPose.get(), botVel.get()), this);
     }
 
     public void goalPrime(Pose2d botLoc, ChassisSpeeds botVel) {

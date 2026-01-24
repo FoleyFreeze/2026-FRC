@@ -15,6 +15,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.Constants;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.spindexter.SpindexterIOSim;
 import org.ironmaple.simulation.SimulatedArena;
@@ -43,7 +44,7 @@ public class ShooterIOSim implements ShooterIO {
     private double wheelFeedfwdVoltage = 0;
     private double hoodFeedfwdVoltage = 0;
     private double turretFeedfwdVoltage = 0;
-    private final double wheelKF = 1000 / 12.0; // 1000rpm at 12v?
+    private final double wheelKF = 5800 / 12.0; // 5800rpm at 12v?
     private boolean hoodClosedLoop = false;
     private boolean turretClosedLoop = false;
 
@@ -60,9 +61,10 @@ public class ShooterIOSim implements ShooterIO {
                 new FlywheelSim(
                         LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60Foc(1), 0.001, 1),
                         DCMotor.getKrakenX60Foc(1));
-        wheelController = new PIDController(2, 0, 0);
-        hoodController = new PIDController(0.2, 0, 0);
-        turretController = new PIDController(0.2, 0, 0);
+
+        wheelController = new PIDController(2, 0, 0); // V/rpm
+        hoodController = new PIDController(0.2, 0, 0); // V/deg
+        turretController = new PIDController(0.2, 0, 0); // V/deg
 
         hood =
                 new SingleJointedArmSim(
@@ -82,7 +84,7 @@ public class ShooterIOSim implements ShooterIO {
                         0.1,
                         Units.inchesToMeters(4),
                         Units.degreesToRadians(0),
-                        Units.degreesToRadians(45),
+                        Units.degreesToRadians(Constants.maximumTurretAngle),
                         false,
                         0);
 
@@ -93,19 +95,20 @@ public class ShooterIOSim implements ShooterIO {
     public void updateInputs(ShooterIOInputs inputs) {
         if (wheelClosedLoop) {
             wheelControlVoltage =
-                    wheelFeedfwdVoltage
-                            + wheelController.calculate(wheel.getAngularVelocityRadPerSec());
+                    wheelFeedfwdVoltage + wheelController.calculate(wheel.getAngularVelocityRPM());
         } else {
             wheelController.reset();
         }
         if (hoodClosedLoop) {
-            hoodControlVoltage = hoodController.calculate(hood.getAngleRads());
+            hoodControlVoltage =
+                    hoodController.calculate(Units.radiansToDegrees(hood.getAngleRads()));
 
         } else {
             hoodController.reset();
         }
         if (turretClosedLoop) {
-            turretControlVoltage = turretController.calculate(turret.getAngleRads());
+            turretControlVoltage =
+                    turretController.calculate(Units.radiansToDegrees(turret.getAngleRads()));
 
         } else {
             turretController.reset();
@@ -153,22 +156,25 @@ public class ShooterIOSim implements ShooterIO {
         turret.update(0.02);
 
         inputs.hoodConnected = true;
-        inputs.hoodPosition = hood.getAngleRads();
-        inputs.hoodVelocity = hood.getVelocityRadPerSec();
+        inputs.hoodPosition = Units.radiansToDegrees(hood.getAngleRads());
+        inputs.hoodVelocity = Units.radiansToDegrees(hood.getVelocityRadPerSec());
         inputs.hoodVoltage = hoodControlVoltage;
         inputs.hoodCurrent = hood.getCurrentDrawAmps();
         inputs.hoodTemp = 0;
 
         inputs.turretConnected = true;
-        inputs.turretPosition = turret.getAngleRads();
-        inputs.turretVelocity = turret.getVelocityRadPerSec();
+        inputs.turretPosition = Units.radiansToDegrees(turret.getAngleRads());
+        inputs.turretVelocity = Units.radiansToDegrees(turret.getVelocityRadPerSec());
         inputs.turretVoltage = turretControlVoltage;
         inputs.turretCurrent = turret.getCurrentDrawAmps();
         inputs.turretTemp = 0;
 
         inputs.wheelConnected = true;
-        inputs.wheelVelocity = wheel.getAngularVelocityRadPerSec();
-        inputs.wheelPosition += 0.02 * inputs.wheelVelocity;
+        inputs.wheelVelocity = wheel.getAngularVelocityRPM();
+        inputs.wheelPosition +=
+                0.02
+                        * Units.radiansToDegrees(
+                                Units.rotationsPerMinuteToRadiansPerSecond(inputs.wheelVelocity));
         inputs.wheelVoltage = wheelControlVoltage;
         inputs.wheelCurrent = wheel.getCurrentDrawAmps();
         inputs.wheelTemp = 0;

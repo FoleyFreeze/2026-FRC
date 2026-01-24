@@ -1,5 +1,10 @@
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.RevolutionsPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -10,6 +15,7 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -111,9 +117,9 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
         inputs.hoodConnected = hoodConnectedDebounce.calculate(hoodStatus.isOK());
         inputs.turretConnected = turretConnectedDebounce.calculate(turretStatus.isOK());
-        inputs.wheelPosition = positionWheel.getValueAsDouble();
-        inputs.hoodPosition = positionHood.getValueAsDouble();
-        inputs.turretPosition = positionTurret.getValueAsDouble();
+        inputs.wheelPosition = positionWheel.getValue().in(Rotations);
+        inputs.hoodPosition = positionHood.getValue().in(Degrees);
+        inputs.turretPosition = positionTurret.getValue().in(Degrees);
         inputs.wheelVoltage = voltageWheel.getValueAsDouble();
         inputs.hoodVoltage = voltageHood.getValueAsDouble();
         inputs.turretVoltage = voltageTurret.getValueAsDouble();
@@ -123,9 +129,9 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.wheelTemp = tempWheel.getValueAsDouble();
         inputs.hoodTemp = tempHood.getValueAsDouble();
         inputs.turretTemp = tempTurret.getValueAsDouble();
-        inputs.wheelVelocity = angularVelocityWheel.getValueAsDouble();
-        inputs.hoodVelocity = angularVelocityHood.getValueAsDouble();
-        inputs.turretVelocity = angularVelocityTurret.getValueAsDouble();
+        inputs.wheelVelocity = angularVelocityWheel.getValue().in(RevolutionsPerSecond) * 60;
+        inputs.hoodVelocity = angularVelocityHood.getValue().in(DegreesPerSecond);
+        inputs.turretVelocity = angularVelocityTurret.getValue().in(DegreesPerSecond);
     }
 
     @Override
@@ -145,16 +151,17 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void setTurretAngle(double turretAngle) {
-        turret.setControl(positionRequestTurret.withPosition(turretAngle));
+        turret.setControl(
+                positionRequestTurret.withPosition(Units.degreesToRotations(turretAngle)));
     }
 
     @Override
     public void setHoodAngle(double hoodAngle) {
-        hood.setControl(positionRequestHood.withPosition(hoodAngle));
+        hood.setControl(positionRequestHood.withPosition(Units.degreesToRotations(hoodAngle)));
     }
 
     @Override
     public void setSpeed(double speed) {
-        wheel.setControl(velocityRequestWheel.withVelocity(speed));
+        wheel.setControl(velocityRequestWheel.withVelocity(speed / 60));
     }
 }

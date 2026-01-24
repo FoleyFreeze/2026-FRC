@@ -205,6 +205,8 @@ public class RobotContainer {
     LoggedMechanism2d mech;
     LoggedMechanismRoot2d mechRoot;
     LoggedMechanismLigament2d intakeMech;
+    LoggedMechanismLigament2d turretMech;
+    LoggedMechanismLigament2d turretHoodMech;
 
     public void simInit() {
         mech = new LoggedMechanism2d(0, 0);
@@ -212,6 +214,13 @@ public class RobotContainer {
         intakeMech =
                 mechRoot.append(
                         new LoggedMechanismLigament2d("Intake", Units.inchesToMeters(14), 0));
+
+        turretMech =
+                mechRoot.append(
+                        new LoggedMechanismLigament2d("Turret", Units.inchesToMeters(6), 0));
+        turretHoodMech =
+                turretMech.append(
+                        new LoggedMechanismLigament2d("Hood", Units.inchesToMeters(6), 45));
     }
 
     public void resetSimulationField() {
@@ -232,6 +241,8 @@ public class RobotContainer {
                 SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
 
         intakeMech.setAngle(Units.radiansToDegrees(intake.getAngle()));
+        turretMech.setAngle(shooter.getTurretAngle());
+        turretHoodMech.setAngle(shooter.getHoodAngle()); //TODO: change pos and whanot
 
         Logger.recordOutput("Mech", mech);
     }

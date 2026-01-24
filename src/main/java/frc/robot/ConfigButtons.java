@@ -81,7 +81,10 @@ public class ConfigButtons {
         controller.b().whileTrue(r.intake.intakeUp());
 
         // shooter wheel
-        controller.leftTrigger().whileTrue(r.shooter.prime());
+        // controller.leftTrigger().whileTrue(r.shooter.prime());
+        controller
+                .leftTrigger()
+                .whileTrue(r.shooter.cameraShoot(r.drive::getPose, r.drive::getFieldVelocity));
         controller.leftTrigger().whileFalse(r.shooter.stop());
 
         // spindexer

@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -130,6 +131,10 @@ public class Drive extends SubsystemBase {
                     kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
 
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
+
+    private Pose2d prevPose = new Pose2d();
+    private ChassisSpeeds robotVelocity = new ChassisSpeeds();
+    private double prevTime = Timer.getFPGATimestamp();
 
     public Drive(
             GyroIO gyroIO,
@@ -240,6 +245,20 @@ public class Drive extends SubsystemBase {
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
+
+        // calculate an average speed over the last timestep
+        // this will be real bad when doing vision updates to the pose
+        // TODO: come up with something better eventually
+        // probably using Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+        double time = Timer.getFPGATimestamp();
+        double dt = time - prevTime;
+        Pose2d currPose = poseEstimator.getEstimatedPosition();
+        double vx = (currPose.getX() - prevPose.getX()) / dt;
+        double vy = (currPose.getY() - prevPose.getY()) / dt;
+        double vz = (currPose.getRotation().minus(prevPose.getRotation()).getRadians()) / dt;
+        robotVelocity = new ChassisSpeeds(vx, vy, vz);
+        prevPose = currPose;
+        prevTime = time;
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
@@ -362,6 +381,11 @@ public class Drive extends SubsystemBase {
     /** Returns the current odometry rotation. */
     public Rotation2d getRotation() {
         return getPose().getRotation();
+    }
+
+    @AutoLogOutput(key = "Odometry/FieldVelocity")
+    public ChassisSpeeds getFieldVelocity() {
+        return robotVelocity;
     }
 
     /** Resets the current odometry pose. */

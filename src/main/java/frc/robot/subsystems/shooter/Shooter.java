@@ -3,6 +3,8 @@ package frc.robot.subsystems.shooter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,6 +20,8 @@ public class Shooter extends SubsystemBase {
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
     private final ShooterInterp1d lerp = new ShooterInterp1d();
+
+    private double rpmTarget, hoodTarget, turretTarget;
 
     public Shooter(ShooterIO io) {
         this.io = io;
@@ -49,21 +53,64 @@ public class Shooter extends SubsystemBase {
         return new RunCommand(() -> goalPrime(botPose.get(), botVel.get()), this);
     }
 
+    private Translation2d getClosestGoal(Pose2d botLoc) {
+        Translation2d goal;
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
+            if (botLoc.getX() < FieldConstants.HorizontalLines.starting) {
+                // shoot@goAL
+                goal = FieldConstants.Hub.center;
+            } else {
+                // pass
+                if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
+                    goal = FieldConstants.passRight;
+                } else {
+                    goal = FieldConstants.passLeft;
+                }
+            }
+        } else {
+            if (botLoc.getX()
+                    > FieldConstants.fieldLength - FieldConstants.HorizontalLines.starting) {
+                // shoot@goAL
+                goal = FieldConstants.flip(FieldConstants.Hub.center);
+            } else {
+                // pass
+                if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
+                    goal = FieldConstants.flip(FieldConstants.passRight);
+                }
+                goal = FieldConstants.flip(FieldConstants.passLeft);
+            }
+        }
+        return goal;
+    }
+
     public void goalPrime(Pose2d botLoc, ChassisSpeeds botVel) {
+
+        // 0 what are we shooting at? (goal vs pass)
+        Translation2d goal = getClosestGoal(botLoc);
+
         // 1 collect the data to call the lerp
-        Translation2d goal = FieldConstants.flipIfRed(FieldConstants.Hub.center);
+
         Translation2d bot =
                 botLoc.getTranslation()
                         .plus(Constants.shooterLocOnBot.rotateBy(botLoc.getRotation()));
 
         // 2 call the lerp
-        DataPoint setpoints = lerp.get(goal, bot, botVel);
+        DataPoint setpoints;
+        // find a better way to indicate which lookup table to use based on the goal
+        if (goal.getY() == FieldConstants.Hub.center.getY()) {
+            setpoints = lerp.getHub(goal, bot, botVel);
+        } else {
+            setpoints = lerp.getPass(goal, bot, botVel);
+        }
 
         // 3 use setpoints from lerp to set motors
         double angleSetpoint = setpoints.angle() - botLoc.getRotation().getDegrees();
         Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
+
+        hoodTarget = setpoints.hood();
+        rpmTarget = setpoints.rpm();
         manageTurretWrap(angleSetpoint);
         io.setHoodAngle(setpoints.hood());
         io.setSpeed(setpoints.rpm());
@@ -91,6 +138,18 @@ public class Shooter extends SubsystemBase {
         }
 
         Logger.recordOutput("Shooter/TurretSetpoint", setPoint);
+        turretTarget = setPoint;
         io.setTurretAngle(setPoint);
+    }
+
+    public boolean wontMiss() {
+        return isWithin(rpmTarget, inputs.wheelVelocity, 50)
+                && isWithin(turretTarget, inputs.turretPosition, 1)
+                && isWithin(hoodTarget, inputs.hoodPosition, 0.5);
+    }
+
+    public boolean isWithin(double target, double actual, double range) {
+        double delta = actual - target;
+        return Math.abs(delta) < range;
     }
 }

@@ -57,6 +57,11 @@ public class FieldConstants {
 
     public static class Outpost {}
 
+    public static Translation2d passLeft =
+            new Translation2d(Units.feetToMeters(3), fieldWidth - Units.feetToMeters(3));
+    public static Translation2d passRight =
+            new Translation2d(Units.feetToMeters(3), Units.feetToMeters(3));
+
     // flip a red coord to blue or blue to red
     public static Translation2d flip(Translation2d pos) {
         if (pos.getX() < HorizontalLines.center) {

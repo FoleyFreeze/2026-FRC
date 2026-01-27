@@ -21,6 +21,7 @@ public class IntakeIOSim implements IntakeIO {
     private boolean armClosedLoop = false;
     private double armControlVoltage = 0;
 
+    private final int hopperCapacity = 100;
     private final FlywheelSim wheel;
     private final PIDController wheelController;
     private boolean wheelClosedLoop = false;
@@ -31,7 +32,13 @@ public class IntakeIOSim implements IntakeIO {
     public IntakeIOSim(AbstractDriveTrainSimulation driveSim) {
         intakeSimulation =
                 IntakeSimulation.OverTheBumperIntake(
-                        "Fuel", driveSim, Inches.of(31), Inches.of(10), IntakeSide.FRONT, 50);
+                        "Fuel",
+                        driveSim,
+                        Inches.of(31),
+                        Inches.of(10),
+                        IntakeSide.FRONT,
+                        hopperCapacity);
+        intakeSimulation.addGamePiecesToIntake(100);
 
         arm =
                 new SingleJointedArmSim(

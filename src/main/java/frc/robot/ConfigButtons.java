@@ -88,7 +88,7 @@ public class ConfigButtons {
         controller.leftTrigger().whileFalse(r.shooter.stop());
 
         // spindexer
-        controller.rightTrigger().whileTrue(r.spindexter.spin());
+        controller.rightTrigger().whileTrue(r.spindexter.smartSpinCmd(r.shooter, r.drive));
         controller.rightTrigger().whileFalse(r.spindexter.stop());
     }
 

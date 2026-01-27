@@ -32,6 +32,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -245,20 +246,7 @@ public class Drive extends SubsystemBase {
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
-
-        // calculate an average speed over the last timestep
-        // this will be real bad when doing vision updates to the pose
-        // TODO: come up with something better eventually
-        // probably using Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        double time = Timer.getFPGATimestamp();
-        double dt = time - prevTime;
-        Pose2d currPose = poseEstimator.getEstimatedPosition();
-        double vx = (currPose.getX() - prevPose.getX()) / dt;
-        double vy = (currPose.getY() - prevPose.getY()) / dt;
-        double vz = (currPose.getRotation().minus(prevPose.getRotation()).getRadians()) / dt;
-        robotVelocity = new ChassisSpeeds(vx, vy, vz);
-        prevPose = currPose;
-        prevTime = time;
+        calcVelocity();
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
@@ -388,6 +376,33 @@ public class Drive extends SubsystemBase {
         return robotVelocity;
     }
 
+    public void calcVelocity() {
+        SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+        double[] sampleTimestamps = modules[0].getOdometryTimestamps();
+        // calculate module deltas (how far did the swerves move)
+        for (int i = 0; i < 4; i++) {
+            SwerveModulePosition first = modules[i].getOdometryPositions()[0];
+            SwerveModulePosition last =
+                    modules[i].getOdometryPositions()[sampleTimestamps.length - 1];
+            moduleDeltas[i] =
+                    new SwerveModulePosition(
+                            last.distanceMeters - first.distanceMeters, last.angle);
+        }
+        // calc dt
+        double t0 = sampleTimestamps[0];
+        double t1 = sampleTimestamps[sampleTimestamps.length - 1];
+        double dt = t1 - t0;
+
+        // make vel robot relative
+        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+        Translation2d botVel = new Translation2d(twist.dx, twist.dy);
+        // make vel field relative
+        Translation2d fieldVel = botVel.rotateBy(getRotation());
+
+        // turn into m/s and make it a chassisspeed object
+        robotVelocity = new ChassisSpeeds(fieldVel.getX() / dt, fieldVel.getY() / dt, twist.dtheta);
+    }
+
     /** Resets the current odometry pose. */
     public void setPose(Pose2d pose) {
         resetSimulationPoseCallBack.accept(pose);
@@ -424,5 +439,10 @@ public class Drive extends SubsystemBase {
             new Translation2d(
                     TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
         };
+    }
+
+    public boolean wontMiss() {
+        return Math.abs(robotVelocity.omegaRadiansPerSecond)
+                < Units.degreesToRadians(90); // TODO: make constant
     }
 }

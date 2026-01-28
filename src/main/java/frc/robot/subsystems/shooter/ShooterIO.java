@@ -2,6 +2,8 @@ package frc.robot.subsystems.shooter;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.wpilibj2.command.Subsystem;
+
 public interface ShooterIO {
     @AutoLog
     public static class ShooterIOInputs {

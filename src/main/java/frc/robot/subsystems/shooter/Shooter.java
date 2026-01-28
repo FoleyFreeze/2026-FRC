@@ -13,6 +13,8 @@ import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
 import frc.robot.util.Util;
+
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -198,5 +200,12 @@ public class Shooter extends SubsystemBase {
     public boolean isWithin(double target, double actual, double range) {
         double delta = actual - target;
         return Math.abs(delta) < range;
+    }
+
+    public Command manualShoot(DoubleSupplier turretPower, DoubleSupplier hoodPower){
+        return new RunCommand(() -> {
+            io.hoodPower(hoodPower.getAsDouble());
+            io.turretPower(turretPower.getAsDouble()); 
+        }, this);
     }
 }

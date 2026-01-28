@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -23,6 +24,15 @@ public class Shooter extends SubsystemBase {
 
     private double rpmTarget, hoodTarget, turretTarget;
 
+    public static enum ShootMode {
+        HUB,
+        PASS,
+        MANUAL,
+    }
+
+    public ShootMode shootMode = ShootMode.MANUAL;
+    public Translation2d goal = new Translation2d();
+
     public Shooter(ShooterIO io) {
         this.io = io;
     }
@@ -42,7 +52,12 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command prime() {
-        return new RunCommand(() -> io.wheelPower(1), this);
+        return new RunCommand(
+                () -> {
+                    io.wheelPower(1);
+                    shootMode = ShootMode.MANUAL;
+                },
+                this);
     }
 
     public Command stop() {
@@ -54,13 +69,14 @@ public class Shooter extends SubsystemBase {
     }
 
     private Translation2d getClosestGoal(Pose2d botLoc) {
-        Translation2d goal;
         if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
             if (botLoc.getX() < FieldConstants.HorizontalLines.starting) {
                 // shoot@goAL
                 goal = FieldConstants.Hub.center;
+                shootMode = ShootMode.HUB;
             } else {
                 // pass
+                shootMode = ShootMode.PASS;
                 if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
                     goal = FieldConstants.passRight;
                 } else {
@@ -72,8 +88,10 @@ public class Shooter extends SubsystemBase {
                     > FieldConstants.fieldLength - FieldConstants.HorizontalLines.starting) {
                 // shoot@goAL
                 goal = FieldConstants.flip(FieldConstants.Hub.center);
+                shootMode = ShootMode.HUB;
             } else {
                 // pass
+                shootMode = ShootMode.PASS;
                 if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
                     goal = FieldConstants.flip(FieldConstants.passRight);
                 }
@@ -96,8 +114,7 @@ public class Shooter extends SubsystemBase {
 
         // 2 call the lerp
         DataPoint setpoints;
-        // find a better way to indicate which lookup table to use based on the goal
-        if (goal.getY() == FieldConstants.Hub.center.getY()) {
+        if (shootMode == ShootMode.HUB) {
             setpoints = lerp.getHub(goal, bot, botVel);
         } else {
             setpoints = lerp.getPass(goal, bot, botVel);
@@ -142,10 +159,40 @@ public class Shooter extends SubsystemBase {
         io.setTurretAngle(setPoint);
     }
 
-    public boolean wontMiss() {
+    public boolean willHitHub(Pose2d botLoc) {
+        // ignore if not passing
+        if (shootMode != ShootMode.PASS) return false;
+
+        // order our x values
+        double startX, endX, startY, endY;
+        if (botLoc.getX() > goal.getX()) {
+            startX = goal.getX();
+            endX = botLoc.getX();
+            startY = goal.getY();
+            endY = botLoc.getY();
+        } else {
+            endX = goal.getX();
+            startX = botLoc.getX();
+            endY = goal.getY();
+            startY = botLoc.getY();
+        }
+
+        // do the lerp
+        double xInterp =
+                MathUtil.inverseInterpolate(
+                        startX, endX, FieldConstants.flipIfRed(FieldConstants.Hub.backLeft).getX());
+        double hubY = MathUtil.interpolate(startY, endY, xInterp);
+
+        // determine if there is an intersection
+        return hubY < FieldConstants.Hub.backLeft.getY()
+                && hubY > FieldConstants.Hub.backRight.getY();
+    }
+
+    public boolean wontMiss(Pose2d botLoc) {
         return isWithin(rpmTarget, inputs.wheelVelocity, 50)
                 && isWithin(turretTarget, inputs.turretPosition, 1)
-                && isWithin(hoodTarget, inputs.hoodPosition, 0.5);
+                && isWithin(hoodTarget, inputs.hoodPosition, 0.5)
+                && willHitHub(botLoc) == false;
     }
 
     public boolean isWithin(double target, double actual, double range) {

@@ -50,13 +50,14 @@ public class ConfigButtons {
 
         r.drive.setDefaultCommand(DriveCommands.joystickDrive(r.drive, () -> 0, () -> 0, () -> 0));
 
-        isNormal.whileTrue(
-                DriveCommands.joystickDrive(
-                                r.drive,
-                                () -> -controller.getLeftY(),
-                                () -> -controller.getLeftX(),
-                                () -> -controller.getRightX())
-                        .ignoringDisable(true));
+        isNormal.and(controller.rightTrigger().negate())
+                .whileTrue(
+                        DriveCommands.joystickDrive(
+                                        r.drive,
+                                        () -> -controller.getLeftY(),
+                                        () -> -controller.getLeftX(),
+                                        () -> -controller.getRightX())
+                                .ignoringDisable(true));
 
         isClimb.whileTrue(
                 DriveCommands.joystickDrive(
@@ -86,9 +87,15 @@ public class ConfigButtons {
                 .leftTrigger()
                 .whileTrue(r.shooter.cameraShoot(r.drive::getPose, r.drive::getFieldVelocity));
         controller.leftTrigger().whileFalse(r.shooter.stop());
-
         // spindexer
-        controller.rightTrigger().whileTrue(r.spindexter.smartSpinCmd(r.shooter, r.drive));
+        controller
+                .rightTrigger()
+                .whileTrue(
+                        r.spindexter
+                                .smartSpinCmd(r.shooter, r.drive)
+                                .alongWith(
+                                        DriveCommands.slowDrive(
+                                                controller, r.drive))); // , botLoc, hubPos
         controller.rightTrigger().whileFalse(r.spindexter.stop());
     }
 

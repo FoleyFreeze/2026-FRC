@@ -34,7 +34,7 @@ public class Spindexter extends SubsystemBase {
     }
 
     private void smartSpin(Shooter shooter, Drive drive) {
-        if (shooter.wontMiss() && drive.wontMiss()) {
+        if (shooter.wontMiss(drive.getPose()) && drive.wontMiss()) {
             io.spinPower(1);
         } else {
             io.spinPower(0);

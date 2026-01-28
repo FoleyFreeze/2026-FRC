@@ -15,10 +15,12 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drive.Drive;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -146,11 +148,63 @@ public class DriveCommands {
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
     }
 
-    /**
-     * Measures the velocity feedforward constants for the drive motors.
-     *
-     * <p>This command should only be used in voltage control mode.
-     */
+    private static ChassisSpeeds prevSpeeds = new ChassisSpeeds();
+    private static double ACCEL_LIMIT = 2.0 * 0.02; // limit to 2m/s^2
+    private static double TURN_LIMIT = Units.degreesToRadians(90); // limit to 90deg/sec
 
-    /** Measures the robot's wheel radius by spinning in a circle. */
+    public static Command slowDrive(CommandXboxController controller, Drive drive) {
+        return Commands.run(
+                () -> {
+                    // Get linear velocity
+                    Translation2d linearVelocity =
+                            getLinearVelocityFromJoysticks(
+                                    -controller.getLeftY(), -controller.getLeftX());
+
+                    // Apply rotation deadband
+                    double omega = MathUtil.applyDeadband(-controller.getRightX(), DEADBAND);
+
+                    // Convert to field relative speeds & send command
+                    ChassisSpeeds speeds =
+                            new ChassisSpeeds(
+                                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                                    omega * drive.getMaxAngularSpeedRadPerSec());
+
+                    speeds.vxMetersPerSecond =
+                            gradLim(
+                                    speeds.vxMetersPerSecond,
+                                    prevSpeeds.vxMetersPerSecond,
+                                    ACCEL_LIMIT);
+                    speeds.vyMetersPerSecond =
+                            gradLim(
+                                    speeds.vyMetersPerSecond,
+                                    prevSpeeds.vyMetersPerSecond,
+                                    ACCEL_LIMIT);
+                    speeds.omegaRadiansPerSecond =
+                            MathUtil.clamp(speeds.omegaRadiansPerSecond, -TURN_LIMIT, TURN_LIMIT);
+
+                    boolean isFlipped =
+                            DriverStation.getAlliance().isPresent()
+                                    && DriverStation.getAlliance().get() == Alliance.Red;
+                    drive.runVelocity(
+                            ChassisSpeeds.fromFieldRelativeSpeeds(
+                                    speeds,
+                                    isFlipped
+                                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                                            : drive.getRotation()));
+
+                    prevSpeeds = speeds;
+                },
+                drive);
+    }
+
+    public static double gradLim(double value, double prevValue, double limit) {
+        if (value - prevValue > limit) {
+            return value += limit;
+        } else if (value - prevValue < -limit) {
+            return value -= limit;
+        } else {
+            return value;
+        }
+    }
 }

@@ -39,6 +39,10 @@ public class FieldConstants {
         public static final double height = Units.inchesToMeters(72);
         public static final Translation2d center =
                 new Translation2d(HorizontalLines.starting + width / 2, VerticalLines.center);
+        public static final Translation2d backLeft =
+                center.plus(new Translation2d(width / 2, width / 2));
+        public static final Translation2d backRight =
+                center.plus(new Translation2d(width / 2, -width / 2));
 
         // consider adding corners (topLeftCorner...)
     }

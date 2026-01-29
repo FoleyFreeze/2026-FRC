@@ -83,13 +83,11 @@ public class ConfigButtons {
 
         // shooter wheel
         // controller.leftTrigger().whileTrue(r.shooter.prime());
-        isNormal.and(controller
-                .leftTrigger())
+        isNormal.and(controller.leftTrigger())
                 .whileTrue(r.shooter.cameraShoot(r.drive::getPose, r.drive::getFieldVelocity));
         controller.leftTrigger().whileFalse(r.shooter.stop());
         // spindexer
-        isNormal.and(controller
-                .rightTrigger())
+        isNormal.and(controller.rightTrigger())
                 .whileTrue(
                         r.spindexter
                                 .smartSpinCmd(r.shooter, r.drive)
@@ -98,11 +96,9 @@ public class ConfigButtons {
                                                 controller, r.drive))); // , botLoc, hubPos
         controller.rightTrigger().whileFalse(r.spindexter.stop());
 
-
-        //TODO: manual shoot cmds
+        // TODO: manual shoot cmds
         isManualShoot.and(controller.leftTrigger()).whileTrue(r.shooter.prime());
         isManualShoot.and(controller.rightTrigger()).whileTrue(r.spindexter.spin());
-
     }
 
     // cycle between normal -> climb -> manual shoot -> manual unjam -> manual climb -> normal

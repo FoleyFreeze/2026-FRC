@@ -13,9 +13,9 @@ import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
 import frc.robot.util.Util;
-
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -34,6 +34,17 @@ public class Shooter extends SubsystemBase {
 
     public ShootMode shootMode = ShootMode.MANUAL;
     public Translation2d goal = new Translation2d();
+
+    public static enum MissReason {
+        NONE,
+        TURRET_ANGLE,
+        HOOD_ANGLE,
+        WHEEL_SPEED,
+        HUB_INTERSECTION,
+    }
+
+    @AutoLogOutput(key = "Shooter/MissReasonShooter")
+    public MissReason missReason = MissReason.NONE;
 
     public Shooter(ShooterIO io) {
         this.io = io;
@@ -191,10 +202,26 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean wontMiss(Pose2d botLoc) {
-        return isWithin(rpmTarget, inputs.wheelVelocity, 50)
-                && isWithin(turretTarget, inputs.turretPosition, 1)
-                && isWithin(hoodTarget, inputs.hoodPosition, 0.5)
-                && willHitHub(botLoc) == false;
+        //allow wider thresholds for passing
+        double speedThresh = shootMode == ShootMode.HUB ? 50 : 100;
+        double angleThresh = shootMode == ShootMode.HUB ? 0.5 : 1;
+
+        if (!isWithin(rpmTarget, inputs.wheelVelocity, speedThresh)) {
+            missReason = MissReason.WHEEL_SPEED;
+            return false;
+        } else if (!isWithin(turretTarget, inputs.turretPosition, angleThresh)) {
+            missReason = MissReason.TURRET_ANGLE;
+            return false;
+        } else if (!isWithin(hoodTarget, inputs.hoodPosition, angleThresh)) {
+            missReason = MissReason.HOOD_ANGLE;
+            return false;
+        } else if (willHitHub(botLoc)) {
+            missReason = MissReason.HUB_INTERSECTION;
+            return false;
+        } else {
+            missReason = MissReason.NONE;
+            return true;
+        }
     }
 
     public boolean isWithin(double target, double actual, double range) {
@@ -202,10 +229,12 @@ public class Shooter extends SubsystemBase {
         return Math.abs(delta) < range;
     }
 
-    public Command manualShoot(DoubleSupplier turretPower, DoubleSupplier hoodPower){
-        return new RunCommand(() -> {
-            io.hoodPower(hoodPower.getAsDouble());
-            io.turretPower(turretPower.getAsDouble()); 
-        }, this);
+    public Command manualShoot(DoubleSupplier turretPower, DoubleSupplier hoodPower) {
+        return new RunCommand(
+                () -> {
+                    io.hoodPower(hoodPower.getAsDouble());
+                    io.turretPower(turretPower.getAsDouble());
+                },
+                this);
     }
 }

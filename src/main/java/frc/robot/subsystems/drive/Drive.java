@@ -37,7 +37,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -45,6 +44,8 @@ import frc.robot.ConfigButtons;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.Shooter.ShootMode;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -133,9 +134,15 @@ public class Drive extends SubsystemBase {
 
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
-    private Pose2d prevPose = new Pose2d();
     private ChassisSpeeds robotVelocity = new ChassisSpeeds();
-    private double prevTime = Timer.getFPGATimestamp();
+
+    public static enum MissReasonDrive {
+        NONE,
+        ANGLE_VEL,
+    }
+
+    @AutoLogOutput(key = "Shooter/MissReasonDrive")
+    public MissReasonDrive missReason = MissReasonDrive.NONE;
 
     public Drive(
             GyroIO gyroIO,
@@ -441,8 +448,17 @@ public class Drive extends SubsystemBase {
         };
     }
 
-    public boolean wontMiss() {
-        return Math.abs(robotVelocity.omegaRadiansPerSecond)
-                < Units.degreesToRadians(90); // TODO: make constant
+    public boolean wontMiss(Shooter shooter) {
+        //allow wider thresholds for passing
+        double angleThresh = shooter.shootMode == ShootMode.HUB ? 90 : 180;
+        
+        if (Math.abs(robotVelocity.omegaRadiansPerSecond)
+                < Units.degreesToRadians(angleThresh)) {
+            missReason = MissReasonDrive.ANGLE_VEL;
+            return false;
+        } else {
+            missReason = MissReasonDrive.NONE;
+            return true;
+        }
     }
 }

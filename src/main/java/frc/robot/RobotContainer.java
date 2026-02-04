@@ -40,6 +40,7 @@ import frc.robot.subsystems.spindexter.Spindexter;
 import frc.robot.subsystems.spindexter.SpindexterIO;
 import frc.robot.subsystems.spindexter.SpindexterIOHardware;
 import frc.robot.subsystems.spindexter.SpindexterIOSim;
+import frc.robot.subsystems.stats.StatsSubsystem;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -66,6 +67,7 @@ public class RobotContainer {
     public final Shooter shooter;
     public final Intake intake;
     public final Climber climber;
+    public final StatsSubsystem stats;
 
     private SwerveDriveSimulation driveSimulation;
 
@@ -74,6 +76,7 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        stats = new StatsSubsystem();
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations

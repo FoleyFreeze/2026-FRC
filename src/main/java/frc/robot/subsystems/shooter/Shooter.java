@@ -202,7 +202,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean wontMiss(Pose2d botLoc) {
-        //allow wider thresholds for passing
+        // allow wider thresholds for passing
         double speedThresh = shootMode == ShootMode.HUB ? 50 : 100;
         double angleThresh = shootMode == ShootMode.HUB ? 0.5 : 1;
 

@@ -119,22 +119,16 @@ public class Shooter extends SubsystemBase {
         // 0 what are we shooting at? (goal vs pass)
         Translation2d goal = getClosestGoal(botLoc);
 
-        // 1 collect the data to call the lerp
-
-        Translation2d bot =
-                botLoc.getTranslation()
-                        .plus(Constants.shooterLocOnBot.rotateBy(botLoc.getRotation()));
-
-        // 2 call the lerp
+        // 1 call the lerp
         DataPoint setpoints;
         if (shootMode == ShootMode.HUB) {
-            setpoints = lerp.getHub(goal, bot, botVel);
+            setpoints = lerp.getHub(goal, botLoc, botVel);
         } else {
-            setpoints = lerp.getPass(goal, bot, botVel);
+            setpoints = lerp.getPass(goal, botLoc, botVel);
         }
 
-        // 3 use setpoints from lerp to set motors
-        double angleSetpoint = setpoints.angle() - botLoc.getRotation().getDegrees();
+        // 2 use setpoints from lerp to set motors
+        double angleSetpoint = setpoints.angle();
         Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());

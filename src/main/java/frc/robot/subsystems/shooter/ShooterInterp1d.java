@@ -1,8 +1,12 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import org.littletonrobotics.junction.Logger;
 
@@ -102,28 +106,31 @@ public class ShooterInterp1d {
 
     private static final int reps = 5;
 
-    public DataPoint get(
+    //this solves move&shoot via multiple recursive lookups
+    public DataPoint getReps(
             Translation2d goal,
-            Translation2d pos,
+            Pose2d pos,
             ChassisSpeeds vel,
             double distAxis[],
             double[] rpmTable,
             double[] hoodAngleTable,
             double[] timeTable) {
+        
+        Translation2d bot = pos.getTranslation();
         // rep 1
-        double dist = goal.minus(pos).getNorm();
+        double dist = goal.minus(bot).getNorm();
         double time = getTime(dist, distAxis, timeTable);
         // rep 2 - x
         Translation2d offset;
         for (int i = 1; i < reps - 1; i++) {
             offset =
                     new Translation2d(-vel.vxMetersPerSecond * time, -vel.vyMetersPerSecond * time);
-            dist = goal.plus(offset).minus(pos).getNorm();
+            dist = goal.plus(offset).minus(bot).getNorm();
             time = getTime(dist, distAxis, timeTable);
         }
         // rep x+1
         offset = new Translation2d(-vel.vxMetersPerSecond * time, -vel.vyMetersPerSecond * time);
-        Translation2d vecToTarget = goal.plus(offset).minus(pos);
+        Translation2d vecToTarget = goal.plus(offset).minus(bot);
         dist = vecToTarget.getNorm();
 
         DataPoint data =
@@ -140,12 +147,70 @@ public class ShooterInterp1d {
         return data;
     }
 
-    public DataPoint getHub(Translation2d goal, Translation2d pos, ChassisSpeeds vel) {
-        return get(goal, pos, vel, distAxis, rpmTable, hoodAngleTable, timeTable);
+    //how much velocity lookahead to do
+    static final double dt = 0.02;
+
+    //do move&shoot via lookups of horizontal velocity
+    public DataPoint getHV(Translation2d goal,
+            Pose2d pos,
+            ChassisSpeeds vel,
+            double distAxis[],
+            double[] rpmTable,
+            double[] hoodAngleTable,
+            double[] timeTable) {
+        
+        //step1: lookup the initial shot assuming a stationary robot
+        //    a: project a future bot pose based on velocity
+        Pose2d futureBotPose = pos.exp(vel.toTwist2d(dt));
+        //TODO: should this rotate by future bot pose rotation or by bot pose rotation?
+        Translation2d turretPos = futureBotPose.getTranslation().plus(Constants.shooterLocOnBot.rotateBy(futureBotPose.getRotation()));
+
+        //    b: lookup the stationary shot from that location
+        double dist = goal.minus(turretPos).getNorm();
+        DataPoint stationaryData =
+                get(dist,
+                        0,
+                        distAxis,
+                        rpmTable,
+                        hoodAngleTable,
+                        timeTable);
+
+        //step2: offset goal location based on robot velocity
+        //    a: turn robot rotation vel into turret vx vy and turret rotation
+        Translation2d botVelXY = new Translation2d(vel.vxMetersPerSecond, vel.vyMetersPerSecond);
+        //tangent velocity is in the direction of the turret with a magnitude of omega*R. Then convert to field coords
+        Translation2d turretXYfromRot = Constants.shooterLocOnBot.rotateBy(Rotation2d.fromRadians(Math.PI/2.0 + vel.omegaRadiansPerSecond*dt)).rotateBy(futureBotPose.getRotation());
+        Translation2d turretVelocity = botVelXY.plus(turretXYfromRot);
+
+        //    b: offset goal based on turret velocity
+        Translation2d velocityOffset = turretVelocity.times(-stationaryData.time);
+        Translation2d vecToGoal = goal.minus(futureBotPose.getTranslation()).plus(velocityOffset);
+        double movingDist = vecToGoal.getNorm();
+
+        //step3: calculate additional horizontal velocity required to make the adjusted shot in the same amount of time
+        //double originalHorizVel = dist / stationaryData.time;
+        double newHorizVel = movingDist / stationaryData.time;
+
+        //step4: assuming the same vertical velocity as the stationary shot, calculate a new exit velocity and angle for the shot
+        double originalVertVel = Math.sin(Math.toRadians(stationaryData.hood)) * stationaryData.rpm;
+        double newRpm = Math.sqrt(newHorizVel*newHorizVel + originalVertVel*originalVertVel);
+        double newHoodAngle = Math.toDegrees(Math.atan2(originalVertVel, newHorizVel));
+        //turret angle, but robot relative
+        double turretAngle = vecToGoal.getAngle().minus(futureBotPose.getRotation()).getDegrees();
+
+        //step5: return this data to the shoot command
+        return new DataPoint(newRpm, turretAngle, newHoodAngle, stationaryData.time);
     }
 
-    public DataPoint getPass(Translation2d goal, Translation2d pos, ChassisSpeeds vel) {
-        return get(
+    public DataPoint getHub(Translation2d goal, Pose2d pos, ChassisSpeeds vel) {
+        //return getReps(goal, pos, vel, distAxis, rpmTable, hoodAngleTable, timeTable);
+        return getHV(goal, pos, vel, distAxis, rpmTable, hoodAngleTable, timeTable);
+    }
+
+    public DataPoint getPass(Translation2d goal, Pose2d pos, ChassisSpeeds vel) {
+        // return getReps(
+        //         goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass, timeTablePass);
+        return getHV(
                 goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass, timeTablePass);
     }
 }

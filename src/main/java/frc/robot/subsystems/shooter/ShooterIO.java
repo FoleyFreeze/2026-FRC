@@ -32,7 +32,7 @@ public interface ShooterIO {
 
     public default void updateInputs(ShooterIOInputs inputs) {}
 
-    public default void setTurretAngle(double turretAngle) {}
+    public default void setTurretAngle(double turretAngle, double velocity) {}
 
     public default void setHoodAngle(double hoodAngle) {}
 

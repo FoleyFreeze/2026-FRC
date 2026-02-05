@@ -130,17 +130,18 @@ public class Shooter extends SubsystemBase {
         // 2 use setpoints from lerp to set motors
         double angleSetpoint = setpoints.angle();
         Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
+        Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
 
         hoodTarget = setpoints.hood();
         rpmTarget = setpoints.rpm();
-        manageTurretWrap(angleSetpoint);
+        manageTurretWrap(angleSetpoint, setpoints.turretVel());
         io.setHoodAngle(setpoints.hood());
         io.setSpeed(setpoints.rpm());
     }
 
-    public void manageTurretWrap(double angle) {
+    public void manageTurretWrap(double angle, double velocity) {
         double trueAngle = angle - Constants.turretAngleOffset;
         double normAngle = Util.floorMod(trueAngle, 360);
         double delta = normAngle - (inputs.turretPosition % 360);
@@ -163,7 +164,7 @@ public class Shooter extends SubsystemBase {
 
         Logger.recordOutput("Shooter/TurretSetpoint", setPoint);
         turretTarget = setPoint;
-        io.setTurretAngle(setPoint);
+        io.setTurretAngle(setPoint, velocity);
     }
 
     public boolean willHitHub(Pose2d botLoc) {
@@ -197,8 +198,8 @@ public class Shooter extends SubsystemBase {
 
     public boolean wontMiss(Pose2d botLoc) {
         // allow wider thresholds for passing
-        double speedThresh = shootMode == ShootMode.HUB ? 50 : 100;
-        double angleThresh = shootMode == ShootMode.HUB ? 0.5 : 1;
+        double speedThresh = shootMode == ShootMode.HUB ? 150 : 300;
+        double angleThresh = shootMode == ShootMode.HUB ? 5 : 10;
 
         if (!isWithin(rpmTarget, inputs.wheelVelocity, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;

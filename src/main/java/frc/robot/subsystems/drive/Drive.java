@@ -407,7 +407,8 @@ public class Drive extends SubsystemBase {
         Translation2d fieldVel = botVel.rotateBy(getRotation());
 
         // turn into m/s and make it a chassisspeed object
-        robotVelocity = new ChassisSpeeds(fieldVel.getX() / dt, fieldVel.getY() / dt, twist.dtheta);
+        robotVelocity =
+                new ChassisSpeeds(fieldVel.getX() / dt, fieldVel.getY() / dt, twist.dtheta / dt);
     }
 
     /** Resets the current odometry pose. */

@@ -47,8 +47,10 @@ public class ShooterIOSim implements ShooterIO {
     private double wheelFeedfwdVoltage = 0;
     private double hoodFeedfwdVoltage = 0;
     private double turretFeedfwdVoltage = 0;
+    private final double turretKF =
+            12.0 / Units.radiansToDegrees(DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt);
     private final double wheelKF =
-            1.0
+            12.0
                     / Units.radiansPerSecondToRotationsPerMinute(
                             DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt);
     private boolean hoodClosedLoop = false;
@@ -71,7 +73,7 @@ public class ShooterIOSim implements ShooterIO {
 
         wheelController = new PIDController(0.10, 0, 0.0001); // V/rpm
         hoodController = new PIDController(0.1, 0, 0.0); // V/deg
-        turretController = new PIDController(0.4, 0, 0.05); // V/deg
+        turretController = new PIDController(0.35, 0, 0.05); // V/deg
 
         hood =
                 new SingleJointedArmSim(
@@ -115,7 +117,9 @@ public class ShooterIOSim implements ShooterIO {
         }
         if (turretClosedLoop) {
             turretControlVoltage =
-                    turretController.calculate(Units.radiansToDegrees(turret.getAngleRads()));
+                    turretFeedfwdVoltage
+                            + turretController.calculate(
+                                    Units.radiansToDegrees(turret.getAngleRads()));
 
         } else {
             turretController.reset();
@@ -212,8 +216,9 @@ public class ShooterIOSim implements ShooterIO {
         inputs.wheelTemp = 0;
     }
 
-    public void setTurretAngle(double turretAngle) {
+    public void setTurretAngle(double turretAngle, double velocity) {
         turretClosedLoop = true;
+        turretFeedfwdVoltage = turretKF * velocity;
         turretController.setSetpoint(turretAngle);
     }
 

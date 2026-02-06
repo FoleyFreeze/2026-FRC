@@ -232,4 +232,48 @@ public class Shooter extends SubsystemBase {
                 },
                 this);
     }
+
+    public double getAngleCRT(double e1, double e2) {
+        final double t_teeth = 400;
+        final double e1_teeth = 25;
+        final double e2_teeth = 27;
+        final double maxTurretDegrees = 400;
+        // maximum number of e1 & e2 rotations worth considering (dependent on how many degrees of
+        // turret angle you can measure)
+        final int arraySize =
+                (int)
+                        Math.ceil(
+                                (maxTurretDegrees / 360.0)
+                                        * t_teeth
+                                        / (Math.min(e1_teeth, e2_teeth)));
+
+        // stores all possible turret angles that match measured encoder angle
+        double[] e1PossibleAngles = new double[arraySize]; // in degrees
+        double[] e2PossibleAngles = new double[arraySize];
+
+        double minError =
+                1e6; // set to a rly big number so it will not be less than the new min error
+        // (ln260)
+        double turretAngle = 0;
+
+        // fills arrays e1 & e2 with possible turretAngles
+        for (int i = 0; i < arraySize; i++) {
+            e1PossibleAngles[i] = (i + (e1 / 360)) * (e1_teeth / t_teeth) * 360;
+            e2PossibleAngles[i] = (i + (e2 / 360)) * (e2_teeth / t_teeth) * 360;
+        }
+        // searching for the angle that both encoders agree on
+        for (int i_e1 = 0; i_e1 < arraySize; i_e1++) {
+            for (int i_e2 = 0; i_e2 < arraySize; i_e2++) {
+                double error = Math.abs(e1PossibleAngles[i_e1] - e2PossibleAngles[i_e2]);
+                if (error < minError) {
+                    minError = error;
+                    turretAngle = (e1PossibleAngles[i_e1] + e2PossibleAngles[i_e2]) / 2.0;
+                }
+            }
+        }
+        Logger.recordOutput("Shooter/CRT_TurretAngle", turretAngle);
+        Logger.recordOutput("Shooter/CRT_MinError", minError);
+
+        return turretAngle;
+    }
 }

@@ -48,11 +48,12 @@ public class ShooterIOSim implements ShooterIO {
     private double hoodFeedfwdVoltage = 0;
     private double turretFeedfwdVoltage = 0;
     private final double turretKF =
-            12.0 / Units.radiansToDegrees(DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt);
+            12.0 / Units.radiansToDegrees(DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt) * 10;
     private final double wheelKF =
-            12.0
+            1.0
                     / Units.radiansPerSecondToRotationsPerMinute(
-                            DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt);
+                            DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt)
+                    / 1.5;
     private boolean hoodClosedLoop = false;
     private boolean turretClosedLoop = false;
 

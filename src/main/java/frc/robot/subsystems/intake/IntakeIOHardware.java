@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -90,7 +92,7 @@ public class IntakeIOHardware implements IntakeIO {
         inputs.armCurrent = currentArm.getValueAsDouble();
         inputs.wheelTemp = tempWheel.getValueAsDouble();
         inputs.armTemp = tempArm.getValueAsDouble();
-        inputs.wheelVelocity = angularVelocityWheel.getValueAsDouble();
+        inputs.wheelVelocity = angularVelocityWheel.getValue().in(RPM);
         inputs.armVelocity = angularVelocityArm.getValueAsDouble();
     }
 

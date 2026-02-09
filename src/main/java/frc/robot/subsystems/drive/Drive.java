@@ -253,7 +253,8 @@ public class Drive extends SubsystemBase {
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
-        calcVelocity();
+
+        robotVelocity = kinematics.toChassisSpeeds(getModuleStates());
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
@@ -346,7 +347,12 @@ public class Drive extends SubsystemBase {
     /** Returns the measured chassis speeds of the robot. */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
     private ChassisSpeeds getChassisSpeeds() {
-        return kinematics.toChassisSpeeds(getModuleStates());
+        return robotVelocity;
+    }
+
+    @AutoLogOutput(key = "SwerveChassisSpeeds/FieldVelocity")
+    public ChassisSpeeds getFieldVelocity() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(robotVelocity, getRotation());
     }
 
     /** Returns the position of each module in radians. */
@@ -376,39 +382,6 @@ public class Drive extends SubsystemBase {
     /** Returns the current odometry rotation. */
     public Rotation2d getRotation() {
         return getPose().getRotation();
-    }
-
-    @AutoLogOutput(key = "Odometry/FieldVelocity")
-    public ChassisSpeeds getFieldVelocity() {
-        return robotVelocity;
-    }
-
-    public void calcVelocity() {
-        SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-        double[] sampleTimestamps = modules[0].getOdometryTimestamps();
-        // calculate module deltas (how far did the swerves move)
-        for (int i = 0; i < 4; i++) {
-            SwerveModulePosition first = modules[i].getOdometryPositions()[0];
-            SwerveModulePosition last =
-                    modules[i].getOdometryPositions()[sampleTimestamps.length - 1];
-            moduleDeltas[i] =
-                    new SwerveModulePosition(
-                            last.distanceMeters - first.distanceMeters, last.angle);
-        }
-        // calc dt
-        double t0 = sampleTimestamps[0];
-        double t1 = sampleTimestamps[sampleTimestamps.length - 1];
-        double dt = t1 - t0;
-
-        // make vel robot relative
-        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        Translation2d botVel = new Translation2d(twist.dx, twist.dy);
-        // make vel field relative
-        Translation2d fieldVel = botVel.rotateBy(getRotation());
-
-        // turn into m/s and make it a chassisspeed object
-        robotVelocity =
-                new ChassisSpeeds(fieldVel.getX() / dt, fieldVel.getY() / dt, twist.dtheta / dt);
     }
 
     /** Resets the current odometry pose. */

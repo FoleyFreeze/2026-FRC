@@ -21,6 +21,7 @@ public class StatsStructReflection implements Struct<Stats> {
         schema = "";
 
         // count the number of double fields
+        // we assume these are all the stats we want to save
         Field[] fields = Stats.class.getDeclaredFields();
         for (Field f : fields) {
             if (f.getType().equals(Double.TYPE)) {

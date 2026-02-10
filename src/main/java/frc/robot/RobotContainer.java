@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
+import frc.robot.auto.ChoreoAutos;
 import frc.robot.commands.DriveTuning;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
@@ -68,6 +69,8 @@ public class RobotContainer {
     public final Intake intake;
     public final Climber climber;
     public final StatsSubsystem stats;
+
+    public final ChoreoAutos chAutos;
 
     private SwerveDriveSimulation driveSimulation;
 
@@ -172,8 +175,11 @@ public class RobotContainer {
                 break;
         }
 
+        chAutos = new ChoreoAutos(this);
+
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+        autoChooser.addOption("TestAutoLeft", chAutos.loadTraj("TestAutoLeft"));
 
         // Set up SysId routines
         autoChooser.addOption(

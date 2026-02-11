@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
 import frc.robot.util.Util;
 import java.util.function.DoubleSupplier;
@@ -19,6 +20,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
+    RobotContainer r;
     private final ShooterIO io;
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 

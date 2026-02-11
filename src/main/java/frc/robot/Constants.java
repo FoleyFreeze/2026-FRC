@@ -31,8 +31,8 @@ public final class Constants {
         REPLAY
     }
 
-    public static final double robotLength = 32;
-    public static final double robotWidth = 28;
+    public static final double robotLength = Units.inchesToMeters(32);
+    public static final double robotWidth = Units.inchesToMeters(28);
     public static final Translation2d shooterLocOnBot =
             new Translation2d(Units.inchesToMeters(-12), Units.inchesToMeters(8));
     public static final double turretAngleOffset = 0; // TODO: fix if needbe

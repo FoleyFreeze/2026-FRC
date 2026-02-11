@@ -2,8 +2,11 @@ package frc.robot.subsystems.stats;
 
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
+import frc.robot.RobotContainer;
 
 public class Stats implements StructSerializable {
+    RobotContainer r;
+
     double totalTravelDist;
     double totalTravelTime;
     double totalBallShots;

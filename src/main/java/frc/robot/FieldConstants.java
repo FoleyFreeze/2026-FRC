@@ -55,7 +55,14 @@ public class FieldConstants {
 
     public static class RightTrench {}
 
-    public static class Tower {}
+    public static class Tower {
+        public static final double halfWidth = Units.inchesToMeters(49.25 / 2.0);
+        public static final double depth = Units.inchesToMeters(45 - 3.25);
+        public static Translation2d towerLeftFront =
+                new Translation2d(depth, tagLayout.getTagPose(31).get().getY() + halfWidth);
+        public static Translation2d towerRightFront =
+                new Translation2d(depth, tagLayout.getTagPose(31).get().getY() - halfWidth);
+    }
 
     public static class Depot {}
 
@@ -69,9 +76,9 @@ public class FieldConstants {
     // flip a red coord to blue or blue to red
     public static Translation2d flip(Translation2d pos) {
         if (pos.getX() < HorizontalLines.center) {
-            return new Translation2d(pos.getX() + HorizontalLines.center, pos.getY());
+            return new Translation2d(pos.getX() + HorizontalLines.center, fieldWidth - pos.getY());
         } else {
-            return new Translation2d(pos.getX() - HorizontalLines.center, pos.getY());
+            return new Translation2d(pos.getX() - HorizontalLines.center, fieldWidth - pos.getY());
         }
     }
 

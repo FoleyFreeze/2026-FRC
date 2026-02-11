@@ -8,6 +8,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,14 +19,19 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
+
     private static final double DEADBAND = 0.1;
     private static final double ANGLE_KP = 5.0;
     private static final double ANGLE_KD = 0.4;
@@ -146,6 +152,52 @@ public class DriveCommands {
 
                 // Reset PID controller when command starts
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+    }
+
+    public static Command driveToPoint(RobotContainer r, Supplier<Pose2d> supplier) {
+        PIDController pidX = new PIDController(8, 0, 0);
+        PIDController pidY = new PIDController(8, 0, 0);
+        final double POS_TOL = Units.inchesToMeters(0.5);
+        final double POS_MAX_VEL = 1; // may change
+        final double POS_MAX_TIME = 2;
+        double[] error = new double[1];
+        Timer timer = new Timer();
+
+        return Commands.run(
+                        () -> {
+                            // gets where go
+                            Pose2d target = supplier.get();
+                            Pose2d meas = r.drive.getPose(); // may do local pose later
+                            // error calculation
+                            Translation2d pointErr =
+                                    target.getTranslation().minus(meas.getTranslation());
+                            error[0] = pointErr.getNorm();
+                            Logger.recordOutput("Odometry/PointErr", pointErr);
+                            Logger.recordOutput("Odometry/PointErrNorm", error[0]);
+                            // using error to calc the vel
+                            double xVel = pidX.calculate(meas.getX(), target.getX());
+                            double yVel = pidY.calculate(meas.getY(), target.getY());
+                            // limits vel (its turtle time)
+                            xVel = MathUtil.clamp(xVel, -POS_MAX_VEL, POS_MAX_VEL);
+                            yVel = MathUtil.clamp(yVel, -POS_MAX_VEL, POS_MAX_VEL);
+
+                            // TODO: run angle PID in parallel
+                            r.drive.runVelocity(
+                                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                                            new ChassisSpeeds(xVel, yVel, 0),
+                                            r.drive.getRotation()));
+                        },
+                        r.drive)
+                .until(() -> error[0] < POS_TOL || timer.hasElapsed(POS_MAX_TIME))
+                .beforeStarting(
+                        () -> {
+                            pidX.reset();
+                            pidY.reset();
+                            timer.restart();
+                        })
+                .andThen(
+                        new InstantCommand(
+                                () -> r.drive.runVelocity(new ChassisSpeeds()), r.drive));
     }
 
     private static ChassisSpeeds prevSpeeds = new ChassisSpeeds();

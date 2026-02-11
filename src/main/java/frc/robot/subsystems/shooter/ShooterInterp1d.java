@@ -116,21 +116,44 @@ public class ShooterInterp1d {
             double[] hoodAngleTable,
             double[] timeTable) {
 
-        Translation2d bot = pos.getTranslation();
+        //step1 project robot movement into the future
+        Pose2d futureBotPose = pos.exp(vel.toTwist2d(dt));
+        Translation2d turretPos =
+                futureBotPose
+                        .getTranslation()
+                        .plus(Constants.shooterLocOnBot.rotateBy(futureBotPose.getRotation()));
+
+        // step2: offset goal location based on robot velocity
+        //    a: turn robot rotation vel into turret vx vy and turret rotation
+        Translation2d botVelXY = new Translation2d(vel.vxMetersPerSecond, vel.vyMetersPerSecond);
+        // tangent velocity is in the direction of the turret with a magnitude of omega*R. Then
+        // convert to field coords
+        Translation2d turretXYfromRot =
+                Constants.shooterLocOnBot
+                        .rotateBy(
+                                Rotation2d.fromRadians(
+                                        Math.PI / 2.0 + vel.omegaRadiansPerSecond * dt))
+                        .rotateBy(futureBotPose.getRotation());
+        Translation2d turretVelocity = botVelXY.plus(turretXYfromRot);
+        Logger.recordOutput("Shooter/turretVelocity", turretVelocity);
+
+        //    b: offset goal based on turret velocity (initial time guess is the lowest shot time)
+        Translation2d velocityOffset = turretVelocity.times(-timeTable[0]);
+        Logger.recordOutput("Shooter/velocityOffset", velocityOffset);
+
         // rep 1
-        double dist = goal.minus(bot).getNorm();
+        double dist = goal.plus(velocityOffset).minus(turretPos).getNorm();
         double time = getTime(dist, distAxis, timeTable);
         // rep 2 - x
-        Translation2d offset;
         for (int i = 1; i < reps - 1; i++) {
-            offset =
-                    new Translation2d(-vel.vxMetersPerSecond * time, -vel.vyMetersPerSecond * time);
-            dist = goal.plus(offset).minus(bot).getNorm();
+            velocityOffset = turretVelocity.times(-time);
+
+            dist = goal.plus(velocityOffset).minus(turretPos).getNorm();
             time = getTime(dist, distAxis, timeTable);
         }
         // rep x+1
-        offset = new Translation2d(-vel.vxMetersPerSecond * time, -vel.vyMetersPerSecond * time);
-        Translation2d vecToTarget = goal.plus(offset).minus(bot);
+        velocityOffset = turretVelocity.times(-time);
+        Translation2d vecToTarget = goal.plus(velocityOffset).minus(turretPos);
         dist = vecToTarget.getNorm();
 
         DataPoint data =
@@ -191,7 +214,7 @@ public class ShooterInterp1d {
         Translation2d velocityOffset = turretVelocity.times(-stationaryData.time);
         Logger.recordOutput("Shooter/velocityOffset", velocityOffset);
 
-        Translation2d vecToGoal = goal.minus(futureBotPose.getTranslation()).plus(velocityOffset);
+        Translation2d vecToGoal = goal.minus(turretPos).plus(velocityOffset);
         Logger.recordOutput("Shooter/vecToGoal", vecToGoal);
 
         double movingDist = vecToGoal.getNorm();
@@ -235,10 +258,10 @@ public class ShooterInterp1d {
     }
 
     public DataPoint getPass(Translation2d goal, Pose2d pos, ChassisSpeeds vel) {
-        // return getReps(
-        //         goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass,
-        // timeTablePass);
-        return getHV(
-                goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass, timeTablePass);
+        return getReps(
+                goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass,
+        timeTablePass);
+        // return getHV(
+        //         goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass, timeTablePass);
     }
 }

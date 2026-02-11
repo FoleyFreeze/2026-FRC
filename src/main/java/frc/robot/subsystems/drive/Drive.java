@@ -43,6 +43,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.ConfigButtons;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShootMode;
@@ -57,6 +58,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
+    RobotContainer r;
+
     // TunerConstants doesn't include these constants, so they are declared locally
     static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
     public static final double DRIVE_BASE_RADIUS =
@@ -96,6 +99,8 @@ public class Drive extends SubsystemBase {
 
     public static final DriveTrainSimulationConfig mapleSimConfig =
             DriveTrainSimulationConfig.Default()
+                    .withBumperSize(
+                            Meters.of(Constants.robotLength), Meters.of(Constants.robotWidth))
                     .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
                     .withCustomModuleTranslations(getModuleTranslations())
                     .withGyro(COTS.ofPigeon2())

@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -9,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.PathFinderCommand;
+import java.util.function.Supplier;
 
 public class ConfigButtons {
 
@@ -51,6 +54,7 @@ public class ConfigButtons {
         r.drive.setDefaultCommand(DriveCommands.joystickDrive(r.drive, () -> 0, () -> 0, () -> 0));
 
         isNormal.and(controller.rightTrigger().negate())
+                .and(controller.x().negate())
                 .whileTrue(
                         DriveCommands.joystickDrive(
                                         r.drive,
@@ -58,6 +62,25 @@ public class ConfigButtons {
                                         () -> -controller.getLeftX(),
                                         () -> -controller.getRightX())
                                 .ignoringDisable(true));
+
+        Supplier<Pose2d> targetPose =
+                () ->
+                        new Pose2d(
+                                FieldConstants.flipIfRed(
+                                        FieldConstants.Tower.towerRightFront.minus(
+                                                new Translation2d(0, Constants.robotWidth))),
+                                Rotation2d.kZero);
+        isNormal.and(controller.x())
+                .whileTrue(
+                        new PathFinderCommand(r, targetPose)
+                                .andThen(
+                                        DriveCommands.driveToPoint(
+                                                r,
+                                                () ->
+                                                        new Pose2d(
+                                                                FieldConstants.Tower
+                                                                        .towerRightFront,
+                                                                Rotation2d.kZero))));
 
         isClimb.whileTrue(
                 DriveCommands.joystickDrive(

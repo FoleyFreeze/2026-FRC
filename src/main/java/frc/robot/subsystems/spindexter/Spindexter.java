@@ -3,11 +3,14 @@ package frc.robot.subsystems.spindexter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
 import org.littletonrobotics.junction.Logger;
 
 public class Spindexter extends SubsystemBase {
+    RobotContainer r;
+
     private final SpindexterIO io;
     private final SpindexterIOInputsAutoLogged inputs = new SpindexterIOInputsAutoLogged();
 

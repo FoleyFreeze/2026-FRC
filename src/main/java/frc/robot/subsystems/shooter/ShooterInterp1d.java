@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class ShooterInterp1d {
     public static record DataPoint(
-            double rpm, double angle, double hood, double time, double turretVel) {}
+            double rpm, double angle, double hood, double time, double turretVel, double dist) {}
 
     private static final double[] distAxis = {0, 1.524, 3.048, 4.572, 6.096};
 
@@ -25,7 +25,7 @@ public class ShooterInterp1d {
     // for sim without drag
     private static final double[] rpmTableSim = {2860, 3403, 3963, 4473, 4938};
     private static final double[] hoodAngleTableSim = {73.3, 59.2, 54.1, 51.6, 50.2};
-    private static final double[] timeTableSim = {0.59, 0.78, 0.96, 1.12, 1.26};
+    private static final double[] timeTableSim = {0.29, 0.42, 0.64, 0.85, 1.0};
 
     // real passes with drag
     private static final double[] rpmTableRealPassing = {1000, 1600, 2200, 2800, 3400, 4000, 4600};
@@ -73,7 +73,8 @@ public class ShooterInterp1d {
             double[] distAxis,
             double[] rpmTable,
             double[] hoodAngleTable,
-            double[] timeTable) {
+            double[] timeTable,
+            double turretVel) {
         int distIdx = 1;
         while (distIdx < distAxis.length - 1 && dist > distAxis[distIdx]) {
             distIdx++;
@@ -87,7 +88,7 @@ public class ShooterInterp1d {
                 MathUtil.interpolate(hoodAngleTable[pDistIdx], hoodAngleTable[distIdx], fracX);
         double time = MathUtil.interpolate(timeTable[pDistIdx], timeTable[distIdx], fracX);
 
-        return new DataPoint(rpm, angle, hood, time, 0);
+        return new DataPoint(rpm, angle, hood, time, turretVel, dist);
     }
 
     public double getTime(double dist, double[] distAxis, double[] timeTable) {
@@ -116,7 +117,7 @@ public class ShooterInterp1d {
             double[] hoodAngleTable,
             double[] timeTable) {
 
-        //step1 project robot movement into the future
+        // step1 project robot movement into the future
         Pose2d futureBotPose = pos.exp(vel.toTwist2d(dt));
         Translation2d turretPos =
                 futureBotPose
@@ -133,7 +134,8 @@ public class ShooterInterp1d {
                         .rotateBy(
                                 Rotation2d.fromRadians(
                                         Math.PI / 2.0 + vel.omegaRadiansPerSecond * dt))
-                        .rotateBy(futureBotPose.getRotation());
+                        .rotateBy(futureBotPose.getRotation())
+                        .times(vel.omegaRadiansPerSecond);
         Translation2d turretVelocity = botVelXY.plus(turretXYfromRot);
         Logger.recordOutput("Shooter/turretVelocity", turretVelocity);
 
@@ -156,14 +158,27 @@ public class ShooterInterp1d {
         Translation2d vecToTarget = goal.plus(velocityOffset).minus(turretPos);
         dist = vecToTarget.getNorm();
 
+        // calc the turret angular vel from the tangential turret velocity
+        double tangentAngle =
+                vecToTarget
+                        .getAngle()
+                        .plus(Rotation2d.kCCW_90deg)
+                        .minus(
+                                Rotation2d.fromRadians(
+                                        Math.atan2(turretVelocity.getY(), turretVelocity.getX())))
+                        .getRadians(); // tangent angle (b)
+        double tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
+        double turretVel = Math.toDegrees(tangentVelocity / dist);
+
         DataPoint data =
                 get(
                         dist,
-                        vecToTarget.getAngle().getDegrees(),
+                        vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(),
                         distAxis,
                         rpmTable,
                         hoodAngleTable,
-                        timeTable);
+                        timeTable,
+                        turretVel);
         double timeError = data.time - time;
         Logger.recordOutput("Shooter/TimeError", timeError);
 
@@ -194,7 +209,7 @@ public class ShooterInterp1d {
 
         //    b: lookup the stationary shot from that location
         double dist = goal.minus(turretPos).getNorm();
-        DataPoint stationaryData = get(dist, 0, distAxis, rpmTable, hoodAngleTable, timeTable);
+        DataPoint stationaryData = get(dist, 0, distAxis, rpmTable, hoodAngleTable, timeTable, 0);
 
         // step2: offset goal location based on robot velocity
         //    a: turn robot rotation vel into turret vx vy and turret rotation
@@ -206,7 +221,8 @@ public class ShooterInterp1d {
                         .rotateBy(
                                 Rotation2d.fromRadians(
                                         Math.PI / 2.0 + vel.omegaRadiansPerSecond * dt))
-                        .rotateBy(futureBotPose.getRotation());
+                        .rotateBy(futureBotPose.getRotation())
+                        .times(vel.omegaRadiansPerSecond);
         Translation2d turretVelocity = botVelXY.plus(turretXYfromRot);
         Logger.recordOutput("Shooter/turretVelocity", turretVelocity);
 
@@ -249,19 +265,20 @@ public class ShooterInterp1d {
                 turretAngle,
                 newHoodAngle,
                 stationaryData.time,
-                Math.toDegrees(-vel.omegaRadiansPerSecond));
+                Math.toDegrees(-vel.omegaRadiansPerSecond),
+                0);
     }
 
     public DataPoint getHub(Translation2d goal, Pose2d pos, ChassisSpeeds vel) {
-        // return getReps(goal, pos, vel, distAxis, rpmTable, hoodAngleTable, timeTable);
-        return getHV(goal, pos, vel, distAxis, rpmTable, hoodAngleTable, timeTable);
+        return getReps(goal, pos, vel, distAxis, rpmTable, hoodAngleTable, timeTable);
+        // return getHV(goal, pos, vel, distAxis, rpmTable, hoodAngleTable, timeTable);
     }
 
     public DataPoint getPass(Translation2d goal, Pose2d pos, ChassisSpeeds vel) {
         return getReps(
-                goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass,
-        timeTablePass);
+                goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass, timeTablePass);
         // return getHV(
-        //         goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass, timeTablePass);
+        //         goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass,
+        // timeTablePass);
     }
 }

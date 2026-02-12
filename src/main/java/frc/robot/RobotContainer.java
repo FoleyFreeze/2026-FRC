@@ -143,7 +143,9 @@ public class RobotContainer {
                 IntakeIOSim iis = new IntakeIOSim(driveSimulation);
                 intake = new Intake(iis);
 
-                shooter = new Shooter(new ShooterIOSim(iis, driveSimulation, spinSim));
+                ShooterIOSim shootSim = new ShooterIOSim(iis, driveSimulation, spinSim);
+                shooter = new Shooter(shootSim);
+                shootSim.registerShooter(shooter);
 
                 climber = new Climber(new ClimberIO() {});
                 break;

@@ -8,7 +8,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -21,6 +20,7 @@ import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.spindexter.SpindexterIOSim;
+import java.util.HashMap;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
@@ -30,6 +30,7 @@ public class ShooterIOSim implements ShooterIO {
     private final IntakeIOSim iis;
     private final SwerveDriveSimulation swerveSim;
     private final SpindexterIOSim spinSim;
+    private Shooter shooter;
 
     private final FlywheelSim wheel;
     private final SingleJointedArmSim hood;
@@ -40,6 +41,7 @@ public class ShooterIOSim implements ShooterIO {
     private final PIDController turretController;
 
     private boolean wheelClosedLoop = false;
+    static final boolean dontModelPID = true;
 
     private double wheelControlVoltage = 0;
     private double hoodControlVoltage = 0;
@@ -48,7 +50,7 @@ public class ShooterIOSim implements ShooterIO {
     private double hoodFeedfwdVoltage = 0;
     private double turretFeedfwdVoltage = 0;
     private final double turretKF =
-            12.0 / Units.radiansToDegrees(DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt) * 10;
+            1.0 / Units.radiansToDegrees(DCMotor.getKrakenX60Foc(1).KvRadPerSecPerVolt) * 10;
     private final double wheelKF =
             1.0
                     / Units.radiansPerSecondToRotationsPerMinute(
@@ -60,6 +62,14 @@ public class ShooterIOSim implements ShooterIO {
     // 10 balls per second
     private final double shotTime = 1 / 5.0;
     private final Timer shotClock = new Timer();
+
+    public static class MapData {
+        double launchTime;
+        double predictedFlightTime;
+    }
+
+    public HashMap<RebuiltFuelOnFly, MapData> timerMap = new HashMap<>();
+    public int failedLookups = 0;
 
     public ShooterIOSim(IntakeIOSim iis, SwerveDriveSimulation swerveSim, SpindexterIOSim spinSim) {
         this.iis = iis;
@@ -101,43 +111,50 @@ public class ShooterIOSim implements ShooterIO {
         shotClock.start();
     }
 
+    public void registerShooter(Shooter shooter) {
+        this.shooter = shooter;
+    }
+
     @Override
     public void updateInputs(ShooterIOInputs inputs) {
-        if (wheelClosedLoop) {
-            wheelControlVoltage =
-                    wheelFeedfwdVoltage + wheelController.calculate(wheel.getAngularVelocityRPM());
-        } else {
-            wheelController.reset();
-        }
-        if (hoodClosedLoop) {
-            hoodControlVoltage =
-                    hoodController.calculate(Units.radiansToDegrees(hood.getAngleRads()));
+        if (!dontModelPID) {
+            if (wheelClosedLoop) {
+                wheelControlVoltage =
+                        wheelFeedfwdVoltage
+                                + wheelController.calculate(wheel.getAngularVelocityRPM());
+            } else {
+                wheelController.reset();
+            }
+            if (hoodClosedLoop) {
+                hoodControlVoltage =
+                        hoodController.calculate(Units.radiansToDegrees(hood.getAngleRads()));
 
-        } else {
-            hoodController.reset();
-        }
-        if (turretClosedLoop) {
-            turretControlVoltage =
-                    turretFeedfwdVoltage
-                            + turretController.calculate(
-                                    Units.radiansToDegrees(turret.getAngleRads()));
+            } else {
+                hoodController.reset();
+            }
+            if (turretClosedLoop) {
+                turretControlVoltage =
+                        turretFeedfwdVoltage
+                                + turretController.calculate(
+                                        Units.radiansToDegrees(turret.getAngleRads()));
 
-        } else {
-            turretController.reset();
-        }
+            } else {
+                turretController.reset();
+            }
 
-        hoodControlVoltage = MathUtil.clamp(hoodControlVoltage, -12, 12);
-        wheelControlVoltage = MathUtil.clamp(wheelControlVoltage, -12, 12);
-        turretControlVoltage = MathUtil.clamp(turretControlVoltage, -12, 12);
-        if (DriverStation.isDisabled()) {
-            hoodControlVoltage = 0;
-            wheelControlVoltage = 0;
-            turretControlVoltage = 0;
-        }
+            hoodControlVoltage = MathUtil.clamp(hoodControlVoltage, -12, 12);
+            wheelControlVoltage = MathUtil.clamp(wheelControlVoltage, -12, 12);
+            turretControlVoltage = MathUtil.clamp(turretControlVoltage, -12, 12);
+            if (DriverStation.isDisabled()) {
+                hoodControlVoltage = 0;
+                wheelControlVoltage = 0;
+                turretControlVoltage = 0;
+            }
 
-        hood.setInputVoltage(hoodControlVoltage);
-        wheel.setInputVoltage(wheelControlVoltage);
-        turret.setInputVoltage(turretControlVoltage);
+            hood.setInputVoltage(hoodControlVoltage);
+            wheel.setInputVoltage(wheelControlVoltage);
+            turret.setInputVoltage(turretControlVoltage);
+        }
 
         // if indexer is feeding a ball to the shooter
         if (spinSim.areWeRunning && shotClock.hasElapsed(shotTime)) {
@@ -150,13 +167,14 @@ public class ShooterIOSim implements ShooterIO {
                         wheel.getAngularVelocityRadPerSec()
                                 - Units.rotationsPerMinuteToRadiansPerSecond(50));
 
+                Rotation2d turretAngle = Rotation2d.fromRadians(turret.getAngleRads());
                 RebuiltFuelOnFly fuel =
                         new RebuiltFuelOnFly(
                                 swerveSim.getSimulatedDriveTrainPose().getTranslation(),
-                                new Translation2d(),
+                                Constants.shooterLocOnBot.rotateBy(turretAngle.unaryMinus()),
                                 swerveSim.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                                Rotation2d.fromRadians(turret.getAngleRads())
-                                        .plus(swerveSim.getSimulatedDriveTrainPose().getRotation()),
+                                turretAngle.plus(
+                                        swerveSim.getSimulatedDriveTrainPose().getRotation()),
                                 Inches.of(18),
                                 MetersPerSecond.of(
                                         wheel.getAngularVelocityRPM()
@@ -185,12 +203,45 @@ public class ShooterIOSim implements ShooterIO {
                                         "Sim/MissedShot", pose3d.toArray(Pose3d[]::new)));
 
                 SimulatedArena.getInstance().addGamePieceProjectile(fuel);
+                // uncomment if we want to measure sim flight time again
+                // if (fuel.willHitTarget()) {
+                //     MapData data = new MapData();
+                //     data.launchTime = Timer.getFPGATimestamp();
+                //     data.predictedFlightTime = shooter.getLastFlightTime();
+                //     timerMap.put(fuel, data);
+
+                //     fuel.setHitTargetCallBack(
+                //             new Runnable() {
+                //                 private RebuiltFuelOnFly selfRef = fuel;
+
+                //                 public void run() {
+                //                     if (selfRef != null && timerMap.containsKey(selfRef)) {
+                //                         double time = Timer.getFPGATimestamp();
+                //                         MapData d = timerMap.get(selfRef);
+                //                         double flightTime = time - d.launchTime;
+                //                         Logger.recordOutput(
+                //                                 "FieldSimultaion/FlightTime", flightTime);
+                //                         Logger.recordOutput(
+                //                                 "FieldSimultaion/FlightTimeError",
+                //                                 flightTime - d.predictedFlightTime);
+                //                         timerMap.remove(selfRef);
+                //                         selfRef = null;
+                //                     } else {
+                //                         Logger.recordOutput(
+                //                                 "FieldSimulation/FailedLookups",
+                // ++failedLookups);
+                //                     }
+                //                 }
+                //             });
+                // }
             }
         }
 
-        hood.update(0.02);
-        wheel.update(0.02);
-        turret.update(0.02);
+        if (!dontModelPID) {
+            hood.update(0.02);
+            wheel.update(0.02);
+            turret.update(0.02);
+        }
 
         inputs.hoodConnected = true;
         inputs.hoodPosition = Units.radiansToDegrees(hood.getAngleRads());
@@ -218,22 +269,34 @@ public class ShooterIOSim implements ShooterIO {
     }
 
     public void setTurretAngle(double turretAngle, double velocity) {
-        turretClosedLoop = true;
-        turretFeedfwdVoltage = turretKF * velocity;
-        turretController.setSetpoint(turretAngle);
+        if (dontModelPID) {
+            turret.setState(Math.toRadians(turretAngle), Math.toRadians(velocity));
+        } else {
+            turretClosedLoop = true;
+            turretFeedfwdVoltage = turretKF * velocity;
+            turretController.setSetpoint(turretAngle);
+        }
     }
 
     @Override
     public void setHoodAngle(double hoodAngle) {
-        hoodClosedLoop = true;
-        hoodController.setSetpoint(hoodAngle);
+        if (dontModelPID) {
+            hood.setState(Math.toRadians(hoodAngle), 0);
+        } else {
+            hoodClosedLoop = true;
+            hoodController.setSetpoint(hoodAngle);
+        }
     }
 
     @Override
     public void setSpeed(double speed) {
-        wheelClosedLoop = true;
-        wheelFeedfwdVoltage = wheelKF * speed;
-        wheelController.setSetpoint(speed);
+        if (dontModelPID) {
+            wheel.setAngularVelocity(Units.rotationsPerMinuteToRadiansPerSecond(speed));
+        } else {
+            wheelClosedLoop = true;
+            wheelFeedfwdVoltage = wheelKF * speed;
+            wheelController.setSetpoint(speed);
+        }
     }
 
     @Override

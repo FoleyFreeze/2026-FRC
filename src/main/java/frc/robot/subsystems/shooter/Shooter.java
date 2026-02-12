@@ -116,6 +116,12 @@ public class Shooter extends SubsystemBase {
         return goal;
     }
 
+    double lastPredFlightTime = 0;
+
+    public double getLastFlightTime() {
+        return lastPredFlightTime;
+    }
+
     public void goalPrime(Pose2d botLoc, ChassisSpeeds botVel) {
 
         // 0 what are we shooting at? (goal vs pass)
@@ -128,6 +134,7 @@ public class Shooter extends SubsystemBase {
         } else {
             setpoints = lerp.getPass(goal, botLoc, botVel);
         }
+        lastPredFlightTime = setpoints.time();
 
         // 2 use setpoints from lerp to set motors
         double angleSetpoint = setpoints.angle();
@@ -135,6 +142,7 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
+        Logger.recordOutput("Shooter/Distance", setpoints.dist());
 
         hoodTarget = setpoints.hood();
         rpmTarget = setpoints.rpm();

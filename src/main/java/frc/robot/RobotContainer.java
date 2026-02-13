@@ -223,10 +223,10 @@ public class RobotContainer {
 
     public void simInit() {
         mech = new LoggedMechanism2d(0, 0);
-        mechRootI = mech.getRoot("IntakeRoot", Units.inchesToMeters(15), 0);
+        mechRootI = mech.getRoot("IntakeRoot", Units.inchesToMeters(16.5), 0);
         intakeMech =
                 mechRootI.append(
-                        new LoggedMechanismLigament2d("Intake", Units.inchesToMeters(14), 0));
+                        new LoggedMechanismLigament2d("Intake", Units.inchesToMeters(10), 0));
 
         mechRootT = mech.getRoot("ShootRoot", Constants.shooterLocOnBot.getX(), 0);
         turretMechOffset =

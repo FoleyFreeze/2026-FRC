@@ -1,6 +1,7 @@
 package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -8,6 +9,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.Constants;
 import frc.robot.subsystems.intake.IntakeIO.IntakeIOInputs;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.IntakeSimulation.IntakeSide;
@@ -34,7 +36,7 @@ public class IntakeIOSim implements IntakeIO {
                 IntakeSimulation.OverTheBumperIntake(
                         "Fuel",
                         driveSim,
-                        Inches.of(31),
+                        Meters.of(Constants.frameWidth),
                         Inches.of(10),
                         IntakeSide.FRONT,
                         hopperCapacity);

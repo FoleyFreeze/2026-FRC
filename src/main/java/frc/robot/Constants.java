@@ -31,10 +31,19 @@ public final class Constants {
         REPLAY
     }
 
-    public static final double robotLength = Units.inchesToMeters(32);
-    public static final double robotWidth = Units.inchesToMeters(28);
+    // with bumpers
+    public static final double robotLength =
+            Units.inchesToMeters(32 + (1.0 / 16.0)); // front and back X
+    public static final double robotWidth = Units.inchesToMeters(34.5625); // left and right Y
+
+    // without bumpers
+    public static final double frameLength = Units.inchesToMeters(26); // front and back X
+    public static final double frameWidth = Units.inchesToMeters(28.5); // left and right Y
+
     public static final Translation2d shooterLocOnBot =
-            new Translation2d(Units.inchesToMeters(-12), Units.inchesToMeters(8));
-    public static final double turretAngleOffset = 0; // TODO: fix if needbe
-    public static final double maximumTurretAngle = 450;
+            new Translation2d(
+                    (frameLength / 2) - Units.inchesToMeters(22),
+                    (-frameWidth / 2) + Units.inchesToMeters(13));
+    public static final double turretAngleOffset = 0;
+    public static final double maximumTurretAngle = 400;
 }

@@ -25,6 +25,8 @@ public interface IntakeIO {
     public default void armPower(double power) {}
 
     public default void armAngle(double angle) {}
+    
+    public default void armMotion(double angle) {}
 
     public default void wheelSpeed(double speed) {}
 

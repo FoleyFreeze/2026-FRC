@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.RPM;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -27,7 +28,8 @@ public class IntakeIOHardware implements IntakeIO {
     private final VoltageOut voltageRequestArm = new VoltageOut(0);
 
     private final VelocityTorqueCurrentFOC velocityRequestWheel = new VelocityTorqueCurrentFOC(0);
-    private final PositionTorqueCurrentFOC positionRequestArm = new PositionTorqueCurrentFOC(0);
+    private final PositionTorqueCurrentFOC positionRequestArm = new PositionTorqueCurrentFOC(0).withSlot(0);
+    private final MotionMagicTorqueCurrentFOC motionRequestArm = new MotionMagicTorqueCurrentFOC(0).withSlot(1);
 
     private final StatusSignal<Angle> positionWheel;
     private final StatusSignal<Angle> positionArm;
@@ -114,5 +116,10 @@ public class IntakeIOHardware implements IntakeIO {
     @Override
     public void armAngle(double angle) {
         arm.setControl(positionRequestArm.withPosition(angle));
+    }
+
+    @Override
+    public void armMotion(double angle) {
+        arm.setControl(motionRequestArm.withPosition(angle));
     }
 }

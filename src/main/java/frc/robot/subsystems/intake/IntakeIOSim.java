@@ -52,12 +52,12 @@ public class IntakeIOSim implements IntakeIO {
                         Units.degreesToRadians(90),
                         true,
                         Units.degreesToRadians(90));
-        armController = new PIDController(0.2, 0, 0);
+        armController = new PIDController(50, 0, 0);
 
         wheel =
                 new FlywheelSim(
                         LinearSystemId.createFlywheelSystem(
-                                DCMotor.getKrakenX60Foc(1), 0.07, 1 / 5.0),
+                                DCMotor.getKrakenX60Foc(1).withReduction(2), 0.01, 1 / 5.0),
                         DCMotor.getKrakenX60Foc(1));
         wheelController = new PIDController(2, 0, 0);
     }
@@ -66,7 +66,8 @@ public class IntakeIOSim implements IntakeIO {
     public void updateInputs(IntakeIOInputs inputs) {
         // Run closed-loop control
         if (armClosedLoop) {
-            armControlVoltage = armController.calculate(arm.getAngleRads());
+            armControlVoltage =
+                    armController.calculate(Units.radiansToRotations(arm.getAngleRads()));
 
         } else {
             armController.reset();
@@ -74,7 +75,9 @@ public class IntakeIOSim implements IntakeIO {
         if (wheelClosedLoop) {
             wheelControlVoltage =
                     wheelFeedfwdVoltage
-                            + wheelController.calculate(wheel.getAngularVelocityRadPerSec());
+                            + wheelController.calculate(
+                                    Units.radiansPerSecondToRotationsPerMinute(
+                                            wheel.getAngularVelocityRadPerSec()));
         } else {
             wheelController.reset();
         }
@@ -86,15 +89,16 @@ public class IntakeIOSim implements IntakeIO {
         wheel.update(0.02);
 
         inputs.armConnected = true;
-        inputs.armPosition = arm.getAngleRads();
-        inputs.armVelocity = arm.getVelocityRadPerSec();
+        inputs.armPosition = Units.radiansToRotations(arm.getAngleRads());
+        inputs.armVelocity = Units.radiansPerSecondToRotationsPerMinute(arm.getVelocityRadPerSec());
         inputs.armVoltage = armControlVoltage;
         inputs.armCurrent = arm.getCurrentDrawAmps();
         inputs.armTemp = 0;
 
         inputs.wheelConnected = true;
-        inputs.wheelVelocity = wheel.getAngularVelocityRadPerSec();
-        inputs.wheelPosition += 0.02 * inputs.wheelVelocity;
+        inputs.wheelVelocity =
+                Units.radiansPerSecondToRotationsPerMinute(wheel.getAngularVelocityRadPerSec());
+        inputs.wheelPosition += 0.02 * inputs.wheelVelocity / 60.0;
         inputs.wheelVoltage = wheelControlVoltage;
         inputs.wheelCurrent = wheel.getCurrentDrawAmps();
         inputs.wheelTemp = 0;
@@ -118,9 +122,14 @@ public class IntakeIOSim implements IntakeIO {
     }
 
     @Override
-    public void armAngle(double angle) {
+    public void armAngle(double rotations) {
         armClosedLoop = true;
-        armController.setSetpoint(angle);
+        armController.setSetpoint(-rotations + 0.25);
+    }
+
+    @Override
+    public void armMotion(double rotations) {
+        armAngle(rotations);
     }
 
     @Override

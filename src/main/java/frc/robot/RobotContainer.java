@@ -259,7 +259,7 @@ public class RobotContainer {
                 "FieldSimulation/Fuel",
                 SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
 
-        intakeMech.setAngle(Units.radiansToDegrees(intake.getAngle()));
+        intakeMech.setAngle(intake.getAngle());
         turretHoodMech.setAngle(-shooter.getHoodAngle());
 
         Logger.recordOutput("Mech", mech);

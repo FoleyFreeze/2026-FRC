@@ -23,7 +23,7 @@ public class Util {
         return r;
     }
 
-    public static boolean isRedAlliance(){
+    public static boolean isRedAlliance() {
         return DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red);
     }
 }

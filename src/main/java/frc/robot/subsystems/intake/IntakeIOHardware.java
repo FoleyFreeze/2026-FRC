@@ -28,8 +28,10 @@ public class IntakeIOHardware implements IntakeIO {
     private final VoltageOut voltageRequestArm = new VoltageOut(0);
 
     private final VelocityTorqueCurrentFOC velocityRequestWheel = new VelocityTorqueCurrentFOC(0);
-    private final PositionTorqueCurrentFOC positionRequestArm = new PositionTorqueCurrentFOC(0).withSlot(0);
-    private final MotionMagicTorqueCurrentFOC motionRequestArm = new MotionMagicTorqueCurrentFOC(0).withSlot(1);
+    private final PositionTorqueCurrentFOC positionRequestArm =
+            new PositionTorqueCurrentFOC(0).withSlot(0);
+    private final MotionMagicTorqueCurrentFOC motionRequestArm =
+            new MotionMagicTorqueCurrentFOC(0).withSlot(1);
 
     private final StatusSignal<Angle> positionWheel;
     private final StatusSignal<Angle> positionArm;

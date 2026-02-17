@@ -21,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
     RobotContainer r;
+
     private final ShooterIO io;
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
@@ -79,7 +80,7 @@ public class Shooter extends SubsystemBase {
         return new RunCommand(() -> io.wheelPower(0), this);
     }
 
-    //deprecated
+    // deprecated
     public Command cameraShoot(Supplier<Pose2d> botPose, Supplier<ChassisSpeeds> botVel) {
         return new RunCommand(() -> goalPrime(botPose.get(), botVel.get()), this);
     }
@@ -135,6 +136,33 @@ public class Shooter extends SubsystemBase {
         } else {
             setpoints = lerp.getPass(goal, botLoc, botVel);
         }
+        lastPredFlightTime = setpoints.time();
+
+        // 2 use setpoints from lerp to set motors
+        double angleSetpoint = setpoints.angle();
+        Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
+        Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
+        Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
+        Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
+        Logger.recordOutput("Shooter/Distance", setpoints.dist());
+
+        hoodTarget = setpoints.hood();
+        rpmTarget = setpoints.rpm();
+        manageTurretWrap(angleSetpoint, setpoints.turretVel());
+        io.setHoodAngle(setpoints.hood());
+        io.setSpeed(setpoints.rpm());
+    }
+
+    public void newPrime(Translation2d goal, RobotContainer r) {
+        // 0 what are we shooting at? (goal vs pass)
+        Pose2d botLoc;
+        botLoc = r.drive.getPose();
+        ChassisSpeeds botVel;
+        botVel = r.drive.getChassisSpeeds();
+
+        // 1 call the lerp
+        DataPoint setpoints;
+        setpoints = lerp.getHub(goal, botLoc, botVel);
         lastPredFlightTime = setpoints.time();
 
         // 2 use setpoints from lerp to set motors

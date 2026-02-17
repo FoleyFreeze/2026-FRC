@@ -40,7 +40,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.ConfigButtons;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.RobotContainer;
@@ -49,7 +48,6 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShootMode;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.Util;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -61,7 +59,6 @@ import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
     RobotContainer r;
-
     // TunerConstants doesn't include these constants, so they are declared locally
     static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
     public static final double DRIVE_BASE_RADIUS =
@@ -395,9 +392,9 @@ public class Drive extends SubsystemBase {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
 
-    public void zeroDrive(){
+    public void zeroDrive() {
         Rotation2d zero = Rotation2d.kZero;
-        if(Util.isRedAlliance()){
+        if (Util.isRedAlliance()) {
             zero = Rotation2d.k180deg;
         }
         poseEstimator.resetRotation(zero);

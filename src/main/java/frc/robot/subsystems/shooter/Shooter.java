@@ -79,6 +79,7 @@ public class Shooter extends SubsystemBase {
         return new RunCommand(() -> io.wheelPower(0), this);
     }
 
+    //deprecated
     public Command cameraShoot(Supplier<Pose2d> botPose, Supplier<ChassisSpeeds> botVel) {
         return new RunCommand(() -> goalPrime(botPose.get(), botVel.get()), this);
     }

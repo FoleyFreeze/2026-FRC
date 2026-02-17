@@ -1,196 +1,59 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.PathFinderCommand;
-import java.util.function.Supplier;
 
 public class ConfigButtons {
-
-    public enum ControllerState {
-        INIT,
-        NORMAL,
-        CLIMB,
-        MANUAL_SHOOT,
-        MANUAL_UNJAM,
-        MANUAL_CLIMB,
-    }
-
-    public static ControllerState conState = ControllerState.INIT;
-
-    private static Trigger isInit = new Trigger(() -> conState == ControllerState.INIT);
-    private static Trigger isNormal = new Trigger(() -> conState == ControllerState.NORMAL);
-    private static Trigger isClimb = new Trigger(() -> conState == ControllerState.CLIMB);
-    private static Trigger isManualShoot =
-            new Trigger(() -> conState == ControllerState.MANUAL_SHOOT);
-    private static Trigger isManualUnjam =
-            new Trigger(() -> conState == ControllerState.MANUAL_UNJAM);
-    private static Trigger isManualClimb =
-            new Trigger(() -> conState == ControllerState.MANUAL_CLIMB);
-    private static Trigger isEnabled = new Trigger(() -> DriverStation.isEnabled());
 
     // Controller
     private static final CommandXboxController controller = new CommandXboxController(0);
 
     public static void config(RobotContainer r) {
-        registerStateTransitions();
 
-        // as soon as the scheduler runs switch out of init mode and into normal mode
-        CommandScheduler.getInstance()
-                .schedule(
-                        new WaitCommand(0.1)
-                                .andThen(
-                                        new InstantCommand(() -> conState = ControllerState.NORMAL))
-                                .ignoringDisable(true));
+        //drive functions
+        r.drive.setDefaultCommand(
+            DriveCommands.joystickDrive(r.drive, 
+                () -> -controller.getLeftY(), 
+                () -> -controller.getLeftX(), 
+                () -> -controller.getRightX()
+        ));
 
-        r.drive.setDefaultCommand(DriveCommands.joystickDrive(r.drive, () -> 0, () -> 0, () -> 0));
+        //add drive over bump
+        //add drive through trench
 
-        isNormal.and(controller.rightTrigger().negate())
-                .and(controller.x().negate())
-                .whileTrue(
-                        DriveCommands.joystickDrive(
-                                        r.drive,
-                                        () -> -controller.getLeftY(),
-                                        () -> -controller.getLeftX(),
-                                        () -> -controller.getRightX())
-                                .ignoringDisable(true));
+        //zero drive
+        //TODO: blink LEDs or something
+        controller.start().debounce(2).onTrue(new InstantCommand(() -> r.drive.zeroDrive()));
 
-        Supplier<Pose2d> targetPose =
-                () ->
-                        new Pose2d(
-                                FieldConstants.flipIfRed(
-                                        FieldConstants.Tower.towerRightFront.minus(
-                                                new Translation2d(0, Constants.robotWidth))),
-                                Rotation2d.kZero);
-        isNormal.and(controller.x())
-                .whileTrue(
-                        new PathFinderCommand(r, targetPose)
-                                .andThen(
-                                        DriveCommands.driveToPoint(
-                                                r,
-                                                () ->
-                                                        new Pose2d(
-                                                                FieldConstants.Tower
-                                                                        .towerRightFront,
-                                                                Rotation2d.kZero))));
 
-        isClimb.whileTrue(
-                DriveCommands.joystickDrive(
-                                r.drive,
-                                () -> -controller.getLeftY() * 0.5,
-                                () -> -controller.getLeftX() * 0.5,
-                                () -> -controller.getRightX() * 0.5)
-                        .ignoringDisable(true));
+        //intake functions
+        //TODO: Victor
+        //intake in M2
+        //intake out M6
+        //camera gather M5
+        //unjam A
 
-        // Reset gyro / odometry
-        final Runnable resetGyro =
-                () ->
-                        r.drive.setPose(
-                                new Pose2d(
-                                        r.drive.getPose().getTranslation(),
-                                        new Rotation2d())); // zero gyro
 
-        // controller.start().onTrue(Commands.runOnce(resetGyro, r.drive).ignoringDisable(true));
+        //shoot functions
+        //pass left LB
+        //pass right RB
+        //shoot hub RT
+        //manual shoot LT
+        //set manual shot positions (X Y B)
 
-        // intake
-        controller.a().whileTrue(r.intake.intakeDown());
-        controller.b().whileTrue(r.intake.intakeUp());
+        //select zero turret (reset to abs enc)
+        //start+select full zero turret (reset to zero and ignore abs)
 
-        // shooter wheel
-        // controller.leftTrigger().whileTrue(r.shooter.prime());
-        isNormal.and(controller.leftTrigger())
-                .whileTrue(r.shooter.cameraShoot(r.drive::getPose, r.drive::getFieldVelocity));
-        controller.leftTrigger().whileFalse(r.shooter.stop());
-        // spindexer
-        isNormal.and(controller.rightTrigger())
-                .whileTrue(
-                        r.spindexter
-                                .smartSpinCmd(r.shooter, r.drive)
-                                .alongWith(
-                                        DriveCommands.slowDrive(
-                                                controller, r.drive))); // , botLoc, hubPos
-        controller.rightTrigger().whileFalse(r.spindexter.stop());
 
-        // TODO: manual shoot cmds
-        isManualShoot.and(controller.leftTrigger()).whileTrue(r.shooter.prime());
-        isManualShoot.and(controller.rightTrigger()).whileTrue(r.spindexter.spin());
-    }
+        //climb functions
+        //dpad + X drive then climb
+        //dpad just climb
 
-    // cycle between normal -> climb -> manual shoot -> manual unjam -> manual climb -> normal
-    private static void registerStateTransitions() {
-        controller
-                .back()
-                .and(controller.start())
-                .and(isNormal)
-                .onFalse(
-                        new InstantCommand(() -> conState = ControllerState.CLIMB)
-                                .ignoringDisable(true));
 
-        controller
-                .back()
-                .and(controller.start())
-                .and(isClimb)
-                .and(isEnabled)
-                .onFalse(
-                        new InstantCommand(() -> conState = ControllerState.NORMAL)
-                                .ignoringDisable(true));
-        controller
-                .back()
-                .and(controller.start())
-                .and(isClimb)
-                .and(isEnabled.negate())
-                .onFalse(
-                        new InstantCommand(() -> conState = ControllerState.MANUAL_SHOOT)
-                                .ignoringDisable(true));
+        //operator board
+        //mode sw (idk what we want this to do yet)
+        //jogs (shoot speed, angle, etc)
 
-        controller
-                .back()
-                .and(controller.start())
-                .and(isManualShoot)
-                .and(isEnabled)
-                .onFalse(
-                        new InstantCommand(() -> conState = ControllerState.NORMAL)
-                                .ignoringDisable(true));
-        controller
-                .back()
-                .and(controller.start())
-                .and(isManualShoot)
-                .and(isEnabled.negate())
-                .onFalse(
-                        new InstantCommand(() -> conState = ControllerState.MANUAL_UNJAM)
-                                .ignoringDisable(true));
-
-        controller
-                .back()
-                .and(controller.start())
-                .and(isManualUnjam)
-                .and(isEnabled)
-                .onFalse(
-                        new InstantCommand(() -> conState = ControllerState.NORMAL)
-                                .ignoringDisable(true));
-        controller
-                .back()
-                .and(controller.start())
-                .and(isManualUnjam)
-                .and(isEnabled)
-                .onFalse(
-                        new InstantCommand(() -> conState = ControllerState.MANUAL_CLIMB)
-                                .ignoringDisable(true));
-
-        controller
-                .back()
-                .and(controller.start())
-                .and(isManualClimb)
-                .onFalse(
-                        new InstantCommand(() -> conState = ControllerState.NORMAL)
-                                .ignoringDisable(true));
     }
 }

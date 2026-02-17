@@ -1,5 +1,8 @@
 package frc.robot.util;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+
 public class Util {
 
     public static double floorMod(double a, double b) {
@@ -18,5 +21,9 @@ public class Util {
             r += b;
         }
         return r;
+    }
+
+    public static boolean isRedAlliance(){
+        return DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red);
     }
 }

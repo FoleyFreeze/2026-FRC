@@ -48,6 +48,8 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShootMode;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.Util;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -263,8 +265,6 @@ public class Drive extends SubsystemBase {
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
-
-        Logger.recordOutput("RobotMode", ConfigButtons.conState);
     }
 
     /**
@@ -351,7 +351,7 @@ public class Drive extends SubsystemBase {
 
     /** Returns the measured chassis speeds of the robot. */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-    private ChassisSpeeds getChassisSpeeds() {
+    public ChassisSpeeds getChassisSpeeds() {
         return robotVelocity;
     }
 
@@ -393,6 +393,14 @@ public class Drive extends SubsystemBase {
     public void setPose(Pose2d pose) {
         resetSimulationPoseCallBack.accept(pose);
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    }
+
+    public void zeroDrive(){
+        Rotation2d zero = Rotation2d.kZero;
+        if(Util.isRedAlliance()){
+            zero = Rotation2d.k180deg;
+        }
+        poseEstimator.resetRotation(zero);
     }
 
     /** Adds a new timestamped vision measurement. */

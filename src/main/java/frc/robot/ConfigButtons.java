@@ -40,6 +40,8 @@ public class ConfigButtons {
         // TODO: Victor
         // intake in M2
         // intake out M6
+        controller.a().onTrue(new InstantCommand(r.intake::extend));
+        controller.b().onTrue(new InstantCommand(r.intake::retract));
         // camera gather M5
         // unjam A
 
@@ -75,6 +77,18 @@ public class ConfigButtons {
                                 () -> manualShotLocState = manualShotLoc.RIGHT_BACK_CORNER));
         // select zero turret (reset to abs enc)
         controller.button(7).onTrue(new InstantCommand()); // TODO: add the part that does stuff
+        // start+select full zero turret (reset to zero and ignore abs)
+
+        // climb functions
+        // dpad + X drive then climb
+        // dpad just climb
+
+        // pass right RB
+        // shoot hub RT
+        // manual shoot LT
+        // set manual shot positions (X Y B)
+
+        // select zero turret (reset to abs enc)
         // start+select full zero turret (reset to zero and ignore abs)
 
         // climb functions

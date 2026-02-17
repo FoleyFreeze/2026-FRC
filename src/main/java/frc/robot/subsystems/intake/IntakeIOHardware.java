@@ -1,6 +1,7 @@
 package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -88,8 +89,8 @@ public class IntakeIOHardware implements IntakeIO {
                         positionArm, voltageArm, currentArm, tempArm, angularVelocityArm);
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
         inputs.armConnected = armConnectedDebounce.calculate(armStatus.isOK());
-        inputs.wheelPosition = positionWheel.getValueAsDouble();
-        inputs.armPosition = positionArm.getValueAsDouble();
+        inputs.wheelPosition = positionWheel.getValue().in(Rotations);
+        inputs.armPosition = positionArm.getValue().in(Rotations);
         inputs.wheelVoltage = voltageWheel.getValueAsDouble();
         inputs.armVoltage = voltageArm.getValueAsDouble();
         inputs.wheelCurrent = currentWheel.getValueAsDouble();
@@ -97,7 +98,7 @@ public class IntakeIOHardware implements IntakeIO {
         inputs.wheelTemp = tempWheel.getValueAsDouble();
         inputs.armTemp = tempArm.getValueAsDouble();
         inputs.wheelVelocity = angularVelocityWheel.getValue().in(RPM);
-        inputs.armVelocity = angularVelocityArm.getValueAsDouble();
+        inputs.armVelocity = angularVelocityArm.getValue().in(RPM);
     }
 
     @Override
@@ -116,12 +117,12 @@ public class IntakeIOHardware implements IntakeIO {
     }
 
     @Override
-    public void armAngle(double angle) {
-        arm.setControl(positionRequestArm.withPosition(angle));
+    public void armAngle(double rotations) {
+        arm.setControl(positionRequestArm.withPosition(rotations));
     }
 
     @Override
-    public void armMotion(double angle) {
-        arm.setControl(motionRequestArm.withPosition(angle));
+    public void armMotion(double rotations) {
+        arm.setControl(motionRequestArm.withPosition(rotations));
     }
 }

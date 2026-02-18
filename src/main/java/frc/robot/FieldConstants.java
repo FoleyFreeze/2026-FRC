@@ -2,6 +2,8 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -43,7 +45,10 @@ public class FieldConstants {
                 center.plus(new Translation2d(width / 2, width / 2));
         public static final Translation2d backRight =
                 center.plus(new Translation2d(width / 2, -width / 2));
-
+        public static final Translation2d frontRight =
+                center.minus(new Translation2d(width / 2, -width / 2));
+        public static final Translation2d frontLeft =
+                center.minus(new Translation2d(width / 2, -width / 2));
         // consider adding corners (topLeftCorner...)
     }
 
@@ -58,20 +63,34 @@ public class FieldConstants {
     public static class Tower {
         public static final double halfWidth = Units.inchesToMeters(49.25 / 2.0);
         public static final double depth = Units.inchesToMeters(45 - 3.25);
+        public static final Translation2d center =
+                new Translation2d(depth, tagLayout.getTagPose(31).get().getY());
         public static Translation2d towerLeftFront =
-                new Translation2d(depth, tagLayout.getTagPose(31).get().getY() + halfWidth);
+                new Translation2d(depth, center.getY() + halfWidth);
         public static Translation2d towerRightFront =
-                new Translation2d(depth, tagLayout.getTagPose(31).get().getY() - halfWidth);
+                new Translation2d(depth, center.getY() - halfWidth);
     }
 
     public static class Depot {}
 
     public static class Outpost {}
 
-    public static Translation2d passLeft =
-            new Translation2d(Units.feetToMeters(3), fieldWidth - Units.feetToMeters(3));
-    public static Translation2d passRight =
-            new Translation2d(Units.feetToMeters(3), Units.feetToMeters(3));
+    public static class Locations {
+        public static Translation2d passLeft =
+                new Translation2d(Units.feetToMeters(3), fieldWidth - Units.feetToMeters(3));
+        public static Translation2d passRight =
+                new Translation2d(Units.feetToMeters(3), Units.feetToMeters(3));
+        public static Pose2d locationHubShoot =
+                new Pose2d(
+                        Hub.frontLeft.getX() - Constants.robotLength / 2,
+                        Hub.center.getY(),
+                        Rotation2d.fromDegrees(0));
+        public static Pose2d locationClimbShoot =
+                new Pose2d(
+                        Tower.center.getX() + Constants.robotLength / 2,
+                        Tower.center.getY(),
+                        Rotation2d.fromDegrees(0));
+    }
 
     // flip a red coord to blue or blue to red
     public static Translation2d flip(Translation2d pos) {

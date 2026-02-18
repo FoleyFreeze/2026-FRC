@@ -7,6 +7,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -36,6 +37,20 @@ public class Shooter extends SubsystemBase {
     }
 
     public ShootMode shootMode = ShootMode.MANUAL;
+
+    public static enum ManualShotLoc {
+        CLIMB, // x
+        FRONT_HUB, // y
+    }
+
+    double climbManualSpeed = 1;
+
+    double frontHubManualSpeed = 1;
+
+    double cornerManualSpeed = 1;
+
+    private static ManualShotLoc manualShotLocState = ManualShotLoc.FRONT_HUB;
+
     public Translation2d goal = new Translation2d();
 
     public static enum MissReason {
@@ -49,8 +64,9 @@ public class Shooter extends SubsystemBase {
     @AutoLogOutput(key = "Shooter/MissReasonShooter")
     public MissReason missReason = MissReason.NONE;
 
-    public Shooter(ShooterIO io) {
+    public Shooter(ShooterIO io, RobotContainer r) {
         this.io = io;
+        this.r = r;
     }
 
     @Override
@@ -68,10 +84,9 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command prime() {
-        return new RunCommand(
+        return new InstantCommand(
                 () -> {
                     io.wheelPower(1);
-                    shootMode = ShootMode.MANUAL;
                 },
                 this);
     }
@@ -95,9 +110,9 @@ public class Shooter extends SubsystemBase {
                 // pass
                 shootMode = ShootMode.PASS;
                 if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
-                    goal = FieldConstants.passRight;
+                    goal = FieldConstants.Locations.passRight;
                 } else {
-                    goal = FieldConstants.passLeft;
+                    goal = FieldConstants.Locations.passLeft;
                 }
             }
         } else {
@@ -110,9 +125,9 @@ public class Shooter extends SubsystemBase {
                 // pass
                 shootMode = ShootMode.PASS;
                 if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
-                    goal = FieldConstants.flip(FieldConstants.passRight);
+                    goal = FieldConstants.flip(FieldConstants.Locations.passRight);
                 }
-                goal = FieldConstants.flip(FieldConstants.passLeft);
+                goal = FieldConstants.flip(FieldConstants.Locations.passLeft);
             }
         }
         return goal;
@@ -153,16 +168,18 @@ public class Shooter extends SubsystemBase {
         io.setSpeed(setpoints.rpm());
     }
 
-    public void newPrime(Translation2d goal, RobotContainer r) {
+    public void newPrime(Translation2d goal, Pose2d botLoc) {
         // 0 what are we shooting at? (goal vs pass)
-        Pose2d botLoc;
-        botLoc = r.drive.getPose();
         ChassisSpeeds botVel;
         botVel = r.drive.getChassisSpeeds();
 
         // 1 call the lerp
         DataPoint setpoints;
-        setpoints = lerp.getHub(goal, botLoc, botVel);
+        if (goal == FieldConstants.Hub.center) {
+            setpoints = lerp.getHub(goal, botLoc, botVel);
+        } else {
+            setpoints = lerp.getPass(goal, botLoc, botVel);
+        }
         lastPredFlightTime = setpoints.time();
 
         // 2 use setpoints from lerp to set motors
@@ -204,6 +221,30 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/TurretSetpoint", setPoint);
         turretTarget = setPoint;
         io.setTurretAngle(setPoint, velocity);
+    }
+
+    public void setManualGoal(ManualShotLoc loc) {
+        manualShotLocState = loc;
+    }
+
+    public Command manualPrimeCmd() {
+        return new RunCommand(() -> newPrime(FieldConstants.Hub.center, getManualPose()), this);
+    }
+
+    public Pose2d getManualPose() {
+        Pose2d fakeLoc;
+
+        switch (manualShotLocState) {
+            case CLIMB:
+                fakeLoc = FieldConstants.Locations.locationClimbShoot;
+                break;
+            case FRONT_HUB:
+                fakeLoc = FieldConstants.Locations.locationHubShoot;
+                break;
+            default:
+                fakeLoc = FieldConstants.Locations.locationClimbShoot;
+        }
+        return fakeLoc;
     }
 
     public boolean willHitHub(Pose2d botLoc) {

@@ -100,9 +100,9 @@ public class RobotContainer {
                                 new VisionIOLimelight("camera0Name", drive::getRotation),
                                 new VisionIOLimelight("camera1Name", drive::getRotation));
 
-                spindexter = new Spindexter(new SpindexterIOHardware());
+                spindexter = new Spindexter(new SpindexterIOHardware(), this);
 
-                shooter = new Shooter(new ShooterIOHardware());
+                shooter = new Shooter(new ShooterIOHardware(), this);
 
                 intake = new Intake(new IntakeIOHardware());
 
@@ -138,13 +138,13 @@ public class RobotContainer {
                                         driveSimulation::getSimulatedDriveTrainPose));
 
                 SpindexterIOSim spinSim = new SpindexterIOSim();
-                spindexter = new Spindexter(spinSim);
+                spindexter = new Spindexter(spinSim, this);
 
                 IntakeIOSim iis = new IntakeIOSim(driveSimulation);
                 intake = new Intake(iis);
 
                 ShooterIOSim shootSim = new ShooterIOSim(iis, driveSimulation, spinSim);
-                shooter = new Shooter(shootSim);
+                shooter = new Shooter(shootSim, this);
                 shootSim.registerShooter(shooter);
 
                 climber = new Climber(new ClimberIO() {});
@@ -166,9 +166,9 @@ public class RobotContainer {
                         new Vision(
                                 drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
 
-                spindexter = new Spindexter(new SpindexterIO() {});
+                spindexter = new Spindexter(new SpindexterIO() {}, this);
 
-                shooter = new Shooter(new ShooterIO() {});
+                shooter = new Shooter(new ShooterIO() {}, null);
 
                 intake = new Intake(new IntakeIO() {});
 

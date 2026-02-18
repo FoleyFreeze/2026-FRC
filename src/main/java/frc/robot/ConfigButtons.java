@@ -1,20 +1,12 @@
 package frc.robot;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
 
 public class ConfigButtons {
-
-    public static enum manualShotLoc {
-        CLIMB, // x
-        FRONT_HUB, // y
-        RIGHT_BACK_CORNER // b
-    }
-
-    private static manualShotLoc manualShotLocState;
 
     // Controller
     private static final CommandXboxController controller = new CommandXboxController(0);
@@ -28,6 +20,8 @@ public class ConfigButtons {
                         () -> -controller.getLeftY(),
                         () -> -controller.getLeftX(),
                         () -> -controller.getRightX()));
+        r.shooter.setDefaultCommand(r.shooter.stop());
+        r.spindexter.setDefaultCommand(r.spindexter.stop());
 
         // add drive over bump
         // add drive through trench
@@ -40,41 +34,65 @@ public class ConfigButtons {
         // TODO: Victor
         // intake in M2
         // intake out M6
+
         controller.a().onTrue(new InstantCommand(r.intake::extend));
         controller.b().onTrue(new InstantCommand(r.intake::retract));
+
         // camera gather M5
         // unjam A
 
         // shoot functions
         // pass left LB
+
         controller
                 .leftBumper()
-                .onTrue(new InstantCommand(() -> r.shooter.newPrime(FieldConstants.passLeft, r)));
-        // pass right RB
+                .whileTrue(
+                        new RunCommand(
+                                        () ->
+                                                r.shooter.newPrime(
+                                                        FieldConstants.Locations.passLeft,
+                                                        r.drive.getPose()),
+                                        r.shooter)
+                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
+        // // pass right RB
         controller
                 .rightBumper()
-                .onTrue(new InstantCommand(() -> r.shooter.newPrime(FieldConstants.passRight, r)));
-        // shoot hub RT 
-        //TODO: BELOW
-            // controller
-            //         .rightTrigger()
-            //         .whileTrue(
-            //                 new InstantCommand(() -> r.shooter.newPrime(FieldConstants.Hub.center, r))).whileTrue(new InstantCommand(()-> r.spindexter.spin()));
+                .whileTrue(
+                        new RunCommand(
+                                        () ->
+                                                r.shooter.newPrime(
+                                                        FieldConstants.Locations.passRight,
+                                                        r.drive.getPose()),
+                                        r.shooter)
+                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
 
-            // controller.rightTrigger().whileFalse(new InstantCommand(()-> r.shooter.stop()));
-        //TODO: ABOVE
+        // shoot hub RT
+        controller
+                .rightTrigger()
+                .whileTrue(
+                        new RunCommand(
+                                        () ->
+                                                r.shooter.newPrime(
+                                                        FieldConstants.Hub.center,
+                                                        r.drive.getPose()),
+                                        r.shooter)
+                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
         // manual shoot LT
-
+        controller
+                .leftTrigger()
+                .whileTrue(
+                        r.shooter
+                                .manualPrimeCmd()
+                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
         // set manual shot positions (X Y B)
-        controller.x().onTrue(new InstantCommand(() -> manualShotLocState = manualShotLoc.CLIMB));
+
+        controller
+                .x()
+                .onTrue(new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.CLIMB)));
         controller
                 .y()
-                .onTrue(new InstantCommand(() -> manualShotLocState = manualShotLoc.FRONT_HUB));
-        controller
-                .b()
-                .onTrue(
-                        new InstantCommand(
-                                () -> manualShotLocState = manualShotLoc.RIGHT_BACK_CORNER));
+                .onTrue(new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.FRONT_HUB)));
+
         // select zero turret (reset to abs enc)
         controller.button(7).onTrue(new InstantCommand()); // TODO: add the part that does stuff
         // start+select full zero turret (reset to zero and ignore abs)

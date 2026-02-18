@@ -29,7 +29,7 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterIOSim implements ShooterIO {
     private final IntakeIOSim iis;
     private final SwerveDriveSimulation swerveSim;
-    private final SpindexterIOSim spinSim;
+    public final SpindexterIOSim spinSim;
     private Shooter shooter;
 
     private final FlywheelSim wheel;
@@ -301,8 +301,14 @@ public class ShooterIOSim implements ShooterIO {
 
     @Override
     public void wheelPower(double power) {
-        wheelClosedLoop = false;
-        wheelControlVoltage = power * 12;
+        if (dontModelPID) {
+            wheelClosedLoop = false;
+            wheelControlVoltage = power * 12;
+            wheel.setAngularVelocity(0);
+        } else {
+            wheelClosedLoop = false;
+            wheelControlVoltage = power * 12;
+        }
     }
 
     @Override

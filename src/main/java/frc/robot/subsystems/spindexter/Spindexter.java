@@ -14,8 +14,9 @@ public class Spindexter extends SubsystemBase {
     private final SpindexterIO io;
     private final SpindexterIOInputsAutoLogged inputs = new SpindexterIOInputsAutoLogged();
 
-    public Spindexter(SpindexterIO io) {
+    public Spindexter(SpindexterIO io, RobotContainer r) {
         this.io = io;
+        this.r = r;
     }
 
     @Override
@@ -33,11 +34,11 @@ public class Spindexter extends SubsystemBase {
     }
 
     public Command smartSpinCmd(Shooter shooter, Drive drive) {
-        return new RunCommand(() -> smartSpin(shooter, drive), this);
+        return new RunCommand(() -> smartSpin(), this);
     }
 
-    private void smartSpin(Shooter shooter, Drive drive) {
-        if (shooter.wontMiss(drive.getPose()) && drive.wontMiss(shooter)) {
+    private void smartSpin() {
+        if (r.shooter.wontMiss(r.drive.getPose()) && r.drive.wontMiss(r.shooter)) {
             io.spinPower(1);
         } else {
             io.spinPower(0);

@@ -69,6 +69,10 @@ public class FieldConstants {
                 new Translation2d(depth, center.getY() + halfWidth);
         public static Translation2d towerRightFront =
                 new Translation2d(depth, center.getY() - halfWidth);
+        public static Pose2d towerLeftFrontPose2d =
+                new Pose2d(depth, center.getY() + halfWidth, Rotation2d.fromDegrees(0));
+        public static Pose2d towerRightFrontPose2d =
+                new Pose2d(depth, center.getY() - halfWidth, Rotation2d.fromDegrees(0));
     }
 
     public static class Depot {}

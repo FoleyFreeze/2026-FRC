@@ -22,6 +22,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOHardware;
+import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -106,7 +107,7 @@ public class RobotContainer {
 
                 intake = new Intake(new IntakeIOHardware());
 
-                climber = new Climber(new ClimberIOHardware());
+                climber = new Climber(new ClimberIOHardware(), this);
 
                 break;
 
@@ -147,7 +148,7 @@ public class RobotContainer {
                 shooter = new Shooter(shootSim, this);
                 shootSim.registerShooter(shooter);
 
-                climber = new Climber(new ClimberIO() {});
+                climber = new Climber(new ClimberIOSim(), this);
                 break;
 
             default:
@@ -168,11 +169,11 @@ public class RobotContainer {
 
                 spindexter = new Spindexter(new SpindexterIO() {}, this);
 
-                shooter = new Shooter(new ShooterIO() {}, null);
+                shooter = new Shooter(new ShooterIO() {}, this);
 
                 intake = new Intake(new IntakeIO() {});
 
-                climber = new Climber(new ClimberIO() {});
+                climber = new Climber(new ClimberIO() {}, this);
 
                 break;
         }

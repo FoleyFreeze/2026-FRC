@@ -200,6 +200,51 @@ public class DriveCommands {
                                 () -> r.drive.runVelocity(new ChassisSpeeds()), r.drive));
     }
 
+    public static Command driveToPointNoSupply(RobotContainer r, Pose2d target) {
+        PIDController pidX = new PIDController(8, 0, 0);
+        PIDController pidY = new PIDController(8, 0, 0);
+        final double POS_TOL = Units.inchesToMeters(0.5);
+        final double POS_MAX_VEL = 1; // may change
+        final double POS_MAX_TIME = 2;
+        double[] error = new double[1];
+        Timer timer = new Timer();
+
+        return Commands.run(
+                        () -> {
+                            // gets where go;
+                            Pose2d meas = r.drive.getPose(); // may do local pose later
+                            // error calculation
+                            Translation2d pointErr =
+                                    target.getTranslation().minus(meas.getTranslation());
+                            error[0] = pointErr.getNorm();
+                            Logger.recordOutput("Odometry/PointErr", pointErr);
+                            Logger.recordOutput("Odometry/PointErrNorm", error[0]);
+                            // using error to calc the vel
+                            double xVel = pidX.calculate(meas.getX(), target.getX());
+                            double yVel = pidY.calculate(meas.getY(), target.getY());
+                            // limits vel (its turtle time)
+                            xVel = MathUtil.clamp(xVel, -POS_MAX_VEL, POS_MAX_VEL);
+                            yVel = MathUtil.clamp(yVel, -POS_MAX_VEL, POS_MAX_VEL);
+
+                            // TODO: run angle PID in parallel
+                            r.drive.runVelocity(
+                                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                                            new ChassisSpeeds(xVel, yVel, 0),
+                                            r.drive.getRotation()));
+                        },
+                        r.drive)
+                .until(() -> error[0] < POS_TOL || timer.hasElapsed(POS_MAX_TIME))
+                .beforeStarting(
+                        () -> {
+                            pidX.reset();
+                            pidY.reset();
+                            timer.restart();
+                        })
+                .andThen(
+                        new InstantCommand(
+                                () -> r.drive.runVelocity(new ChassisSpeeds()), r.drive));
+    }
+
     private static ChassisSpeeds prevSpeeds = new ChassisSpeeds();
     private static double ACCEL_LIMIT = 2.0 * 0.02; // limit to 2m/s^2
     private static double TURN_LIMIT = Units.degreesToRadians(90); // limit to 90deg/sec

@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.PathFinderCommand;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
 
 public class ConfigButtons {
@@ -97,21 +98,24 @@ public class ConfigButtons {
         controller.button(7).onTrue(new InstantCommand()); // TODO: add the part that does stuff
         // start+select full zero turret (reset to zero and ignore abs)
 
-        // climb functions
-        // dpad + X drive then climb
-        // dpad just climb
-
-        // pass right RB
-        // shoot hub RT
-        // manual shoot LT
-        // set manual shot positions (X Y B)
-
         // select zero turret (reset to abs enc)
         // start+select full zero turret (reset to zero and ignore abs)
 
         // climb functions
         // dpad + X drive then climb
+        controller
+                .x()
+                .and(controller.povLeft())
+                .whileTrue(
+                        new PathFinderCommand(r, () -> FieldConstants.Tower.towerLeftFrontPose2d));
+        controller
+                .x()
+                .and(controller.povRight())
+                .whileTrue(
+                        new PathFinderCommand(r, () -> FieldConstants.Tower.towerRightFrontPose2d)
+                                .andThen(new RunCommand(() -> r.climber.climbDo1(), r.climber)));
         // dpad just climb
+        controller.povUp().whileTrue(r.climber.climbDo1());
 
         // operator board
         // mode sw (idk what we want this to do yet)

@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.PathFinderCommand;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
@@ -107,15 +108,18 @@ public class ConfigButtons {
                 .x()
                 .and(controller.povLeft())
                 .whileTrue(
-                        new PathFinderCommand(r, () -> FieldConstants.Tower.towerLeftFrontPose2d));
+                        new PathFinderCommand(r, () -> FieldConstants.Locations.towerLeftFrontPose2d));
         controller
                 .x()
                 .and(controller.povRight())
                 .whileTrue(
-                        new PathFinderCommand(r, () -> FieldConstants.Tower.towerRightFrontPose2d)
-                                .andThen(new RunCommand(() -> r.climber.climbDo1(), r.climber)));
+                        new PathFinderCommand(r, () -> FieldConstants.Locations.towerRightFrontPose2d)
+                                .andThen(new RunCommand(() -> r.climber.autoExtendCmd(), r.climber)));
         // dpad just climb
-        controller.povUp().whileTrue(r.climber.climbDo1());
+        controller.povUp().whileTrue(r.climber.autoExtendCmd());
+
+        // dpad down to declimb
+        controller.povDown().onTrue(ClimbCommands.autoDown(r));
 
         // operator board
         // mode sw (idk what we want this to do yet)

@@ -23,6 +23,15 @@ public class Climber extends SubsystemBase {
 
     public Pose2d climbLocDecided = new Pose2d();
 
+    public enum AutoClimbState {
+        PRECLIMB,
+        PATHFIND_DONE,
+        POINT_DRIVEN,
+        ROBOT_LIFTED
+    }
+
+    public AutoClimbState autoClimbState = AutoClimbState.PRECLIMB;
+
     public Climber(ClimberIO io, RobotContainer r) {
         this.io = io;
         this.r = r;
@@ -32,8 +41,7 @@ public class Climber extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Climber", inputs);
-        Logger.recordOutput("Climber/Pos", inputs.climb1Position);
-        Logger.recordOutput("Climber/Voltage", inputs.climb1Voltage);
+        Logger.recordOutput("Climber/AutoClimbState", autoClimbState);
     }
 
     public double getClimbPos1() {

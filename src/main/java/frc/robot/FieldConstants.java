@@ -1,7 +1,5 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Rotation;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -109,8 +107,12 @@ public class FieldConstants {
     public static Translation2d flip(Translation2d pos) {
         return new Translation2d(fieldLength - pos.getX(), fieldWidth - pos.getY());
     }
+
     public static Pose2d flip(Pose2d pos) {
-        return new Pose2d(fieldLength - pos.getX(), fieldWidth - pos.getY(), pos.getRotation().minus(Rotation2d.k180deg));
+        return new Pose2d(
+                fieldLength - pos.getX(),
+                fieldWidth - pos.getY(),
+                pos.getRotation().minus(Rotation2d.k180deg));
     }
 
     // flip if on red
@@ -121,6 +123,7 @@ public class FieldConstants {
             return pos;
         }
     }
+
     public static Pose2d flipIfRed(Pose2d pos) {
         if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
             return flip(pos);

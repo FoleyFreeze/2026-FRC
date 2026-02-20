@@ -171,14 +171,18 @@ public class Shooter extends SubsystemBase {
     public void newPrime(Translation2d goal, Pose2d botLoc) {
         // 0 what are we shooting at? (goal vs pass)
         ChassisSpeeds botVel;
+
         botVel = r.drive.getChassisSpeeds();
+        this.goal = FieldConstants.flipIfRed(goal);
 
         // 1 call the lerp
         DataPoint setpoints;
         if (goal == FieldConstants.Hub.center) {
-            setpoints = lerp.getHub(goal, botLoc, botVel);
+            setpoints = lerp.getHub(this.goal, botLoc, botVel);
+            shootMode = ShootMode.HUB;
         } else {
-            setpoints = lerp.getPass(goal, botLoc, botVel);
+            setpoints = lerp.getPass(this.goal, botLoc, botVel);
+            shootMode = ShootMode.PASS;
         }
         lastPredFlightTime = setpoints.time();
 

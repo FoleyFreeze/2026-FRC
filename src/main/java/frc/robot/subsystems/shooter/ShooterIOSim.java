@@ -8,6 +8,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -184,11 +185,13 @@ public class ShooterIOSim implements ShooterIO {
                                 Radians.of(hood.getAngleRads()));
                 fuel.enableBecomesGamePieceOnFieldAfterTouchGround();
                 fuel.withTargetPosition(
-                        () ->
-                                new Translation3d(
-                                        FieldConstants.Hub.center.getX(),
-                                        FieldConstants.Hub.center.getY(),
-                                        Units.inchesToMeters(72)));
+                        () -> {
+                            Translation2d goal =
+                                    FieldConstants.flipIfRed(FieldConstants.Hub.center);
+                            return new Translation3d(
+                                    goal.getX(), goal.getY(), Units.inchesToMeters(72));
+                        });
+
                 fuel.withTargetTolerance(
                         new Translation3d(
                                 Units.inchesToMeters(41.7 / 2),

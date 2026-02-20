@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -69,7 +71,6 @@ public class FieldConstants {
                 new Translation2d(depth, center.getY() + halfWidth);
         public static Translation2d towerRightFront =
                 new Translation2d(depth, center.getY() - halfWidth);
-        
     }
 
     public static class Depot {}
@@ -92,24 +93,35 @@ public class FieldConstants {
                         Tower.center.getY(),
                         Rotation2d.fromDegrees(0));
 
-                        public static Pose2d towerLeftFrontPose2d =
-                new Pose2d(Tower.towerLeftFront.getX(),Tower.towerLeftFront.getY() + Constants.robotWidth/2, Rotation2d.fromDegrees(0));
+        public static Pose2d towerLeftFrontPose2d =
+                new Pose2d(
+                        Tower.towerLeftFront.getX(),
+                        Tower.towerLeftFront.getY() + Constants.robotWidth / 2,
+                        Rotation2d.fromDegrees(0));
         public static Pose2d towerRightFrontPose2d =
-                new Pose2d(Tower.towerRightFront.getX(),Tower.towerRightFront.getY() - Constants.robotWidth/2, Rotation2d.fromDegrees(180));
-
+                new Pose2d(
+                        Tower.towerRightFront.getX(),
+                        Tower.towerRightFront.getY() - Constants.robotWidth / 2,
+                        Rotation2d.fromDegrees(180));
     }
 
     // flip a red coord to blue or blue to red
     public static Translation2d flip(Translation2d pos) {
-        if (pos.getX() < HorizontalLines.center) {
-            return new Translation2d(pos.getX() + HorizontalLines.center, fieldWidth - pos.getY());
-        } else {
-            return new Translation2d(pos.getX() - HorizontalLines.center, fieldWidth - pos.getY());
-        }
+        return new Translation2d(fieldLength - pos.getX(), fieldWidth - pos.getY());
+    }
+    public static Pose2d flip(Pose2d pos) {
+        return new Pose2d(fieldLength - pos.getX(), fieldWidth - pos.getY(), pos.getRotation().minus(Rotation2d.k180deg));
     }
 
     // flip if on red
     public static Translation2d flipIfRed(Translation2d pos) {
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+            return flip(pos);
+        } else {
+            return pos;
+        }
+    }
+    public static Pose2d flipIfRed(Pose2d pos) {
         if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
             return flip(pos);
         } else {

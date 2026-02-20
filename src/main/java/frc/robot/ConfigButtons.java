@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -107,14 +108,12 @@ public class ConfigButtons {
         controller
                 .x()
                 .and(controller.povLeft())
-                .whileTrue(
-                        new PathFinderCommand(r, () -> FieldConstants.Locations.towerLeftFrontPose2d));
+                .whileTrue( ClimbCommands.autoClimb(r, ()-> FieldConstants.flipIfRed(FieldConstants.Locations.towerLeftFrontPose2d), Units.inchesToMeters(12)));
         controller
                 .x()
                 .and(controller.povRight())
                 .whileTrue(
-                        new PathFinderCommand(r, () -> FieldConstants.Locations.towerRightFrontPose2d)
-                                .andThen(new RunCommand(() -> r.climber.autoExtendCmd(), r.climber)));
+                        ClimbCommands.autoClimb(r, ()-> FieldConstants.flipIfRed(FieldConstants.Locations.towerRightFrontPose2d), Units.inchesToMeters(12)));
         // dpad just climb
         controller.povUp().whileTrue(r.climber.autoExtendCmd());
 

@@ -30,6 +30,7 @@ import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.fuelvision.FuelVision;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOHardware;
@@ -65,6 +66,7 @@ public class RobotContainer {
     // Subsystems
     public final Drive drive;
     public final Vision vision;
+    public final FuelVision fuelVision;
     public final Spindexter spindexter;
     public final Shooter shooter;
     public final Intake intake;
@@ -100,6 +102,8 @@ public class RobotContainer {
                                 drive::addVisionMeasurement,
                                 new VisionIOLimelight("camera0Name", drive::getRotation),
                                 new VisionIOLimelight("camera1Name", drive::getRotation));
+
+                fuelVision = new FuelVision(this);
 
                 spindexter = new Spindexter(new SpindexterIOHardware(), this);
 
@@ -138,6 +142,8 @@ public class RobotContainer {
                                         new Transform3d(),
                                         driveSimulation::getSimulatedDriveTrainPose));
 
+                fuelVision = new FuelVision(this);
+
                 SpindexterIOSim spinSim = new SpindexterIOSim();
                 spindexter = new Spindexter(spinSim, this);
 
@@ -166,6 +172,8 @@ public class RobotContainer {
                 vision =
                         new Vision(
                                 drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+
+                fuelVision = new FuelVision(this);
 
                 spindexter = new Spindexter(new SpindexterIO() {}, this);
 

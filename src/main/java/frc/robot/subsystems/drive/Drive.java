@@ -443,4 +443,16 @@ public class Drive extends SubsystemBase {
             return true;
         }
     }
+
+    public Rotation2d getBumpAngle() {
+        Rotation2d botAngle = getRotation();
+        double targetAngle = Util.wrapAngle(botAngle.getDegrees() + 45, 90) - 45;
+        return Rotation2d.fromDegrees(targetAngle);
+    }
+
+    public Rotation2d getTrenchAngle() {
+        Rotation2d botAngle = getRotation();
+        double targetAngle = Util.wrapAngle(botAngle.getDegrees(), 90);
+        return Rotation2d.fromDegrees(targetAngle);
+    }
 }

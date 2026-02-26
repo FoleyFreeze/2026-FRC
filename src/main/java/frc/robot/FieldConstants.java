@@ -94,13 +94,13 @@ public class FieldConstants {
         public static Pose2d towerLeftFrontPose2d =
                 new Pose2d(
                         Tower.towerLeftFront.getX(),
-                        Tower.towerLeftFront.getY() + Constants.robotWidth / 2,
-                        Rotation2d.fromDegrees(0));
+                        Tower.towerLeftFront.getY() + Constants.robotLength / 2,
+                        Rotation2d.fromDegrees(90));
         public static Pose2d towerRightFrontPose2d =
                 new Pose2d(
                         Tower.towerRightFront.getX(),
-                        Tower.towerRightFront.getY() - Constants.robotWidth / 2,
-                        Rotation2d.fromDegrees(180));
+                        Tower.towerRightFront.getY() - Constants.robotLength / 2,
+                        Rotation2d.fromDegrees(-90));
     }
 
     // flip a red coord to blue or blue to red

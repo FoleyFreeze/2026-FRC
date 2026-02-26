@@ -26,4 +26,18 @@ public class Util {
     public static boolean isRedAlliance() {
         return DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red);
     }
+
+    public static double wrapAngle(double currentAngle, double targetModulo) {
+        double delta = currentAngle % targetModulo;
+        double shortDelta;
+        if (delta > targetModulo / 2) {
+            shortDelta = delta - targetModulo;
+        } else if (delta < -targetModulo / 2) {
+            shortDelta = delta + targetModulo;
+        } else {
+            shortDelta = delta;
+        }
+        double setPoint = currentAngle - shortDelta;
+        return setPoint;
+    }
 }

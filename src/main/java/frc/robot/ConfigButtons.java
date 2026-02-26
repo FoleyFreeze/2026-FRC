@@ -25,8 +25,24 @@ public class ConfigButtons {
         r.shooter.setDefaultCommand(r.shooter.stop());
         r.spindexter.setDefaultCommand(r.spindexter.stop());
 
-        // add drive over bump
-        // add drive through trench
+        // add drive over trench
+        controller
+                .leftStick()
+                .whileTrue(
+                        DriveCommands.joystickDriveAtAngle(
+                                r.drive,
+                                () -> -controller.getLeftY(),
+                                () -> -controller.getLeftX(),
+                                r.drive::getTrenchAngle));
+        // add drive through bump
+        controller
+                .rightStick()
+                .whileTrue(
+                        DriveCommands.joystickDriveAtAngle(
+                                r.drive,
+                                () -> -controller.getLeftY(),
+                                () -> -controller.getLeftX(),
+                                r.drive::getBumpAngle));
 
         // zero drive
         // TODO: blink LEDs or something

@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class ClimbCommands {
     public static Command autoClimb(RobotContainer r, Supplier<Pose2d> climbLoc, double yOffset) {
         Supplier<Pose2d> offsetPose =
-                () -> climbLoc.get().plus(new Transform2d(0, yOffset, Rotation2d.kZero));
+                () -> climbLoc.get().plus(new Transform2d(yOffset, 0, Rotation2d.kZero));
         SequentialCommandGroup sc = new SequentialCommandGroup();
         sc.addCommands(
                 new PathFinderCommand(r, offsetPose)

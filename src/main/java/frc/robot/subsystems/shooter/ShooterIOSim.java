@@ -107,7 +107,7 @@ public class ShooterIOSim implements ShooterIO {
                         Units.degreesToRadians(0),
                         Units.degreesToRadians(Constants.maximumTurretAngle),
                         false,
-                        0);
+                        Math.toRadians(90));
 
         shotClock.start();
     }

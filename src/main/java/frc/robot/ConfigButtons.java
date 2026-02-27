@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
 
 public class ConfigButtons {
@@ -85,16 +86,7 @@ public class ConfigButtons {
                                 .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
 
         // shoot hub RT
-        controller
-                .rightTrigger()
-                .whileTrue(
-                        new RunCommand(
-                                        () ->
-                                                r.shooter.newPrime(
-                                                        FieldConstants.Hub.center,
-                                                        r.drive.getPose()),
-                                        r.shooter)
-                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
+        controller.rightTrigger().whileTrue(ShooterCommands.smartHubShoot(r, controller));
         // manual shoot LT
         controller
                 .leftTrigger()

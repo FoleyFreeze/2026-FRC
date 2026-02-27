@@ -82,7 +82,8 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        stats = new StatsSubsystem();
+        stats = new StatsSubsystem(this);
+
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
@@ -155,6 +156,7 @@ public class RobotContainer {
                 shootSim.registerShooter(shooter);
 
                 climber = new Climber(new ClimberIOSim(), this);
+
                 break;
 
             default:

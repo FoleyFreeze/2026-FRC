@@ -4,9 +4,12 @@ import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
+import frc.robot.util.Util;
+import org.littletonrobotics.junction.Logger;
 
 public class ChoreoAutos {
     RobotContainer r;
@@ -40,6 +43,12 @@ public class ChoreoAutos {
         // Get the current pose of the robot
         Pose2d pose = r.drive.getPose();
 
+        // log the error data stuff
+        Logger.recordOutput("Choreo/Xerr", pose.getX() - sample.getPose().getX());
+        Logger.recordOutput("Choreo/Yerr", pose.getY() - sample.getPose().getY());
+        Logger.recordOutput(
+                "Choreo/Rerr", pose.getRotation().minus(sample.getPose().getRotation()));
+
         // Generate the next speeds for the robot
         ChassisSpeeds speeds =
                 new ChassisSpeeds(
@@ -50,6 +59,12 @@ public class ChoreoAutos {
                                         pose.getRotation().getRadians(), sample.heading));
 
         // Apply the generated speeds
+        speeds =
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        speeds,
+                        Util.isRedAlliance()
+                                ? r.drive.getRotation().plus(new Rotation2d(Math.PI))
+                                : r.drive.getRotation());
         r.drive.runVelocity(speeds);
     }
 }

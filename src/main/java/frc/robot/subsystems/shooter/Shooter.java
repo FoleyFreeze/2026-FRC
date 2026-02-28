@@ -24,6 +24,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
     RobotContainer r;
+    public boolean isTurret = false; // TODO: cal for turret
 
     private final ShooterIO io;
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
@@ -31,6 +32,9 @@ public class Shooter extends SubsystemBase {
     private final ShooterInterp1d lerp = new ShooterInterp1d();
 
     private double rpmTarget, hoodTarget, turretTarget, botAngleTarget;
+
+    public static final double minHoodAngle = 48;
+    public static final double maxHoodAngle = 87;
 
     public static enum ShootMode {
         HUB,
@@ -95,7 +99,12 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command stop() {
-        return new RunCommand(() -> io.wheelPower(0), this);
+        return new RunCommand(
+                () -> {
+                    io.wheelPower(0);
+                    io.setHoodAngle(maxHoodAngle);
+                },
+                this);
     }
 
     // deprecated
@@ -173,19 +182,19 @@ public class Shooter extends SubsystemBase {
 
     // for the current no-turret
     public void newPrime(
-            Translation2d goal,
+            Translation2d localgoal,
             Pose2d botLoc,
             Thing<Rotation2d> rotationThing,
             Thing<Double> velocityThing) {
         // 0 what are we shooting at? (goal vs pass)
         ChassisSpeeds botVel;
 
-        botVel = r.drive.getChassisSpeeds();
-        this.goal = FieldConstants.flipIfRed(goal);
+        botVel = r.drive.getFieldVelocity();
+        this.goal = FieldConstants.flipIfRed(localgoal);
 
         // 1 call the lerp
         DataPoint setpoints;
-        if (goal == FieldConstants.Hub.center) {
+        if (localgoal == FieldConstants.Hub.center) {
             setpoints = lerp.getHub(this.goal, botLoc, botVel);
             shootMode = ShootMode.HUB;
         } else {
@@ -329,7 +338,6 @@ public class Shooter extends SubsystemBase {
         // allow wider thresholds for passing
         double speedThresh = shootMode == ShootMode.HUB ? 150 : 300;
         double angleThresh = shootMode == ShootMode.HUB ? 5 : 10;
-        boolean isTurret = false; // TODO: cal for turret
 
         if (!isWithin(rpmTarget, inputs.wheelVelocity, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;

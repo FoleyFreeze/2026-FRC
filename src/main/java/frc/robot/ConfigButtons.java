@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
@@ -66,27 +65,19 @@ public class ConfigButtons {
         controller
                 .leftBumper()
                 .whileTrue(
-                        new RunCommand(
-                                        () ->
-                                                r.shooter.newPrime(
-                                                        FieldConstants.Locations.passLeft,
-                                                        r.drive.getPose()),
-                                        r.shooter)
-                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
+                        ShooterCommands.smartShoot(
+                                r, controller, FieldConstants.Locations.passLeft));
         // // pass right RB
         controller
                 .rightBumper()
                 .whileTrue(
-                        new RunCommand(
-                                        () ->
-                                                r.shooter.newPrime(
-                                                        FieldConstants.Locations.passRight,
-                                                        r.drive.getPose()),
-                                        r.shooter)
-                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
+                        ShooterCommands.smartShoot(
+                                r, controller, FieldConstants.Locations.passRight));
 
         // shoot hub RT
-        controller.rightTrigger().whileTrue(ShooterCommands.smartHubShoot(r, controller));
+        controller
+                .rightTrigger()
+                .whileTrue(ShooterCommands.smartShoot(r, controller, FieldConstants.Hub.center));
         // manual shoot LT
         controller
                 .leftTrigger()

@@ -91,6 +91,7 @@ public class RobotContainer {
                 // a CANcoder
                 drive =
                         new Drive(
+                                this,
                                 new GyroIOPigeon2(),
                                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                                 new ModuleIOTalonFX(TunerConstants.FrontRight),
@@ -124,6 +125,7 @@ public class RobotContainer {
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
                 drive =
                         new Drive(
+                                this,
                                 new GyroIOSim(driveSimulation.getGyroSimulation()),
                                 new ModuleIOSim(driveSimulation.getModules()[0]),
                                 new ModuleIOSim(driveSimulation.getModules()[1]),
@@ -163,6 +165,7 @@ public class RobotContainer {
                 // Replayed robot, disable IO implementations
                 drive =
                         new Drive(
+                                this,
                                 new GyroIO() {},
                                 new ModuleIO() {},
                                 new ModuleIO() {},
@@ -256,7 +259,11 @@ public class RobotContainer {
     public void resetSimulationField() {
         if (Constants.currentMode != Mode.SIM) return;
 
-        driveSimulation.setSimulationWorldPose(new Pose2d(3, 3, new Rotation2d()));
+        driveSimulation.setSimulationWorldPose(
+                new Pose2d(
+                        3.6069583892822266,
+                        7.715467166900635,
+                        new Rotation2d(-1.5707963267948966)));
         SimulatedArena.getInstance().resetFieldForAuto();
     }
 

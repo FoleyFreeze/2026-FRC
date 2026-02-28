@@ -30,7 +30,12 @@ public class Spindexter extends SubsystemBase {
     }
 
     public Command stop() {
-        return new RunCommand(() -> io.spinPower(0), this);
+        return new RunCommand(
+                () -> {
+                    io.spinPower(0);
+                    io.gatePower(0);
+                },
+                this);
     }
 
     public Command smartSpinCmd(Shooter shooter, Drive drive) {
@@ -38,8 +43,9 @@ public class Spindexter extends SubsystemBase {
     }
 
     private void smartSpin() {
+        io.spinPower(0.7);
         if (r.shooter.wontMiss(r.drive.getPose()) && r.drive.wontMiss(r.shooter)) {
-            io.spinPower(1);
+            io.gatePower(0.7);
         } else {
             io.spinPower(0);
         }

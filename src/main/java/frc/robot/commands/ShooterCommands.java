@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -33,17 +34,15 @@ public class ShooterCommands {
                 .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive));
     }
 
-    public static Command smartHubShoot(RobotContainer r, CommandXboxController controller) {
+    public static Command smartShoot(
+            RobotContainer r, CommandXboxController controller, Translation2d target) {
         Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
         Thing<Double> velocityThing = new Thing<>(); // thing2
 
         return new RunCommand(
                         () ->
                                 r.shooter.newPrime(
-                                        FieldConstants.Hub.center,
-                                        r.drive.getPose(),
-                                        rotationThing,
-                                        velocityThing),
+                                        target, r.drive.getPose(), rotationThing, velocityThing),
                         r.shooter)
                 .alongWith(
                         DriveCommands.driveAtAngleFFw(

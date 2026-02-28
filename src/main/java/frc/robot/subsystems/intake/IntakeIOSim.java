@@ -35,7 +35,9 @@ public class IntakeIOSim implements IntakeIO {
                 IntakeSimulation.OverTheBumperIntake(
                         "Fuel",
                         driveSim,
-                        Meters.of(Constants.frameWidth),
+                        Meters.of(
+                                Constants.frameWidth
+                                        - Units.inchesToMeters(7)), // intake is 21 in wide
                         Inches.of(10),
                         IntakeSide.FRONT,
                         hopperCapacity);

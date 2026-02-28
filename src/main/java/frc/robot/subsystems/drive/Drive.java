@@ -149,12 +149,14 @@ public class Drive extends SubsystemBase {
     public MissReasonDrive missReason = MissReasonDrive.NONE;
 
     public Drive(
+            RobotContainer r,
             GyroIO gyroIO,
             ModuleIO flModuleIO,
             ModuleIO frModuleIO,
             ModuleIO blModuleIO,
             ModuleIO brModuleIO,
             Consumer<Pose2d> resetSimulationPoseCallBack) {
+        this.r = r;
         this.gyroIO = gyroIO;
         this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
         modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
@@ -455,7 +457,9 @@ public class Drive extends SubsystemBase {
         // allow wider thresholds for passing
         double angleThresh = shooter.shootMode == ShootMode.HUB ? 90 : 180;
 
-        if (Math.abs(robotVelocity.omegaRadiansPerSecond) > Units.degreesToRadians(angleThresh)) {
+        if (!r.shooter.isTurret
+                && Math.abs(robotVelocity.omegaRadiansPerSecond)
+                        > Units.degreesToRadians(angleThresh)) {
             missReason = MissReasonDrive.ANGLE_VEL;
             return false;
         } else {

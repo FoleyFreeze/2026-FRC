@@ -2,11 +2,13 @@ package frc.robot;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
+import frc.robot.subsystems.spindexter.Spindexter;
 
 public class ConfigButtons {
 
@@ -54,10 +56,11 @@ public class ConfigButtons {
         // intake out M6
 
         controller.a().onTrue(new InstantCommand(r.intake::extend));
-        controller.b().onTrue(new InstantCommand(r.intake::retract));
+        controller.b().debounce(0.2).onTrue(new InstantCommand(r.intake::retract)); // require holding button but only for a tiny bit
 
         // camera gather M5
-        // unjam A
+        // unjam back
+        controller.back().whileTrue(new RunCommand(()-> r.spindexter.unjam(), r.spindexter));
 
         // shoot functions
         // pass left LB
@@ -78,25 +81,20 @@ public class ConfigButtons {
         controller
                 .rightTrigger()
                 .whileTrue(ShooterCommands.smartShoot(r, controller, FieldConstants.Hub.center));
-        // manual shoot LT
-        controller
-                .leftTrigger()
-                .whileTrue(
-                        r.shooter
-                                .manualPrimeCmd()
-                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive)));
+
         // set manual shot positions (X Y B)
 
         controller
-                .x()
-                .onTrue(new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.CLIMB)));
+                .x().and(controller.leftTrigger())
+                .whileTrue(new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.CLIMB)).andThen(r.shooter
+                                .manualPrimeCmd()
+                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive))));
         controller
-                .y()
-                .onTrue(new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.FRONT_HUB)));
+                .y().and(controller.leftTrigger())
+                .whileTrue(new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.FRONT_HUB)).andThen(r.shooter
+                                .manualPrimeCmd()
+                                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive))));
 
-        // select zero turret (reset to abs enc)
-        controller.button(7).onTrue(new InstantCommand()); // TODO: add the part that does stuff
-        // start+select full zero turret (reset to zero and ignore abs)
 
         // select zero turret (reset to abs enc)
         // start+select full zero turret (reset to zero and ignore abs)

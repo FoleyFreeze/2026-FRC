@@ -9,6 +9,9 @@ import frc.robot.subsystems.shooter.Shooter;
 import org.littletonrobotics.junction.Logger;
 
 public class Spindexter extends SubsystemBase {
+    double unjam = -0.7;
+    double spinPower =0.7;
+    double gatePower = 0.7;
     RobotContainer r;
 
     private final SpindexterIO io;
@@ -43,11 +46,15 @@ public class Spindexter extends SubsystemBase {
     }
 
     private void smartSpin() {
-        io.spinPower(0.7);
+        io.spinPower(spinPower);
         if (r.shooter.wontMiss(r.drive.getPose()) && r.drive.wontMiss(r.shooter)) {
-            io.gatePower(0.7);
+            io.gatePower(gatePower);
         } else {
             io.spinPower(0);
         }
+    }
+    public void unjam(){
+        io.spinPower(unjam);
+        io.gatePower(unjam);
     }
 }

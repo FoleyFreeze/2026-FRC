@@ -10,7 +10,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Spindexter extends SubsystemBase {
     double unjam = -0.7;
-    double spinPower =0.7;
+    double spinPower = 0.7;
     double gatePower = 0.7;
     RobotContainer r;
 
@@ -53,7 +53,8 @@ public class Spindexter extends SubsystemBase {
             io.spinPower(0);
         }
     }
-    public void unjam(){
+
+    public void unjam() {
         io.spinPower(unjam);
         io.gatePower(unjam);
     }

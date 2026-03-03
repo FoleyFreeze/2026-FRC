@@ -7,47 +7,24 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
 import frc.robot.auto.ChoreoAutos;
-import frc.robot.commands.DriveTuning;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOHardware;
-import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.GyroIOSim;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.fuelvision.FuelVision;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOHardware;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOHardware;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.spindexter.Spindexter;
-import frc.robot.subsystems.spindexter.SpindexterIO;
-import frc.robot.subsystems.spindexter.SpindexterIOHardware;
 import frc.robot.subsystems.spindexter.SpindexterIOSim;
 import frc.robot.subsystems.stats.StatsSubsystem;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -82,139 +59,60 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        SpindexterIOSim spinSim = null;
+        IntakeIOSim iis = null;
+        ShooterIOSim shootSim = null;
+        if (Constants.currentMode == Mode.SIM) {
+            driveSimulation =
+                    new SwerveDriveSimulation(
+                            Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+            spinSim = new SpindexterIOSim();
+            iis = new IntakeIOSim(driveSimulation);
+            shootSim = new ShooterIOSim(iis, driveSimulation, spinSim);
+        } else {
+            driveSimulation = null;
+        }
+
         stats = new StatsSubsystem(this);
+        drive = Drive.create(this, driveSimulation);
+        vision = Vision.create(this, drive, driveSimulation);
+        fuelVision = FuelVision.create(this);
+        spindexter = Spindexter.create(this, spinSim);
+        shooter = Shooter.create(this, shootSim);
+        intake = Intake.create(this, iis);
+        climber = Climber.create(this);
 
-        switch (Constants.currentMode) {
-            case REAL:
-                // Real robot, instantiate hardware IO implementations
-                // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
-                // a CANcoder
-                drive =
-                        new Drive(
-                                this,
-                                new GyroIOPigeon2(),
-                                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                                new ModuleIOTalonFX(TunerConstants.BackRight),
-                                (pose) -> {});
-
-                vision =
-                        new Vision(
-                                drive::addVisionMeasurement,
-                                new VisionIOLimelight("camera0Name", drive::getRotation),
-                                new VisionIOLimelight("camera1Name", drive::getRotation));
-
-                fuelVision = new FuelVision(this);
-
-                spindexter = new Spindexter(new SpindexterIOHardware(), this);
-
-                shooter = new Shooter(new ShooterIOHardware(), this);
-
-                intake = new Intake(new IntakeIOHardware());
-
-                climber = new Climber(new ClimberIOHardware(), this);
-
-                break;
-
-            case SIM:
-                // Sim robot, instantiate physics sim IO implementations
-                driveSimulation =
-                        new SwerveDriveSimulation(
-                                Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
-                SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
-                drive =
-                        new Drive(
-                                this,
-                                new GyroIOSim(driveSimulation.getGyroSimulation()),
-                                new ModuleIOSim(driveSimulation.getModules()[0]),
-                                new ModuleIOSim(driveSimulation.getModules()[1]),
-                                new ModuleIOSim(driveSimulation.getModules()[2]),
-                                new ModuleIOSim(driveSimulation.getModules()[3]),
-                                driveSimulation::setSimulationWorldPose);
-
-                vision =
-                        new Vision(
-                                drive::addVisionMeasurement,
-                                new VisionIOPhotonVisionSim(
-                                        "camera0Name",
-                                        new Transform3d(),
-                                        driveSimulation::getSimulatedDriveTrainPose),
-                                new VisionIOPhotonVisionSim(
-                                        "camera1Name",
-                                        new Transform3d(),
-                                        driveSimulation::getSimulatedDriveTrainPose));
-
-                fuelVision = new FuelVision(this);
-
-                SpindexterIOSim spinSim = new SpindexterIOSim();
-                spindexter = new Spindexter(spinSim, this);
-
-                IntakeIOSim iis = new IntakeIOSim(driveSimulation);
-                intake = new Intake(iis);
-
-                ShooterIOSim shootSim = new ShooterIOSim(iis, driveSimulation, spinSim);
-                shooter = new Shooter(shootSim, this);
-                shootSim.registerShooter(shooter);
-
-                climber = new Climber(new ClimberIOSim(), this);
-
-                break;
-
-            default:
-                // Replayed robot, disable IO implementations
-                drive =
-                        new Drive(
-                                this,
-                                new GyroIO() {},
-                                new ModuleIO() {},
-                                new ModuleIO() {},
-                                new ModuleIO() {},
-                                new ModuleIO() {},
-                                (pose) -> {});
-
-                // (Use same number of dummy implementations as the real robot)
-                vision =
-                        new Vision(
-                                drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-
-                fuelVision = new FuelVision(this);
-
-                spindexter = new Spindexter(new SpindexterIO() {}, this);
-
-                shooter = new Shooter(new ShooterIO() {}, this);
-
-                intake = new Intake(new IntakeIO() {});
-
-                climber = new Climber(new ClimberIO() {}, this);
-
-                break;
+        if (Constants.currentMode == Mode.SIM) {
+            shootSim.registerShooter(shooter);
         }
 
         chAutos = new ChoreoAutos(this);
 
+        autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         // Set up auto routines
-        autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-        autoChooser.addOption("TestAutoLeft", chAutos.loadTraj("TestAutoLeft"));
+        // autoChooser = new LoggedDashboardChooser<>("Auto Choices",
+        // AutoBuilder.buildAutoChooser());
+        // autoChooser.addOption("TestAutoLeft", chAutos.loadTraj("TestAutoLeft"));
 
-        // Set up SysId routines
-        autoChooser.addOption(
-                "Drive Wheel Radius Characterization",
-                DriveTuning.wheelRadiusCharacterization(drive));
-        autoChooser.addOption(
-                "Drive Simple FF Characterization", DriveTuning.feedforwardCharacterization(drive));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Forward)",
-                drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Reverse)",
-                drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption(
-                "Drive SysId (Dynamic Forward)",
-                drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Dynamic Reverse)",
-                drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        // // Set up SysId routines
+        // autoChooser.addOption(
+        //         "Drive Wheel Radius Characterization",
+        //         DriveTuning.wheelRadiusCharacterization(drive));
+        // autoChooser.addOption(
+        //         "Drive Simple FF Characterization",
+        // DriveTuning.feedforwardCharacterization(drive));
+        // autoChooser.addOption(
+        //         "Drive SysId (Quasistatic Forward)",
+        //         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        // autoChooser.addOption(
+        //         "Drive SysId (Quasistatic Reverse)",
+        //         drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        // autoChooser.addOption(
+        //         "Drive SysId (Dynamic Forward)",
+        //         drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        // autoChooser.addOption(
+        //         "Drive SysId (Dynamic Reverse)",
+        //         drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
         ConfigButtons.config(this);
     }

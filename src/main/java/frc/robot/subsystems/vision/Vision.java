@@ -14,24 +14,61 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
     RobotContainer r;
 
+    public static final boolean isDisabled = false;
+
     private final VisionConsumer consumer;
     private final VisionIO[] io;
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
+
+    public static Vision create(
+            RobotContainer r, Drive drive, SwerveDriveSimulation driveSimulation) {
+        if (isDisabled) {
+            return new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        }
+
+        switch (Constants.currentMode) {
+            case REAL:
+                return new Vision(
+                        drive::addVisionMeasurement,
+                        new VisionIOLimelight("camera0Name", drive::getRotation),
+                        new VisionIOLimelight("camera1Name", drive::getRotation));
+
+            case SIM:
+                return new Vision(
+                        drive::addVisionMeasurement,
+                        new VisionIOPhotonVisionSim(
+                                "camera0Name",
+                                new Transform3d(),
+                                driveSimulation::getSimulatedDriveTrainPose),
+                        new VisionIOPhotonVisionSim(
+                                "camera1Name",
+                                new Transform3d(),
+                                driveSimulation::getSimulatedDriveTrainPose));
+
+            default:
+                return new Vision(
+                        drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        }
+    }
 
     public Vision(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;

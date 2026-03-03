@@ -52,6 +52,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -59,6 +60,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
     RobotContainer r;
+
+    public static final boolean isDisabled = false;
+
     // TunerConstants doesn't include these constants, so they are declared locally
     static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
     public static final double DRIVE_BASE_RADIUS =
@@ -147,6 +151,51 @@ public class Drive extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/MissReasonDrive")
     public MissReasonDrive missReason = MissReasonDrive.NONE;
+
+    public static Drive create(RobotContainer r, SwerveDriveSimulation driveSim) {
+        if (isDisabled) {
+            return new Drive(
+                    r,
+                    new GyroIO() {},
+                    new ModuleIO() {},
+                    new ModuleIO() {},
+                    new ModuleIO() {},
+                    new ModuleIO() {},
+                    (pose) -> {});
+        }
+
+        switch (Constants.currentMode) {
+            case REAL:
+                return new Drive(
+                        r,
+                        new GyroIOPigeon2(),
+                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFX(TunerConstants.FrontRight),
+                        new ModuleIOTalonFX(TunerConstants.BackLeft),
+                        new ModuleIOTalonFX(TunerConstants.BackRight),
+                        (pose) -> {});
+
+            case SIM:
+                return new Drive(
+                        r,
+                        new GyroIOSim(driveSim.getGyroSimulation()),
+                        new ModuleIOSim(driveSim.getModules()[0]),
+                        new ModuleIOSim(driveSim.getModules()[1]),
+                        new ModuleIOSim(driveSim.getModules()[2]),
+                        new ModuleIOSim(driveSim.getModules()[3]),
+                        driveSim::setSimulationWorldPose);
+
+            default:
+                return new Drive(
+                        r,
+                        new GyroIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        (pose) -> {});
+        }
+    }
 
     public Drive(
             RobotContainer r,

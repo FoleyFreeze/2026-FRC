@@ -24,6 +24,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
     RobotContainer r;
+
+    public static final boolean isDisabled = true;
     public boolean isTurret = false; // TODO: cal for turret
 
     private final ShooterIO io;
@@ -70,6 +72,21 @@ public class Shooter extends SubsystemBase {
 
     @AutoLogOutput(key = "Shooter/MissReasonShooter")
     public MissReason missReason = MissReason.NONE;
+
+    public static Shooter create(RobotContainer r, ShooterIOSim shootSim) {
+        if (isDisabled) {
+            return new Shooter(new ShooterIO() {}, r);
+        }
+
+        switch (Constants.currentMode) {
+            case REAL:
+                return new Shooter(new ShooterIOHardware(), r);
+            case SIM:
+                return new Shooter(shootSim, r);
+            default:
+                return new Shooter(new ShooterIO() {}, r);
+        }
+    }
 
     public Shooter(ShooterIO io, RobotContainer r) {
         this.io = io;

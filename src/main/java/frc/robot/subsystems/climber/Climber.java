@@ -5,12 +5,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
     RobotContainer r;
+
+    public static final boolean isDisabled = true;
+
     private final ClimberIO io;
     private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
     public static final double climberHighEnough = 30;
@@ -31,6 +35,21 @@ public class Climber extends SubsystemBase {
     }
 
     public AutoClimbState autoClimbState = AutoClimbState.PRECLIMB;
+
+    public static Climber create(RobotContainer r) {
+        if (isDisabled) {
+            return new Climber(new ClimberIO() {}, r);
+        }
+
+        switch (Constants.currentMode) {
+            case REAL:
+                return new Climber(new ClimberIOHardware(), r);
+            case SIM:
+                return new Climber(new ClimberIOSim(), r);
+            default:
+                return new Climber(new ClimberIO() {}, r);
+        }
+    }
 
     public Climber(ClimberIO io, RobotContainer r) {
         this.io = io;

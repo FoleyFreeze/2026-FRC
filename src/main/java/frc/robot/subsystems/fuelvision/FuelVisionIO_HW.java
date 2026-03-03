@@ -20,8 +20,8 @@ public class FuelVisionIO_HW implements FuelVisionIO {
         float imageTime;
     }
 
-    FuelVisionHeader fuelHeader;
-    FuelVisionData[] fuelData;
+    FuelVisionHeader fuelHeader = new FuelVisionHeader();
+    FuelVisionData[] fuelData = new FuelVisionData[0];
 
     // based on the 2023-FRC project
     public FuelVisionIO_HW() {

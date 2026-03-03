@@ -6,6 +6,7 @@ import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.CircularBuffer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
@@ -14,6 +15,8 @@ public class FuelVision extends SubsystemBase {
     RobotContainer r;
     FuelVisionIO io;
     FuelVisionIOInputsAutoLogged inputs = new FuelVisionIOInputsAutoLogged();
+
+    public static final boolean isDisabled = false;
 
     public static int bufferSize = 1;
     public static boolean disable = false;
@@ -33,6 +36,21 @@ public class FuelVision extends SubsystemBase {
     }
 
     CircularBuffer<TimestampedPose2d> robotPoseBuffer;
+
+    public static FuelVision create(RobotContainer r) {
+        if (isDisabled) {
+            return new FuelVision(r);
+        }
+
+        switch (Constants.currentMode) {
+            case REAL:
+                return new FuelVision(r);
+            case SIM:
+                return new FuelVision(r);
+            default:
+                return new FuelVision(r);
+        }
+    }
 
     public FuelVision(RobotContainer r) {
         this.r = r;

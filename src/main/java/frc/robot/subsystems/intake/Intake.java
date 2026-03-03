@@ -2,11 +2,14 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
     RobotContainer r;
+
+    public static final boolean isDisabled = true;
 
     private final IntakeIO io;
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
@@ -25,6 +28,21 @@ public class Intake extends SubsystemBase {
     private static final double armOutPos = 0.25; // TODO: measure real value
     private static final double wheelSpeed = 0.7;
     private static final double armTol = 0.02;
+
+    public static Intake create(RobotContainer r, IntakeIOSim iis) {
+        if (isDisabled) {
+            return new Intake(new IntakeIO() {});
+        }
+
+        switch (Constants.currentMode) {
+            case REAL:
+                return new Intake(new IntakeIOHardware());
+            case SIM:
+                return new Intake(iis);
+            default:
+                return new Intake(new IntakeIO() {});
+        }
+    }
 
     public Intake(IntakeIO io) {
         this.io = io;

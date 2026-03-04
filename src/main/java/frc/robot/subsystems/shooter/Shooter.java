@@ -49,6 +49,7 @@ public class Shooter extends SubsystemBase {
     public static enum ManualShotLoc {
         CLIMB, // x
         FRONT_HUB, // y
+        TRENCH
     }
 
     double climbManualSpeed = 1;
@@ -318,6 +319,11 @@ public class Shooter extends SubsystemBase {
             case FRONT_HUB:
                 fakeLoc = FieldConstants.Locations.locationHubShoot;
                 break;
+            case TRENCH:
+                fakeLoc = new Pose2d(
+                        1.6069583892822266,
+                        7.715467166900635,
+                        new Rotation2d(-1.5707963267948966));
             default:
                 fakeLoc = FieldConstants.Locations.locationClimbShoot;
         }

@@ -20,6 +20,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.util.Units;
@@ -32,6 +33,12 @@ import edu.wpi.first.units.measure.Voltage;
 public class ShooterIOHardware implements ShooterIO {
 
     private static final boolean hasTurret = false;
+
+    //total angle range of 32.4deg
+    public static final double hoodMinAngle = 49;//deg
+    public static final double hoodMaxAngle = 81.4;
+    public static final double hoodMinRot = 0.005;//rotations
+    public static final double hoodMaxRot = 0.095;
 
     private final TalonFX wheel;
     private final TalonFX wheel2;
@@ -67,13 +74,13 @@ public class ShooterIOHardware implements ShooterIO {
     private final Debouncer turretConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
     public ShooterIOHardware() {
-        wheel = new TalonFX(12); 
+        wheel = new TalonFX(12);
 
         var cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         cfg.Slot0.kP = 10;
-        cfg.Slot0.kS =5;
+        cfg.Slot0.kS = 5;
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
@@ -85,7 +92,6 @@ public class ShooterIOHardware implements ShooterIO {
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         wheel2.getConfigurator().apply(cfg);
         wheel2.setControl(new Follower(12, MotorAlignmentValue.Opposed));
-
 
         hood = new TalonFX(15);
         cfg = new TalonFXConfiguration();
@@ -101,10 +107,8 @@ public class ShooterIOHardware implements ShooterIO {
         cfg.Feedback.SensorToMechanismRatio = 20.0 / 48.0 * 314.0 / 20.0;
         hood.getConfigurator().apply(cfg);
 
-
-
         if (hasTurret) {
-            turret = new TalonFX(0); 
+            turret = new TalonFX(0);
             voltageTurret = turret.getMotorVoltage();
             currentTurret = turret.getStatorCurrent();
             tempTurret = turret.getDeviceTemp();
@@ -216,7 +220,12 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void setHoodAngle(double hoodAngle) {
-        hood.setControl(positionRequestHood.withPosition(Units.degreesToRotations(hoodAngle)));
+        double t = MathUtil.inverseInterpolate(hoodMinAngle, hoodMaxAngle, hoodAngle);
+        t = MathUtil.clamp(t, 0, 1);
+        double rotationSetPoint = MathUtil.interpolate(hoodMinRot, hoodMaxRot, t);
+
+        //hood.setControl(positionRequestHood.withPosition(Units.degreesToRotations(hoodAngle)));
+        hood.setControl(positionRequestHood.withPosition(rotationSetPoint));
     }
 
     @Override

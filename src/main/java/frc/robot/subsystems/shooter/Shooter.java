@@ -298,6 +298,8 @@ public class Shooter extends SubsystemBase {
         io.setTurretAngle(setPoint, velocity);
     }
 
+    
+
     public void setManualGoal(ManualShotLoc loc) {
         manualShotLocState = loc;
     }

@@ -102,6 +102,7 @@ public class ShooterIOHardware implements ShooterIO {
         hood.getConfigurator().apply(cfg);
 
 
+
         if (hasTurret) {
             turret = new TalonFX(0); 
             voltageTurret = turret.getMotorVoltage();

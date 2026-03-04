@@ -3,10 +3,13 @@ package frc.robot.subsystems.spindexter;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.Angle;
@@ -42,8 +45,19 @@ public class SpindexterIOHardware implements SpindexterIO {
     private final Debouncer gateConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
     public SpindexterIOHardware() {
+        
+        var cfg = new TalonFXConfiguration();
         spin = new TalonFX(0); // TODO: add motorIDs & CANbus names
-        gate = new TalonFX(0);
+        gate = new TalonFX(17);
+        cfg = new TalonFXConfiguration();
+        cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        cfg.Slot0.kP = 10;
+        cfg.Slot0.kS = 10;
+        cfg.Slot0.kV = 0.17;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
+
+
         // TODO: do motor config
 
         positionSpin = spin.getPosition();

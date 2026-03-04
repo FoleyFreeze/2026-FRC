@@ -6,12 +6,15 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.Angle;
@@ -23,7 +26,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class IntakeIOHardware implements IntakeIO {
 
     private final TalonFX wheel;
-    private final TalonFX arm;
+    private final TalonFX intakeBar;
 
     private final VoltageOut voltageRequestWheel = new VoltageOut(0);
     private final VoltageOut voltageRequestArm = new VoltageOut(0);
@@ -49,20 +52,29 @@ public class IntakeIOHardware implements IntakeIO {
     private final Debouncer armConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
     public IntakeIOHardware() {
-        wheel = new TalonFX(0); // TODO: add motorIDs & CANbus names
-        arm = new TalonFX(0); // TODO: add motorIDs & CANbus names
-        // TODO: do motor config
+        var cfg = new TalonFXConfiguration();
+        wheel = new TalonFX(3);
+
+
+        intakeBar = new TalonFX(2);
+        cfg = new TalonFXConfiguration();
+        cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 80;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -25;
+        //TODO: not done with intake arm, left off after torque current, check slack for info
+
+
 
         positionWheel = wheel.getPosition();
-        positionArm = arm.getPosition();
+        positionArm = intakeBar.getPosition();
         voltageWheel = wheel.getMotorVoltage();
-        voltageArm = arm.getMotorVoltage();
+        voltageArm = intakeBar.getMotorVoltage();
         currentWheel = wheel.getStatorCurrent();
-        currentArm = arm.getStatorCurrent();
+        currentArm = intakeBar.getStatorCurrent();
         tempWheel = wheel.getDeviceTemp();
-        tempArm = arm.getDeviceTemp();
+        tempArm = intakeBar.getDeviceTemp();
         angularVelocityWheel = wheel.getVelocity();
-        angularVelocityArm = arm.getVelocity();
+        angularVelocityArm = intakeBar.getVelocity();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50,
@@ -76,7 +88,7 @@ public class IntakeIOHardware implements IntakeIO {
                 tempArm,
                 angularVelocityWheel,
                 angularVelocityArm);
-        ParentDevice.optimizeBusUtilizationForAll(wheel, arm);
+        ParentDevice.optimizeBusUtilizationForAll(wheel, intakeBar);
     }
 
     @Override
@@ -113,16 +125,16 @@ public class IntakeIOHardware implements IntakeIO {
 
     @Override
     public void armPower(double power) {
-        arm.setControl(voltageRequestArm.withOutput(power * 12));
+        intakeBar.setControl(voltageRequestArm.withOutput(power * 12));
     }
 
     @Override
     public void armAngle(double rotations) {
-        arm.setControl(positionRequestArm.withPosition(rotations));
+        intakeBar.setControl(positionRequestArm.withPosition(rotations));
     }
 
     @Override
     public void armMotion(double rotations) {
-        arm.setControl(motionRequestArm.withPosition(rotations));
+        intakeBar.setControl(motionRequestArm.withPosition(rotations));
     }
 }

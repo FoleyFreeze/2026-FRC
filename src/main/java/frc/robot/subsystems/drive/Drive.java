@@ -61,7 +61,7 @@ import org.littletonrobotics.junction.Logger;
 public class Drive extends SubsystemBase {
     RobotContainer r;
 
-    public static final boolean isDisabled = true;
+    public static final boolean isDisabled = false;
 
     // TunerConstants doesn't include these constants, so they are declared locally
     static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;

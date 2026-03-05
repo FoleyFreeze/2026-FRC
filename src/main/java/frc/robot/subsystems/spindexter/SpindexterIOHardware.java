@@ -10,7 +10,6 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.Angle;
@@ -47,11 +46,11 @@ public class SpindexterIOHardware implements SpindexterIO {
     private final Debouncer gateConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
     public SpindexterIOHardware() {
-        
+
         var cfg = new TalonFXConfiguration();
-        spin = new TalonFX(6, TunerConstants.kCANBus); 
+        spin = new TalonFX(6, TunerConstants.kCANBus);
         cfg = new TalonFXConfiguration();
-        cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         spin.getConfigurator().apply(cfg);
 
@@ -102,12 +101,12 @@ public class SpindexterIOHardware implements SpindexterIO {
         inputs.spinTemp = tempSpin.getValueAsDouble();
         inputs.spinVelocity = angularVelocitySpin.getValueAsDouble();
 
-        inputs.spinConnected = gateConnectedDebounce.calculate(gateStatus.isOK());
-        inputs.spinPosition = positionGate.getValueAsDouble();
-        inputs.spinVoltage = voltageGate.getValueAsDouble();
-        inputs.spinCurrent = currentGate.getValueAsDouble();
-        inputs.spinTemp = tempGate.getValueAsDouble();
-        inputs.spinVelocity = angularVelocityGate.getValueAsDouble();
+        inputs.gateConnected = gateConnectedDebounce.calculate(gateStatus.isOK());
+        inputs.gatePosition = positionGate.getValueAsDouble();
+        inputs.gateVoltage = voltageGate.getValueAsDouble();
+        inputs.gateCurrent = currentGate.getValueAsDouble();
+        inputs.gateTemp = tempGate.getValueAsDouble();
+        inputs.gateVelocity = angularVelocityGate.getValueAsDouble();
     }
 
     @Override
@@ -117,7 +116,7 @@ public class SpindexterIOHardware implements SpindexterIO {
 
     @Override
     public void gatePower(double power) {
-        spin.setControl(voltageRequestGate.withOutput(power * 12));
+        gate.setControl(voltageRequestGate.withOutput(power * 12));
     }
 
     @Override
@@ -127,6 +126,6 @@ public class SpindexterIOHardware implements SpindexterIO {
 
     @Override
     public void gateSpeed(double speed) {
-        spin.setControl(velocityRequestGate.withAcceleration(speed));
+        gate.setControl(velocityRequestGate.withAcceleration(speed));
     }
 }

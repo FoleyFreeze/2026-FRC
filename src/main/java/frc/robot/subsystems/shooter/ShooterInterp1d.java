@@ -18,7 +18,7 @@ public class ShooterInterp1d {
     private static final double[] distAxisPassing = {3, 6, 9, 12, 15, 18, 21};
 
     // with modeled drag
-    private static final double[] rpmTableReal = {2907, 3494, 4121, 4714, 5274};
+    private static final double[] rpmTableReal = {1507, 1794, 2021, 2314, 2874};
     private static final double[] hoodAngleTableReal = {73.2, 58.7, 53.4, 50.8, 49.1};
     private static final double[] timeTableReal = {0.58, 0.78, 0.96, 1.12, 1.27};
 

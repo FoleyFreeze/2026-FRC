@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -23,7 +22,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -39,10 +37,10 @@ public class ShooterIOHardware implements ShooterIO {
 
     private static final boolean hasTurret = false;
 
-    //total angle range of 32.4deg
-    public static final double hoodMinAngle = 49;//deg
+    // total angle range of 32.4deg
+    public static final double hoodMinAngle = 49; // deg
     public static final double hoodMaxAngle = 81.4;
-    public static final double hoodMinRot = 0.005;//rotations
+    public static final double hoodMinRot = 0.005; // rotations
     public static final double hoodMaxRot = 0.095;
 
     private final TalonFX wheel;
@@ -106,7 +104,7 @@ public class ShooterIOHardware implements ShooterIO {
         var encCfg = new CANcoderConfiguration();
         encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg.MagnetSensor.MagnetOffset = 0;        
+        encCfg.MagnetSensor.MagnetOffset = 0;
         hoodAbsEnc.getConfigurator().apply(encCfg);
 
         hood = new TalonFX(15, TunerConstants.kCANBus);
@@ -122,11 +120,10 @@ public class ShooterIOHardware implements ShooterIO {
         cfg.Feedback.RotorToSensorRatio = 9.0 * 48.0 / 20.0;
         cfg.Feedback.SensorToMechanismRatio = 20.0 / 48.0 * 314.0 / 20.0;
         hood.getConfigurator().apply(cfg);
-        
 
         if (hasTurret) {
             turret = new TalonFX(0);
-            //TODO: cfg
+            // TODO: cfg
 
             voltageTurret = turret.getMotorVoltage();
             currentTurret = turret.getStatorCurrent();
@@ -180,7 +177,12 @@ public class ShooterIOHardware implements ShooterIO {
                         positionWheel, voltageWheel, currentWheel, tempWheel, angularVelocityWheel);
         StatusCode hoodStatus =
                 BaseStatusSignal.refreshAll(
-                        positionHood, voltageHood, currentHood, tempHood, angularVelocityHood, positionHoodAbs);
+                        positionHood,
+                        voltageHood,
+                        currentHood,
+                        tempHood,
+                        angularVelocityHood,
+                        positionHoodAbs);
 
         if (hasTurret) {
             StatusCode turretStatus =
@@ -249,7 +251,7 @@ public class ShooterIOHardware implements ShooterIO {
         t = MathUtil.clamp(t, 0, 1);
         double rotationSetPoint = MathUtil.interpolate(hoodMinRot, hoodMaxRot, t);
 
-        //hood.setControl(positionRequestHood.withPosition(Units.degreesToRotations(hoodAngle)));
+        // hood.setControl(positionRequestHood.withPosition(Units.degreesToRotations(hoodAngle)));
         hood.setControl(positionRequestHood.withPosition(rotationSetPoint));
     }
 

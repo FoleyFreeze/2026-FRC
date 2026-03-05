@@ -267,7 +267,8 @@ public class ShooterIOSim implements ShooterIO {
         inputs.wheelPosition +=
                 0.02
                         * Units.radiansToDegrees(
-                                Units.rotationsPerMinuteToRadiansPerSecond(inputs.wheelVelocityRPM));
+                                Units.rotationsPerMinuteToRadiansPerSecond(
+                                        inputs.wheelVelocityRPM));
         inputs.wheelVoltage = wheelControlVoltage;
         inputs.wheelCurrent = wheel.getCurrentDrawAmps();
         inputs.wheelTemp = 0;

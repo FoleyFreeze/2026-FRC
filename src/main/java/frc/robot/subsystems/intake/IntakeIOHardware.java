@@ -20,7 +20,6 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.Angle;
@@ -82,8 +81,8 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -25;
         cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         cfg.Feedback.FeedbackRemoteSensorID = 2;
-        cfg.Feedback.RotorToSensorRatio = 52.0/16.0*52.0/24.0*54.0/18.0;
-        cfg.Feedback.SensorToMechanismRatio = 38.0/22.0;
+        cfg.Feedback.RotorToSensorRatio = 52.0 / 16.0 * 52.0 / 24.0 * 54.0 / 18.0;
+        cfg.Feedback.SensorToMechanismRatio = 38.0 / 22.0;
         cfg.Slot1.GravityType = GravityTypeValue.Arm_Cosine;
         cfg.Slot1.GravityArmPositionOffset = 0.2;
         cfg.Slot1.kG = 40;
@@ -130,7 +129,12 @@ public class IntakeIOHardware implements IntakeIO {
                         positionWheel, voltageWheel, currentWheel, tempWheel, angularVelocityWheel);
         StatusCode armStatus =
                 BaseStatusSignal.refreshAll(
-                        positionArm, voltageArm, currentArm, tempArm, angularVelocityArm, positionArmAbs);
+                        positionArm,
+                        voltageArm,
+                        currentArm,
+                        tempArm,
+                        angularVelocityArm,
+                        positionArmAbs);
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
         inputs.armConnected = armConnectedDebounce.calculate(armStatus.isOK());
         inputs.wheelPosition = positionWheel.getValue().in(Rotations);
@@ -158,16 +162,16 @@ public class IntakeIOHardware implements IntakeIO {
 
     @Override
     public void armPower(double power) {
-        intakeBar.setControl(voltageRequestArm.withOutput(power * 12));
+        // intakeBar.setControl(voltageRequestArm.withOutput(power * 12));
     }
 
     @Override
     public void armAngle(double rotations) {
-        intakeBar.setControl(positionRequestArm.withPosition(rotations));
+        // intakeBar.setControl(positionRequestArm.withPosition(rotations));
     }
 
     @Override
     public void armMotion(double rotations) {
-        intakeBar.setControl(motionRequestArm.withPosition(rotations));
+        // intakeBar.setControl(motionRequestArm.withPosition(rotations));
     }
 }

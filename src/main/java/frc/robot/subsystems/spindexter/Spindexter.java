@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 public class Spindexter extends SubsystemBase {
     RobotContainer r;
 
-    public static final boolean isDisabled = true;
+    public static final boolean isDisabled = false;
 
     double unjam = -0.7;
     double spinPower = 0.7;
@@ -65,10 +65,11 @@ public class Spindexter extends SubsystemBase {
     }
 
     private void smartSpin() {
-        io.spinPower(spinPower);
         if (r.shooter.wontMiss(r.drive.getPose()) && r.drive.wontMiss(r.shooter)) {
             io.gatePower(gatePower);
+            io.spinPower(spinPower);
         } else {
+            io.spinPower(0);
             io.spinPower(0);
         }
     }

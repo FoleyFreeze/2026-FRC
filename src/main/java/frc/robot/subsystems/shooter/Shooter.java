@@ -25,7 +25,7 @@ import org.littletonrobotics.junction.Logger;
 public class Shooter extends SubsystemBase {
     RobotContainer r;
 
-    public static final boolean isDisabled = true;
+    public static final boolean isDisabled = false;
     public boolean isTurret = false; // TODO: cal for turret
 
     private final ShooterIO io;
@@ -299,8 +299,6 @@ public class Shooter extends SubsystemBase {
         io.setTurretAngle(setPoint, velocity);
     }
 
-    
-
     public void setManualGoal(ManualShotLoc loc) {
         manualShotLocState = loc;
     }
@@ -311,6 +309,7 @@ public class Shooter extends SubsystemBase {
 
     public Pose2d getManualPose() {
         Pose2d fakeLoc;
+        shootMode = ShootMode.MANUAL;
 
         switch (manualShotLocState) {
             case CLIMB:
@@ -320,10 +319,12 @@ public class Shooter extends SubsystemBase {
                 fakeLoc = FieldConstants.Locations.locationHubShoot;
                 break;
             case TRENCH:
-                fakeLoc = new Pose2d(
-                        1.6069583892822266,
-                        7.715467166900635,
-                        new Rotation2d(-1.5707963267948966));
+                fakeLoc =
+                        new Pose2d(
+                                1.6069583892822266,
+                                7.715467166900635,
+                                new Rotation2d(-1.5707963267948966));
+                break;
             default:
                 fakeLoc = FieldConstants.Locations.locationClimbShoot;
         }
@@ -371,6 +372,7 @@ public class Shooter extends SubsystemBase {
             missReason = MissReason.TURRET_ANGLE;
             return false;
         } else if (!isTurret
+                && shootMode != ShootMode.MANUAL
                 && !isWithin(
                         r.drive
                                 .getRotation()

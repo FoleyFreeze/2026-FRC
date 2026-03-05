@@ -249,25 +249,25 @@ public class ShooterIOSim implements ShooterIO {
         }
 
         inputs.hoodConnected = true;
-        inputs.hoodPosition = Units.radiansToDegrees(hood.getAngleRads());
+        inputs.hoodPositionDeg = Units.radiansToDegrees(hood.getAngleRads());
         inputs.hoodVelocity = Units.radiansToDegrees(hood.getVelocityRadPerSec());
         inputs.hoodVoltage = hoodControlVoltage;
         inputs.hoodCurrent = hood.getCurrentDrawAmps();
         inputs.hoodTemp = 0;
 
         inputs.turretConnected = true;
-        inputs.turretPosition = Units.radiansToDegrees(turret.getAngleRads());
+        inputs.turretPositionDeg = Units.radiansToDegrees(turret.getAngleRads());
         inputs.turretVelocity = Units.radiansToDegrees(turret.getVelocityRadPerSec());
         inputs.turretVoltage = turretControlVoltage;
         inputs.turretCurrent = turret.getCurrentDrawAmps();
         inputs.turretTemp = 0;
 
         inputs.wheelConnected = true;
-        inputs.wheelVelocity = wheel.getAngularVelocityRPM();
+        inputs.wheelVelocityRPM = wheel.getAngularVelocityRPM();
         inputs.wheelPosition +=
                 0.02
                         * Units.radiansToDegrees(
-                                Units.rotationsPerMinuteToRadiansPerSecond(inputs.wheelVelocity));
+                                Units.rotationsPerMinuteToRadiansPerSecond(inputs.wheelVelocityRPM));
         inputs.wheelVoltage = wheelControlVoltage;
         inputs.wheelCurrent = wheel.getCurrentDrawAmps();
         inputs.wheelTemp = 0;

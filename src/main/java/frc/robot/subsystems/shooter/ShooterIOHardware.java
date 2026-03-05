@@ -6,19 +6,23 @@ import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -29,6 +33,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.generated.TunerConstants;
 
 public class ShooterIOHardware implements ShooterIO {
 
@@ -44,6 +49,10 @@ public class ShooterIOHardware implements ShooterIO {
     private final TalonFX wheel2;
     private final TalonFX hood;
     private TalonFX turret;
+
+    private final CANcoder hoodAbsEnc;
+    // private final CANcoder turretAbsEnc1;
+    // private final CANcoder turretAbsEnc2;
 
     private final VoltageOut voltageRequestWheel = new VoltageOut(0);
     private final VoltageOut voltageRequestHood = new VoltageOut(0);
@@ -68,14 +77,14 @@ public class ShooterIOHardware implements ShooterIO {
     private final StatusSignal<AngularVelocity> angularVelocityWheel;
     private final StatusSignal<AngularVelocity> angularVelocityHood;
     private StatusSignal<AngularVelocity> angularVelocityTurret;
+    private final StatusSignal<Angle> positionHoodAbs;
 
     private final Debouncer wheelConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer hoodConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer turretConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
     public ShooterIOHardware() {
-        wheel = new TalonFX(12);
-
+        wheel = new TalonFX(12, TunerConstants.kCANBus);
         var cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -86,14 +95,21 @@ public class ShooterIOHardware implements ShooterIO {
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
         wheel.getConfigurator().apply(cfg);
 
-        wheel2 = new TalonFX(13);
+        wheel2 = new TalonFX(13, TunerConstants.kCANBus);
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         wheel2.getConfigurator().apply(cfg);
         wheel2.setControl(new Follower(12, MotorAlignmentValue.Opposed));
 
-        hood = new TalonFX(15);
+        hoodAbsEnc = new CANcoder(15, TunerConstants.kCANBus);
+        var encCfg = new CANcoderConfiguration();
+        encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
+        encCfg.MagnetSensor.MagnetOffset = 0;        
+        hoodAbsEnc.getConfigurator().apply(encCfg);
+
+        hood = new TalonFX(15, TunerConstants.kCANBus);
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -106,9 +122,12 @@ public class ShooterIOHardware implements ShooterIO {
         cfg.Feedback.RotorToSensorRatio = 9.0 * 48.0 / 20.0;
         cfg.Feedback.SensorToMechanismRatio = 20.0 / 48.0 * 314.0 / 20.0;
         hood.getConfigurator().apply(cfg);
+        
 
         if (hasTurret) {
             turret = new TalonFX(0);
+            //TODO: cfg
+
             voltageTurret = turret.getMotorVoltage();
             currentTurret = turret.getStatorCurrent();
             tempTurret = turret.getDeviceTemp();
@@ -125,6 +144,7 @@ public class ShooterIOHardware implements ShooterIO {
         tempHood = hood.getDeviceTemp();
         angularVelocityWheel = wheel.getVelocity();
         angularVelocityHood = hood.getVelocity();
+        positionHoodAbs = hoodAbsEnc.getPosition();
 
         if (hasTurret) {
             BaseStatusSignal.setUpdateFrequencyForAll(
@@ -148,8 +168,9 @@ public class ShooterIOHardware implements ShooterIO {
                 tempWheel,
                 tempHood,
                 angularVelocityWheel,
-                angularVelocityHood);
-        ParentDevice.optimizeBusUtilizationForAll(wheel, hood);
+                angularVelocityHood,
+                positionHoodAbs);
+        ParentDevice.optimizeBusUtilizationForAll(wheel, hood, hoodAbsEnc);
     }
 
     @Override
@@ -159,7 +180,7 @@ public class ShooterIOHardware implements ShooterIO {
                         positionWheel, voltageWheel, currentWheel, tempWheel, angularVelocityWheel);
         StatusCode hoodStatus =
                 BaseStatusSignal.refreshAll(
-                        positionHood, voltageHood, currentHood, tempHood, angularVelocityHood);
+                        positionHood, voltageHood, currentHood, tempHood, angularVelocityHood, positionHoodAbs);
 
         if (hasTurret) {
             StatusCode turretStatus =
@@ -170,7 +191,7 @@ public class ShooterIOHardware implements ShooterIO {
                             tempTurret,
                             angularVelocityTurret);
             inputs.turretConnected = turretConnectedDebounce.calculate(turretStatus.isOK());
-            inputs.turretPosition = positionTurret.getValue().in(Degrees);
+            inputs.turretPositionDeg = positionTurret.getValue().in(Degrees);
             inputs.turretVoltage = voltageTurret.getValueAsDouble();
             inputs.turretCurrent = currentTurret.getValueAsDouble();
             inputs.turretTemp = tempTurret.getValueAsDouble();
@@ -180,15 +201,19 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
         inputs.hoodConnected = hoodConnectedDebounce.calculate(hoodStatus.isOK());
         inputs.wheelPosition = positionWheel.getValue().in(Rotations);
-        inputs.hoodPosition = positionHood.getValue().in(Degrees);
         inputs.wheelVoltage = voltageWheel.getValueAsDouble();
         inputs.hoodVoltage = voltageHood.getValueAsDouble();
         inputs.wheelCurrent = currentWheel.getValueAsDouble();
         inputs.hoodCurrent = currentHood.getValueAsDouble();
         inputs.wheelTemp = tempWheel.getValueAsDouble();
         inputs.hoodTemp = tempHood.getValueAsDouble();
-        inputs.wheelVelocity = angularVelocityWheel.getValue().in(RevolutionsPerSecond) * 60;
+        inputs.wheelVelocityRPM = angularVelocityWheel.getValue().in(RevolutionsPerSecond) * 60;
         inputs.hoodVelocity = angularVelocityHood.getValue().in(DegreesPerSecond);
+        inputs.hoodAbsEncRotations = positionHoodAbs.getValue().in(Rotations);
+
+        double rawHoodPosition = positionHood.getValue().in(Rotations);
+        double t = MathUtil.inverseInterpolate(hoodMinRot, hoodMaxRot, rawHoodPosition);
+        inputs.hoodPositionDeg = MathUtil.interpolate(hoodMinAngle, hoodMaxAngle, t);
     }
 
     @Override

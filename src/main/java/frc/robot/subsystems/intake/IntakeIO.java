@@ -12,6 +12,8 @@ public interface IntakeIO {
         public double armVelocity = 0;
         public double armTemp = 0;
 
+        public double armPositionAbs = 0;
+
         public boolean wheelConnected = false;
         public double wheelVoltage = 0;
         public double wheelCurrent = 0;

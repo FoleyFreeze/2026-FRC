@@ -6,14 +6,20 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -22,11 +28,13 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.generated.TunerConstants;
 
 public class IntakeIOHardware implements IntakeIO {
 
     private final TalonFX wheel;
     private final TalonFX intakeBar;
+    private final CANcoder intakeAbsEnc;
 
     private final VoltageOut voltageRequestWheel = new VoltageOut(0);
     private final VoltageOut voltageRequestArm = new VoltageOut(0);
@@ -39,6 +47,7 @@ public class IntakeIOHardware implements IntakeIO {
 
     private final StatusSignal<Angle> positionWheel;
     private final StatusSignal<Angle> positionArm;
+    private final StatusSignal<Angle> positionArmAbs;
     private final StatusSignal<Voltage> voltageWheel;
     private final StatusSignal<Voltage> voltageArm;
     private final StatusSignal<Current> currentWheel;
@@ -52,18 +61,39 @@ public class IntakeIOHardware implements IntakeIO {
     private final Debouncer armConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
     public IntakeIOHardware() {
+        wheel = new TalonFX(3, TunerConstants.kCANBus);
         var cfg = new TalonFXConfiguration();
-        wheel = new TalonFX(3);
+        cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        wheel.getConfigurator().apply(cfg);
 
+        intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);
+        var encCfg = new CANcoderConfiguration();
+        encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        encCfg.MagnetSensor.MagnetOffset = 0;
+        encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
+        intakeAbsEnc.getConfigurator().apply(encCfg);
 
-        intakeBar = new TalonFX(2);
+        intakeBar = new TalonFX(2, TunerConstants.kCANBus);
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 80;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -25;
-        //TODO: not done with intake arm, left off after torque current, check slack for info
-
-
+        cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        cfg.Feedback.FeedbackRemoteSensorID = 2;
+        cfg.Feedback.RotorToSensorRatio = 52.0/16.0*52.0/24.0*54.0/18.0;
+        cfg.Feedback.SensorToMechanismRatio = 38.0/22.0;
+        cfg.Slot1.GravityType = GravityTypeValue.Arm_Cosine;
+        cfg.Slot1.GravityArmPositionOffset = 0.2;
+        cfg.Slot1.kG = 40;
+        cfg.Slot1.kP = 120;
+        cfg.Slot1.kD = 5;
+        cfg.Slot1.kV = 0;
+        cfg.Slot1.kA = 20;
+        cfg.MotionMagic.MotionMagicCruiseVelocity = 0.1;
+        cfg.MotionMagic.MotionMagicAcceleration = 0.5;
+        intakeBar.getConfigurator().apply(cfg);
 
         positionWheel = wheel.getPosition();
         positionArm = intakeBar.getPosition();
@@ -75,6 +105,7 @@ public class IntakeIOHardware implements IntakeIO {
         tempArm = intakeBar.getDeviceTemp();
         angularVelocityWheel = wheel.getVelocity();
         angularVelocityArm = intakeBar.getVelocity();
+        positionArmAbs = intakeAbsEnc.getPosition();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50,
@@ -87,8 +118,9 @@ public class IntakeIOHardware implements IntakeIO {
                 tempWheel,
                 tempArm,
                 angularVelocityWheel,
-                angularVelocityArm);
-        ParentDevice.optimizeBusUtilizationForAll(wheel, intakeBar);
+                angularVelocityArm,
+                positionArmAbs);
+        ParentDevice.optimizeBusUtilizationForAll(wheel, intakeBar, intakeAbsEnc);
     }
 
     @Override
@@ -98,7 +130,7 @@ public class IntakeIOHardware implements IntakeIO {
                         positionWheel, voltageWheel, currentWheel, tempWheel, angularVelocityWheel);
         StatusCode armStatus =
                 BaseStatusSignal.refreshAll(
-                        positionArm, voltageArm, currentArm, tempArm, angularVelocityArm);
+                        positionArm, voltageArm, currentArm, tempArm, angularVelocityArm, positionArmAbs);
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
         inputs.armConnected = armConnectedDebounce.calculate(armStatus.isOK());
         inputs.wheelPosition = positionWheel.getValue().in(Rotations);
@@ -111,6 +143,7 @@ public class IntakeIOHardware implements IntakeIO {
         inputs.armTemp = tempArm.getValueAsDouble();
         inputs.wheelVelocity = angularVelocityWheel.getValue().in(RPM);
         inputs.armVelocity = angularVelocityArm.getValue().in(RPM);
+        inputs.armPositionAbs = positionArmAbs.getValue().in(Rotations);
     }
 
     @Override

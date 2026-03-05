@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -17,6 +18,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.generated.TunerConstants;
 
 public class SpindexterIOHardware implements SpindexterIO {
 
@@ -47,18 +49,22 @@ public class SpindexterIOHardware implements SpindexterIO {
     public SpindexterIOHardware() {
         
         var cfg = new TalonFXConfiguration();
-        spin = new TalonFX(0); // TODO: add motorIDs & CANbus names
-        gate = new TalonFX(17);
+        spin = new TalonFX(6, TunerConstants.kCANBus); 
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        spin.getConfigurator().apply(cfg);
+
+        gate = new TalonFX(17, TunerConstants.kCANBus);
+        cfg = new TalonFXConfiguration();
+        cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         cfg.Slot0.kP = 10;
         cfg.Slot0.kS = 10;
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-
-
-        // TODO: do motor config
+        gate.getConfigurator().apply(cfg);
 
         positionSpin = spin.getPosition();
         voltageSpin = spin.getMotorVoltage();

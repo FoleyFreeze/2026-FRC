@@ -101,11 +101,11 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getTurretAngle() {
-        return inputs.turretPosition;
+        return inputs.turretPositionDeg;
     }
 
     public double getHoodAngle() {
-        return inputs.hoodPosition;
+        return inputs.hoodPositionDeg;
     }
 
     public Command prime() {
@@ -276,7 +276,7 @@ public class Shooter extends SubsystemBase {
     public void manageTurretWrap(double angle, double velocity) {
         double trueAngle = angle - Constants.turretAngleOffset;
         double normAngle = Util.floorMod(trueAngle, 360);
-        double delta = normAngle - (inputs.turretPosition % 360);
+        double delta = normAngle - (inputs.turretPositionDeg % 360);
 
         double shortDelta;
         if (delta > 180) {
@@ -287,7 +287,7 @@ public class Shooter extends SubsystemBase {
             shortDelta = delta;
         }
 
-        double setPoint = shortDelta + (inputs.turretPosition);
+        double setPoint = shortDelta + (inputs.turretPositionDeg);
         if (setPoint > Constants.maximumTurretAngle) {
             setPoint -= 360;
         } else if (setPoint < 0) {
@@ -364,10 +364,10 @@ public class Shooter extends SubsystemBase {
         double speedThresh = shootMode == ShootMode.HUB ? 150 : 300;
         double angleThresh = shootMode == ShootMode.HUB ? 5 : 10;
 
-        if (!isWithin(rpmTarget, inputs.wheelVelocity, speedThresh)) {
+        if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;
             return false;
-        } else if (isTurret && !isWithin(turretTarget, inputs.turretPosition, angleThresh)) {
+        } else if (isTurret && !isWithin(turretTarget, inputs.turretPositionDeg, angleThresh)) {
             missReason = MissReason.TURRET_ANGLE;
             return false;
         } else if (!isTurret
@@ -380,7 +380,7 @@ public class Shooter extends SubsystemBase {
                         angleThresh)) {
             missReason = MissReason.ROBOT_ANGLE;
             return false;
-        } else if (!isWithin(hoodTarget, inputs.hoodPosition, angleThresh)) {
+        } else if (!isWithin(hoodTarget, inputs.hoodPositionDeg, angleThresh)) {
             missReason = MissReason.HOOD_ANGLE;
             return false;
         } else if (willHitHub(botLoc)) {

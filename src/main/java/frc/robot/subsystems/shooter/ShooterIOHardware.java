@@ -38,10 +38,10 @@ public class ShooterIOHardware implements ShooterIO {
     private static final boolean hasTurret = false;
 
     // total angle range of 32.4deg
-    public static final double hoodMinAngle = 49; // deg
+    public static final double hoodMinAngle = 49.5; // deg
     public static final double hoodMaxAngle = 81.4;
-    public static final double hoodMinRot = 0.005; // rotations
-    public static final double hoodMaxRot = 0.095;
+    public static final double hoodMinRot = 0.00525; // rotations
+    public static final double hoodMaxRot = 0.09525;
 
     private final TalonFX wheel;
     private final TalonFX wheel2;
@@ -112,7 +112,7 @@ public class ShooterIOHardware implements ShooterIO {
         hood = new TalonFX(15, TunerConstants.kCANBus);
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         cfg.Slot0.kP = 1800;
         cfg.Slot0.kD = 80;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 25;
@@ -143,7 +143,7 @@ public class ShooterIOHardware implements ShooterIO {
         tempHood = hood.getDeviceTemp();
         angularVelocityWheel = wheel.getVelocity();
         angularVelocityHood = hood.getVelocity();
-        positionHoodAbs = hoodAbsEnc.getPosition();
+        positionHoodAbs = hoodAbsEnc.getAbsolutePosition();
 
         if (hasTurret) {
             BaseStatusSignal.setUpdateFrequencyForAll(
@@ -213,7 +213,7 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.hoodTemp = tempHood.getValueAsDouble();
         inputs.wheelVelocityRPM = angularVelocityWheel.getValue().in(RevolutionsPerSecond) * 60;
         inputs.hoodVelocity = angularVelocityHood.getValue().in(DegreesPerSecond);
-        inputs.hoodAbsEncRotations = positionHoodAbs.getValue().in(Rotations);
+        inputs.hoodAbsEncRotations = positionHoodAbs.getValueAsDouble();
 
         double rawHoodPosition = positionHood.getValue().in(Rotations);
         double t = MathUtil.inverseInterpolate(hoodMinRot, hoodMaxRot, rawHoodPosition);

@@ -11,8 +11,8 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -56,7 +56,8 @@ public class ShooterIOHardware implements ShooterIO {
     private final VoltageOut voltageRequestHood = new VoltageOut(0);
     private VoltageOut voltageRequestTurret = new VoltageOut(0);
 
-    private final VelocityTorqueCurrentFOC velocityRequestWheel = new VelocityTorqueCurrentFOC(0);
+    private final MotionMagicVelocityTorqueCurrentFOC velocityRequestWheel =
+            new MotionMagicVelocityTorqueCurrentFOC(0);
     private final PositionTorqueCurrentFOC positionRequestHood = new PositionTorqueCurrentFOC(0);
     private PositionTorqueCurrentFOC positionRequestTurret = new PositionTorqueCurrentFOC(0);
 
@@ -91,6 +92,7 @@ public class ShooterIOHardware implements ShooterIO {
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
+        cfg.MotionMagic.MotionMagicAcceleration = 120;
         wheel.getConfigurator().apply(cfg);
 
         wheel2 = new TalonFX(13, TunerConstants.kCANBus);

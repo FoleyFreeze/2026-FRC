@@ -96,7 +96,7 @@ public class ConfigButtons {
                         new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.CLIMB))
                                 .andThen(
                                         r.shooter
-                                                .manualPrimeCmd()
+                                                .manualShot()
                                                 .alongWith(
                                                         r.spindexter.smartSpinCmd(
                                                                 r.shooter, r.drive))));
@@ -107,7 +107,7 @@ public class ConfigButtons {
                         new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.FRONT_HUB))
                                 .andThen(
                                         r.shooter
-                                                .manualPrimeCmd()
+                                                .manualShot()
                                                 .alongWith(
                                                         r.spindexter.smartSpinCmd(
                                                                 r.shooter, r.drive))));

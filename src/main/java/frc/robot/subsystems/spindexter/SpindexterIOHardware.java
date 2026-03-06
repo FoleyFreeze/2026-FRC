@@ -1,10 +1,13 @@
 package frc.robot.subsystems.spindexter;
 
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -27,8 +30,10 @@ public class SpindexterIOHardware implements SpindexterIO {
     private final VoltageOut voltageRequestSpin = new VoltageOut(0);
     private final VoltageOut voltageRequestGate = new VoltageOut(0);
 
-    private final VelocityTorqueCurrentFOC velocityRequestSpin = new VelocityTorqueCurrentFOC(0);
-    private final VelocityTorqueCurrentFOC velocityRequestGate = new VelocityTorqueCurrentFOC(0);
+    private final MotionMagicVelocityTorqueCurrentFOC velocityRequestSpin =
+            new MotionMagicVelocityTorqueCurrentFOC(0);
+    private final MotionMagicVelocityTorqueCurrentFOC velocityRequestGate =
+            new MotionMagicVelocityTorqueCurrentFOC(0);
 
     private final StatusSignal<Angle> positionSpin;
     private final StatusSignal<Voltage> voltageSpin;
@@ -52,17 +57,24 @@ public class SpindexterIOHardware implements SpindexterIO {
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        cfg.Slot0.kP = 10;
+        cfg.Slot0.kS = 10;
+        cfg.Slot0.kV = 0.17;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
+        cfg.MotionMagic.MotionMagicAcceleration = 180;
         spin.getConfigurator().apply(cfg);
 
         gate = new TalonFX(17, TunerConstants.kCANBus);
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfg.Slot0.kP = 10;
+        cfg.Slot0.kP = 12;
         cfg.Slot0.kS = 10;
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
+        cfg.MotionMagic.MotionMagicAcceleration = 120;
         gate.getConfigurator().apply(cfg);
 
         positionSpin = spin.getPosition();
@@ -95,18 +107,18 @@ public class SpindexterIOHardware implements SpindexterIO {
                         positionGate, voltageGate, currentGate, tempGate, angularVelocityGate);
 
         inputs.spinConnected = spinConnectedDebounce.calculate(spinStatus.isOK());
-        inputs.spinPosition = positionSpin.getValueAsDouble();
+        inputs.spinPosition = positionSpin.getValue().in(Rotations);
         inputs.spinVoltage = voltageSpin.getValueAsDouble();
         inputs.spinCurrent = currentSpin.getValueAsDouble();
         inputs.spinTemp = tempSpin.getValueAsDouble();
-        inputs.spinVelocity = angularVelocitySpin.getValueAsDouble();
+        inputs.spinVelocity = angularVelocitySpin.getValue().in(RPM);
 
         inputs.gateConnected = gateConnectedDebounce.calculate(gateStatus.isOK());
-        inputs.gatePosition = positionGate.getValueAsDouble();
+        inputs.gatePosition = positionGate.getValue().in(Rotations);
         inputs.gateVoltage = voltageGate.getValueAsDouble();
         inputs.gateCurrent = currentGate.getValueAsDouble();
         inputs.gateTemp = tempGate.getValueAsDouble();
-        inputs.gateVelocity = angularVelocityGate.getValueAsDouble();
+        inputs.gateVelocity = angularVelocityGate.getValue().in(RPM);
     }
 
     @Override
@@ -121,11 +133,11 @@ public class SpindexterIOHardware implements SpindexterIO {
 
     @Override
     public void spinSpeed(double speed) {
-        spin.setControl(velocityRequestGate.withAcceleration(speed));
+        spin.setControl(velocityRequestSpin.withVelocity(speed / 60));
     }
 
     @Override
     public void gateSpeed(double speed) {
-        gate.setControl(velocityRequestGate.withAcceleration(speed));
+        gate.setControl(velocityRequestGate.withVelocity(speed / 60));
     }
 }

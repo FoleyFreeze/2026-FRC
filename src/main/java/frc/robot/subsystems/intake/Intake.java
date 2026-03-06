@@ -62,7 +62,7 @@ public class Intake extends SubsystemBase {
                 // if(inputs.armPosition < armStartWheelPos){
                 //     io.wheelPower(wheelSpeed);
                 // } else {
-                io.wheelPower(0);
+                io.wheelPower(wheelSpeed);
                 // }
                 if (Math.abs(inputs.armPosition - armOutPos) < armTol) {
                     mode = IntakeMode.HOLD_OUT;

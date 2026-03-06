@@ -5,6 +5,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -74,6 +76,20 @@ public class Shooter extends SubsystemBase {
     @AutoLogOutput(key = "Shooter/MissReasonShooter")
     public MissReason missReason = MissReason.NONE;
 
+    NetworkTableEntry rpmSet =
+            NetworkTableInstance.getDefault().getTable("Tuning").getEntry("RpmSet");
+    NetworkTableEntry hoodSet =
+            NetworkTableInstance.getDefault().getTable("Tuning").getEntry("HoodSet");
+
+    // DoubleSubscriber rpmSet =
+    //         NetworkTableInstance.getDefault()
+    //                 .getDoubleTopic("/Tuning/RpmSet")
+    //                 .subscribe(0);
+    // DoubleSubscriber hoodSet =
+    //         NetworkTableInstance.getDefault()
+    //                 .getDoubleTopic("/Tuning/HoodSet")
+    //                 .subscribe(0);
+
     public static Shooter create(RobotContainer r, ShooterIOSim shootSim) {
         if (isDisabled) {
             return new Shooter(new ShooterIO() {}, r);
@@ -92,6 +108,11 @@ public class Shooter extends SubsystemBase {
     public Shooter(ShooterIO io, RobotContainer r) {
         this.io = io;
         this.r = r;
+
+        rpmSet.setDouble(100);
+        rpmSet.getDouble(0);
+        hoodSet.setDouble(55);
+        hoodSet.getDouble(0);
     }
 
     @Override
@@ -273,6 +294,17 @@ public class Shooter extends SubsystemBase {
         io.setSpeed(setpoints.rpm());
     }
 
+    public void manualPrime(double rpm, double hoodAngle) {
+        Logger.recordOutput("Shooter/HoodSetpoint", hoodAngle);
+        Logger.recordOutput("Shooter/RPMSetpoint", rpm);
+
+        // manageTurretWrap(angleSetpoint, setpoints.turretVel());
+        hoodTarget = hoodAngle;
+        rpmTarget = rpm;
+        io.setHoodAngle(hoodAngle);
+        io.setSpeed(rpm);
+    }
+
     public void manageTurretWrap(double angle, double velocity) {
         double trueAngle = angle - Constants.turretAngleOffset;
         double normAngle = Util.floorMod(trueAngle, 360);
@@ -331,6 +363,31 @@ public class Shooter extends SubsystemBase {
         return fakeLoc;
     }
 
+    public Command manualShot() {
+        return new RunCommand(
+                () -> {
+                    shootMode = ShootMode.MANUAL;
+
+                    switch (manualShotLocState) {
+                        case CLIMB:
+                            manualPrime(3200, 60);
+                            break;
+                        case FRONT_HUB:
+                            double hood = hoodSet.getDouble(0);
+                            double rpm = rpmSet.getDouble(0);
+                            manualPrime(rpm, hood);
+                            // manualPrime(2000, 49);
+                            break;
+                        case TRENCH:
+                            manualPrime(2000, 49);
+                            break;
+                        default:
+                            manualPrime(2000, 49);
+                    }
+                },
+                this);
+    }
+
     public boolean willHitHub(Pose2d botLoc) {
         // ignore if not passing
         if (shootMode != ShootMode.PASS) return false;
@@ -362,8 +419,8 @@ public class Shooter extends SubsystemBase {
 
     public boolean wontMiss(Pose2d botLoc) {
         // allow wider thresholds for passing
-        double speedThresh = shootMode == ShootMode.HUB ? 150 : 300;
-        double angleThresh = shootMode == ShootMode.HUB ? 5 : 10;
+        double speedThresh = shootMode == ShootMode.HUB ? 100 : 300;
+        double angleThresh = shootMode == ShootMode.HUB ? 1.5 : 3;
 
         if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;

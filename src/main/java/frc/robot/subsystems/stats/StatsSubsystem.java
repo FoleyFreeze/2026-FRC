@@ -1,5 +1,7 @@
 package frc.robot.subsystems.stats;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -10,9 +12,6 @@ import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter.ShootMode;
-
-import static edu.wpi.first.units.Units.Meters;
-
 import org.littletonrobotics.junction.Logger;
 
 public class StatsSubsystem extends SubsystemBase {
@@ -35,13 +34,14 @@ public class StatsSubsystem extends SubsystemBase {
         double time = Timer.getFPGATimestamp();
         double dt = time - prevtime;
         prevtime = time;
-        
+
         ChassisSpeeds speed = r.drive.getChassisSpeeds();
-        double deltaDist = 
-        Math.sqrt(
-                speed.vxMetersPerSecond*speed.vxMetersPerSecond
-              + speed.vyMetersPerSecond*speed.vyMetersPerSecond) * dt
-              + Math.abs(speed.omegaRadiansPerSecond) * botRadius * dt;
+        double deltaDist =
+                Math.sqrt(
+                                        speed.vxMetersPerSecond * speed.vxMetersPerSecond
+                                                + speed.vyMetersPerSecond * speed.vyMetersPerSecond)
+                                * dt
+                        + Math.abs(speed.omegaRadiansPerSecond) * botRadius * dt;
         stats.totalTravelDist += deltaDist;
 
         stats.totalDistFLwheel += getWheelDistDelta(0);
@@ -49,38 +49,40 @@ public class StatsSubsystem extends SubsystemBase {
         stats.totalDistFLwheel += getWheelDistDelta(2);
         stats.totalDistFLwheel += getWheelDistDelta(3);
 
-        if(deltaDist > Units.inchesToMeters(2)){
+        if (deltaDist > Units.inchesToMeters(2)) {
             stats.totalTravelTime += dt;
         }
 
-        if(r.shooter.ballShotEdge){
+        if (r.shooter.ballShotEdge) {
             stats.totalBallShots++;
         }
 
-        if(r.shooter.shootMode == ShootMode.HUB){
+        if (r.shooter.shootMode == ShootMode.HUB) {
             stats.totalHubShootTime += dt;
-        } else if(r.shooter.shootMode == ShootMode.PASS){
+        } else if (r.shooter.shootMode == ShootMode.PASS) {
             stats.totalPassShootTime += dt;
         }
 
         stats.totalButtonsPressed += ConfigButtons.trackButtons();
 
-        //stats.totalDistanceClimbed;
-        //stats.totalClimbs;
+        // stats.totalDistanceClimbed;
+        // stats.totalClimbs;
 
         // stats.totalTurretFlips;
         // stats.totalTurretRotations;
 
-        if(DriverStation.isEnabled()){
-            //stats.totalEnabledBallImages;
+        if (DriverStation.isEnabled()) {
+            // stats.totalEnabledBallImages;
             stats.totalEnabledTagImages += r.vision.validImages;
         }
 
         Logger.recordOutput("Stats", stats);
     }
 
-    private double getWheelDistDelta(int idx){
-        double dist = r.drive.modules[idx].inputs.drivePositionRad * TunerConstants.kWheelRadius.in(Meters);
+    private double getWheelDistDelta(int idx) {
+        double dist =
+                r.drive.modules[idx].inputs.drivePositionRad
+                        * TunerConstants.kWheelRadius.in(Meters);
         double deltaDist = Math.abs(dist - prevWheelDist[idx]);
         prevWheelDist[idx] = dist;
         return deltaDist;

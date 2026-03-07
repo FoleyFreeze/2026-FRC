@@ -9,8 +9,8 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -38,7 +38,8 @@ public class IntakeIOHardware implements IntakeIO {
     private final VoltageOut voltageRequestWheel = new VoltageOut(0);
     private final VoltageOut voltageRequestArm = new VoltageOut(0);
 
-    private final VelocityTorqueCurrentFOC velocityRequestWheel = new VelocityTorqueCurrentFOC(0);
+    private final MotionMagicVelocityTorqueCurrentFOC velocityRequestWheel =
+            new MotionMagicVelocityTorqueCurrentFOC(0);
     private final PositionTorqueCurrentFOC positionRequestArm =
             new PositionTorqueCurrentFOC(0).withSlot(0);
     private final MotionMagicTorqueCurrentFOC motionRequestArm =
@@ -63,7 +64,14 @@ public class IntakeIOHardware implements IntakeIO {
         wheel = new TalonFX(3, TunerConstants.kCANBus);
         var cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        cfg.Slot0.kP = 14;
+        cfg.Slot0.kS = 10;
+        cfg.Slot0.kV = 0.17;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
+        cfg.MotionMagic.MotionMagicAcceleration = 180;
+        cfg.MotionMagic.MotionMagicJerk = 1000;
         wheel.getConfigurator().apply(cfg);
 
         intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);

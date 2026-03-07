@@ -19,12 +19,12 @@ public class Stats implements StructSerializable {
     double totalTurretFlips;
     double totalHubShootTime;
     double totalPassShootTime;
-    
+
     double totalButtonsPressed;
-    
+
     double totalDistanceClimbed;
     double totalClimbs;
-    
+
     double totalEnabledTagImages;
     double totalEnabledBallImages;
 

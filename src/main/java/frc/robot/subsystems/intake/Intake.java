@@ -1,6 +1,8 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -14,22 +16,17 @@ public class Intake extends SubsystemBase {
     private final IntakeIO io;
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
-    public enum IntakeMode {
-        EXTENDING,
-        RETRACTING,
-        HOLD_OUT,
-        HOLD_IN
-    }
-
-    private IntakeMode mode = IntakeMode.HOLD_IN;
-
     // positions in rotations
     private static final double armInPos = 0.25;
     private static final double armStartWheelPos = 0.11;
     private static final double armOutPos = 0.005;
     private static final double armTol = 0.04;
 
-    private static final double wheelSpeed = 0.7;
+    private static final double wheelSpeed = 2000; // rpm
+
+    //TODO: set false when we are allowed to use arm again
+    private boolean armDisabled = true;
+    private boolean overrideToSpinWheels = false;
 
     public static Intake create(RobotContainer r, IntakeIOSim iis) {
         if (isDisabled) {
@@ -54,53 +51,32 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
-
-        // control intake arm via main state machine
-        switch (mode) {
-            case EXTENDING:
-                io.armMotion(armOutPos);
-                // if(inputs.armPosition < armStartWheelPos){
-                //     io.wheelPower(wheelSpeed);
-                // } else {
-                io.wheelPower(wheelSpeed);
-                // }
-                if (Math.abs(inputs.armPosition - armOutPos) < armTol) {
-                    mode = IntakeMode.HOLD_OUT;
-                }
-                break;
-            case RETRACTING:
-                io.armMotion(armInPos);
-                // if(inputs.armPosition < armStartWheelPos){
-                //     io.wheelPower(wheelSpeed);
-                // } else {
-                io.wheelPower(0);
-                // }
-                if (Math.abs(inputs.armPosition - armInPos) < armTol) {
-                    mode = IntakeMode.HOLD_IN;
-                }
-                break;
-
-            case HOLD_IN:
-                // io.armAngle(armInPos);
-                io.armMotion(armInPos);
-                io.wheelPower(0);
-                break;
-            case HOLD_OUT:
-                // io.armAngle(armOutPos);
-                io.armMotion(armOutPos);
-                io.wheelPower(wheelSpeed);
-                break;
-        }
-
-        Logger.recordOutput("Intake/Mode", mode);
     }
 
     public void extend() {
-        mode = IntakeMode.EXTENDING;
+        io.armMotion(armOutPos);
+        overrideToSpinWheels =true;
     }
 
     public void retract() {
-        mode = IntakeMode.RETRACTING;
+        io.armMotion(armInPos);
+        overrideToSpinWheels =false;
+    }
+
+    public Command runIntake() {
+        return new RunCommand(
+                () -> {
+                if(!armDisabled || overrideToSpinWheels){
+                    if (inputs.armPosition <= armStartWheelPos) {
+                        io.wheelSpeed(wheelSpeed);
+                    } else {
+                        io.wheelPower(0);
+                    }
+                } else {
+                    io.wheelPower(0);
+                }
+            },
+                this);
     }
 
     public double getAngle() {

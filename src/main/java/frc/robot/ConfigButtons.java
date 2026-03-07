@@ -25,6 +25,7 @@ public class ConfigButtons {
                         () -> -controller.getRightX()));
         r.shooter.setDefaultCommand(r.shooter.stop());
         r.spindexter.setDefaultCommand(r.spindexter.stop());
+        r.intake.setDefaultCommand(r.intake.runIntake());
 
         // add drive over trench
         controller
@@ -55,6 +56,7 @@ public class ConfigButtons {
         // intake out M6
 
         controller.a().onTrue(new InstantCommand(r.intake::extend));
+
         controller
                 .b()
                 .debounce(0.2)
@@ -149,12 +151,12 @@ public class ConfigButtons {
 
     }
 
-    public static double trackButtons(){
+    public static double trackButtons() {
         double count = 0;
 
         int buttoncount = controller.getHID().getButtonCount();
-        for(int i=0;i<buttoncount;i++){
-            if(controller.getHID().getRawButtonPressed(0)){
+        for (int i = 0; i < buttoncount; i++) {
+            if (controller.getHID().getRawButtonPressed(0)) {
                 count++;
             }
         }

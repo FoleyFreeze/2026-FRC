@@ -21,6 +21,7 @@ public class Spindexter extends SubsystemBase {
     double gatePower = 0.7;
     double gateSpeed = 2000;
     double spinSpeed = 1500;
+    double spinUnjamSpeed = -2500;
 
     boolean spinLatch = false;
 
@@ -96,5 +97,9 @@ public class Spindexter extends SubsystemBase {
     public void unjam() {
         io.spinPower(unjam);
         io.gatePower(unjam);
+    }
+
+    public Command smartUnjam() {
+        return new RunCommand(() -> io.spinSpeed(spinUnjamSpeed));
     }
 }

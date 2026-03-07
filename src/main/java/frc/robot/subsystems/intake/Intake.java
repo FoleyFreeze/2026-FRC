@@ -24,7 +24,7 @@ public class Intake extends SubsystemBase {
 
     private static final double wheelSpeed = 2000; // rpm
 
-    //TODO: set false when we are allowed to use arm again
+    // TODO: set false when we are allowed to use arm again
     private boolean armDisabled = true;
     private boolean overrideToSpinWheels = false;
 
@@ -55,27 +55,27 @@ public class Intake extends SubsystemBase {
 
     public void extend() {
         io.armMotion(armOutPos);
-        overrideToSpinWheels =true;
+        overrideToSpinWheels = true;
     }
 
     public void retract() {
         io.armMotion(armInPos);
-        overrideToSpinWheels =false;
+        overrideToSpinWheels = false;
     }
 
     public Command runIntake() {
         return new RunCommand(
                 () -> {
-                if(!armDisabled || overrideToSpinWheels){
-                    if (inputs.armPosition <= armStartWheelPos) {
-                        io.wheelSpeed(wheelSpeed);
+                    if (!armDisabled || overrideToSpinWheels) {
+                        if (inputs.armPosition <= armStartWheelPos) {
+                            io.wheelSpeed(wheelSpeed);
+                        } else {
+                            io.wheelPower(0);
+                        }
                     } else {
                         io.wheelPower(0);
                     }
-                } else {
-                    io.wheelPower(0);
-                }
-            },
+                },
                 this);
     }
 

@@ -121,6 +121,14 @@ public class Shooter extends SubsystemBase {
         Logger.processInputs("Shooter", inputs);
 
         determineBallShot();
+
+        Logger.recordOutput(
+                "Shooter/Distance",
+                r.drive
+                        .getPose()
+                        .getTranslation()
+                        .plus(Constants.shooterLocOnBot.rotateBy(r.drive.getRotation()))
+                        .getDistance(FieldConstants.flipIfRed(FieldConstants.Hub.center)));
     }
 
     public double getTurretAngle() {
@@ -215,7 +223,7 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
-        Logger.recordOutput("Shooter/Distance", setpoints.dist());
+        Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
 
         hoodTarget = setpoints.hood();
         rpmTarget = setpoints.rpm();
@@ -254,7 +262,7 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
-        Logger.recordOutput("Shooter/Distance", setpoints.dist());
+        Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
 
         hoodTarget = setpoints.hood();
         rpmTarget = setpoints.rpm();
@@ -290,7 +298,7 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
-        Logger.recordOutput("Shooter/Distance", setpoints.dist());
+        Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
 
         hoodTarget = setpoints.hood();
         rpmTarget = setpoints.rpm();

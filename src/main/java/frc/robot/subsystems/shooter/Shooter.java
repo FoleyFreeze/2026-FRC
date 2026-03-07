@@ -119,6 +119,8 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Shooter", inputs);
+        
+        determineBallShot();
     }
 
     public double getTurretAngle() {
@@ -142,6 +144,9 @@ public class Shooter extends SubsystemBase {
                 () -> {
                     io.wheelPower(0);
                     io.setHoodAngle(maxHoodAngle);
+                    rpmTarget = 0;
+                    hoodTarget = maxHoodAngle;
+                    shootMode = ShootMode.MANUAL;
                 },
                 this);
     }
@@ -508,4 +513,37 @@ public class Shooter extends SubsystemBase {
 
         return turretAngle;
     }
+
+    public boolean ballShotEdge = false;
+    private double prevRpm = 0;
+    private boolean sharpDrop = false;
+    private void determineBallShot(){
+        //in general, look for:
+        //commanded velocity > 0
+        //velocity sharply drops
+        //velocity starts increasing again within 1-3 timesteps
+
+        if(rpmTarget > 100){
+            //if sharp drop
+            if(inputs.wheelVelocityRPM < rpmTarget - 150 &&
+               prevRpm > inputs.wheelVelocityRPM + 50){
+                sharpDrop = true;
+            }
+
+            //rpm increasing after sharp drop
+            if(sharpDrop && inputs.wheelVelocityRPM > prevRpm){
+                ballShotEdge = true;
+                sharpDrop = false;
+            } else {
+                ballShotEdge = false;
+            }
+
+            //remember prev rpm
+            prevRpm = inputs.wheelVelocityRPM;
+        } else {
+            ballShotEdge = false;
+            prevRpm = 0;
+            sharpDrop = false;
+        }
+    }   
 }

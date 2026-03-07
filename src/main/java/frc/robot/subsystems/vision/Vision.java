@@ -99,6 +99,8 @@ public class Vision extends SubsystemBase {
         return inputs[cameraIndex].latestTargetObservation.tx();
     }
 
+    public int validImages = 0;
+
     @Override
     public void periodic() {
         for (int i = 0; i < io.length; i++) {
@@ -199,6 +201,8 @@ public class Vision extends SubsystemBase {
             allRobotPoses.addAll(robotPoses);
             allRobotPosesAccepted.addAll(robotPosesAccepted);
             allRobotPosesRejected.addAll(robotPosesRejected);
+
+            validImages = allRobotPoses.size();
         }
 
         // Log summary data

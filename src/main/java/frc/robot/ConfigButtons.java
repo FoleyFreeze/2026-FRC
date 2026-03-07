@@ -148,4 +148,17 @@ public class ConfigButtons {
         // jogs (shoot speed, angle, etc)
 
     }
+
+    public static double trackButtons(){
+        double count = 0;
+
+        int buttoncount = controller.getHID().getButtonCount();
+        for(int i=0;i<buttoncount;i++){
+            if(controller.getHID().getRawButtonPressed(0)){
+                count++;
+            }
+        }
+
+        return count;
+    }
 }

@@ -35,7 +35,7 @@ public class Shooter extends SubsystemBase {
 
     private final ShooterInterp1d lerp = new ShooterInterp1d();
 
-    private double rpmTarget, hoodTarget, turretTarget, botAngleTarget;
+    public double rpmTarget, hoodTarget, turretTarget, botAngleTarget;
 
     public static final double minHoodAngle = 48;
     public static final double maxHoodAngle = 87;
@@ -464,8 +464,8 @@ public class Shooter extends SubsystemBase {
     public Command manualShoot(DoubleSupplier turretPower, DoubleSupplier hoodPower) {
         return new RunCommand(
                 () -> {
-                    io.hoodPower(hoodPower.getAsDouble());
-                    io.turretPower(turretPower.getAsDouble());
+                    // io.hoodPower(hoodPower.getAsDouble());
+                    // io.turretPower(turretPower.getAsDouble());
                 },
                 this);
     }
@@ -526,8 +526,8 @@ public class Shooter extends SubsystemBase {
 
         if (rpmTarget > 100) {
             // if sharp drop
-            if (inputs.wheelVelocityRPM < rpmTarget - 150
-                    && prevRpm > inputs.wheelVelocityRPM + 50) {
+            if (inputs.wheelVelocityRPM < rpmTarget - 250
+                    && prevRpm > inputs.wheelVelocityRPM + 150) {
                 sharpDrop = true;
             }
 

@@ -49,18 +49,18 @@ public class Vision extends SubsystemBase {
             case REAL:
                 return new Vision(
                         drive::addVisionMeasurement,
-                        new VisionIOLimelight("camera0Name", drive::getRotation),
-                        new VisionIOLimelight("camera1Name", drive::getRotation));
+                        new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+                        new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
 
             case SIM:
                 return new Vision(
                         drive::addVisionMeasurement,
                         new VisionIOPhotonVisionSim(
-                                "camera0Name",
+                                VisionConstants.camera0Name,
                                 new Transform3d(),
                                 driveSimulation::getSimulatedDriveTrainPose),
                         new VisionIOPhotonVisionSim(
-                                "camera1Name",
+                                VisionConstants.camera1Name,
                                 new Transform3d(),
                                 driveSimulation::getSimulatedDriveTrainPose));
 

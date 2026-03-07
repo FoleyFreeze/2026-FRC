@@ -110,9 +110,7 @@ public class ConfigButtons {
                                 .andThen(
                                         r.shooter
                                                 .manualShot()
-                                                .alongWith(
-                                                        r.spindexter.smartSpinCmd(
-                                                                r.shooter, r.drive))));
+                                                .alongWith(r.spindexter.smarterSpinCmd())));
 
         // select zero turret (reset to abs enc)
         // start+select full zero turret (reset to zero and ignore abs)
@@ -155,8 +153,8 @@ public class ConfigButtons {
         double count = 0;
 
         int buttoncount = controller.getHID().getButtonCount();
-        for (int i = 0; i < buttoncount; i++) {
-            if (controller.getHID().getRawButtonPressed(0)) {
+        for (int i = 1; i < buttoncount + 1; i++) {
+            if (controller.getHID().getRawButtonPressed(i)) {
                 count++;
             }
         }

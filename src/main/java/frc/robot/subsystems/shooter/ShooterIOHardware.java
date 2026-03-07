@@ -40,8 +40,8 @@ public class ShooterIOHardware implements ShooterIO {
     // total angle range of 32.4deg
     public static final double hoodMinAngle = 49.5; // deg
     public static final double hoodMaxAngle = 81.4;
-    public static final double hoodMinRot = 0.00525; // rotations
-    public static final double hoodMaxRot = 0.09575;
+    public static final double hoodMinRot = 0.001; // rotations
+    public static final double hoodMaxRot = 0.090;
 
     private final TalonFX wheel;
     private final TalonFX wheel2;
@@ -109,7 +109,7 @@ public class ShooterIOHardware implements ShooterIO {
         var encCfg = new CANcoderConfiguration();
         encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg.MagnetSensor.MagnetOffset = 0;
+        encCfg.MagnetSensor.MagnetOffset = 0.34228515625;
         hoodAbsEnc.getConfigurator().apply(encCfg);
 
         hood = new TalonFX(15, TunerConstants.kCANBus);

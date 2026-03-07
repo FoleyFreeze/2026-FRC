@@ -57,24 +57,26 @@ public class SpindexterIOHardware implements SpindexterIO {
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfg.Slot0.kP = 10;
+        cfg.Slot0.kP = 11;
         cfg.Slot0.kS = 10;
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-        cfg.MotionMagic.MotionMagicAcceleration = 180;
+        cfg.MotionMagic.MotionMagicAcceleration = 250;
+        cfg.MotionMagic.MotionMagicJerk = 1000;
         spin.getConfigurator().apply(cfg);
 
         gate = new TalonFX(17, TunerConstants.kCANBus);
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfg.Slot0.kP = 12;
+        cfg.Slot0.kP = 14;
         cfg.Slot0.kS = 10;
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-        cfg.MotionMagic.MotionMagicAcceleration = 120;
+        cfg.MotionMagic.MotionMagicAcceleration = 180;
+        cfg.MotionMagic.MotionMagicJerk = 1000;
         gate.getConfigurator().apply(cfg);
 
         positionSpin = spin.getPosition();
@@ -93,6 +95,9 @@ public class SpindexterIOHardware implements SpindexterIO {
                 50, positionSpin, voltageSpin, currentSpin, tempSpin, angularVelocitySpin);
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50, positionGate, voltageGate, currentGate, tempGate, angularVelocityGate);
+        // TODO: temporary
+        BaseStatusSignal.setUpdateFrequencyForAll(200, currentGate, currentSpin);
+
         ParentDevice.optimizeBusUtilizationForAll(spin);
         ParentDevice.optimizeBusUtilizationForAll(gate);
     }

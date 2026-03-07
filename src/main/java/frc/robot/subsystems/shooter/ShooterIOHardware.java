@@ -41,7 +41,7 @@ public class ShooterIOHardware implements ShooterIO {
     public static final double hoodMinAngle = 49.5; // deg
     public static final double hoodMaxAngle = 81.4;
     public static final double hoodMinRot = 0.00525; // rotations
-    public static final double hoodMaxRot = 0.09525;
+    public static final double hoodMaxRot = 0.09575;
 
     private final TalonFX wheel;
     private final TalonFX wheel2;
@@ -68,9 +68,11 @@ public class ShooterIOHardware implements ShooterIO {
     private final StatusSignal<Voltage> voltageHood;
     private StatusSignal<Voltage> voltageTurret;
     private final StatusSignal<Current> currentWheel;
+    private final StatusSignal<Current> currentWheel2;
     private final StatusSignal<Current> currentHood;
     private StatusSignal<Current> currentTurret;
     private final StatusSignal<Temperature> tempWheel;
+    private final StatusSignal<Temperature> tempWheel2;
     private final StatusSignal<Temperature> tempHood;
     private StatusSignal<Temperature> tempTurret;
     private final StatusSignal<AngularVelocity> angularVelocityWheel;
@@ -87,12 +89,13 @@ public class ShooterIOHardware implements ShooterIO {
         var cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfg.Slot0.kP = 10;
+        cfg.Slot0.kP = 11;
         cfg.Slot0.kS = 5;
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-        cfg.MotionMagic.MotionMagicAcceleration = 120;
+        cfg.MotionMagic.MotionMagicAcceleration = 180;
+        cfg.MotionMagic.MotionMagicJerk = 1000;
         wheel.getConfigurator().apply(cfg);
 
         wheel2 = new TalonFX(13, TunerConstants.kCANBus);
@@ -128,7 +131,7 @@ public class ShooterIOHardware implements ShooterIO {
             // TODO: cfg
 
             voltageTurret = turret.getMotorVoltage();
-            currentTurret = turret.getStatorCurrent();
+            currentTurret = turret.getTorqueCurrent();
             tempTurret = turret.getDeviceTemp();
             angularVelocityTurret = turret.getVelocity();
         }
@@ -137,13 +140,15 @@ public class ShooterIOHardware implements ShooterIO {
         positionHood = hood.getPosition();
         voltageWheel = wheel.getMotorVoltage();
         voltageHood = hood.getMotorVoltage();
-        currentWheel = wheel.getStatorCurrent();
-        currentHood = hood.getStatorCurrent();
+        currentWheel = wheel.getTorqueCurrent();
+        currentHood = hood.getTorqueCurrent();
         tempWheel = wheel.getDeviceTemp();
         tempHood = hood.getDeviceTemp();
         angularVelocityWheel = wheel.getVelocity();
         angularVelocityHood = hood.getVelocity();
         positionHoodAbs = hoodAbsEnc.getAbsolutePosition();
+        tempWheel2 = wheel2.getDeviceTemp();
+        currentWheel2 = wheel2.getTorqueCurrent();
 
         if (hasTurret) {
             BaseStatusSignal.setUpdateFrequencyForAll(
@@ -156,27 +161,36 @@ public class ShooterIOHardware implements ShooterIO {
             ParentDevice.optimizeBusUtilizationForAll(turret);
         }
 
+        BaseStatusSignal.setUpdateFrequencyForAll(200, currentWheel);
+
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50,
                 positionWheel,
                 positionHood,
                 voltageWheel,
                 voltageHood,
-                currentWheel,
                 currentHood,
                 tempWheel,
                 tempHood,
                 angularVelocityWheel,
                 angularVelocityHood,
-                positionHoodAbs);
-        ParentDevice.optimizeBusUtilizationForAll(wheel, hood, hoodAbsEnc);
+                positionHoodAbs,
+                currentWheel2,
+                tempWheel2);
+        ParentDevice.optimizeBusUtilizationForAll(wheel, wheel2, hood, hoodAbsEnc);
     }
 
     @Override
     public void updateInputs(ShooterIOInputs inputs) {
         StatusCode wheelStatus =
                 BaseStatusSignal.refreshAll(
-                        positionWheel, voltageWheel, currentWheel, tempWheel, angularVelocityWheel);
+                        positionWheel,
+                        voltageWheel,
+                        currentWheel,
+                        tempWheel,
+                        angularVelocityWheel,
+                        tempWheel2,
+                        currentWheel2);
         StatusCode hoodStatus =
                 BaseStatusSignal.refreshAll(
                         positionHood,
@@ -214,8 +228,11 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.wheelVelocityRPM = angularVelocityWheel.getValue().in(RevolutionsPerSecond) * 60;
         inputs.hoodVelocity = angularVelocityHood.getValue().in(DegreesPerSecond);
         inputs.hoodAbsEncRotations = positionHoodAbs.getValueAsDouble();
+        inputs.wheel2Temp = tempWheel2.getValueAsDouble();
+        inputs.wheel2Current = currentWheel2.getValueAsDouble();
 
         double rawHoodPosition = positionHood.getValue().in(Rotations);
+        inputs.hoodPositionRaw = rawHoodPosition;
         double t = MathUtil.inverseInterpolate(hoodMinRot, hoodMaxRot, rawHoodPosition);
         inputs.hoodPositionDeg = MathUtil.interpolate(hoodMinAngle, hoodMaxAngle, t);
     }

@@ -12,10 +12,14 @@ public interface ShooterIO {
         public double wheelVelocityRPM = 0;
         public double wheelTemp = 0;
 
+        public double wheel2Temp = 0;
+        public double wheel2Current = 0;
+
         public boolean hoodConnected = false;
         public double hoodVoltage = 0;
         public double hoodCurrent = 0;
         public double hoodPositionDeg = 0;
+        public double hoodPositionRaw = 0;
         public double hoodVelocity = 0;
         public double hoodTemp = 0;
 

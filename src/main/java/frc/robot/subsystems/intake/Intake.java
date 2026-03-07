@@ -24,9 +24,9 @@ public class Intake extends SubsystemBase {
     private IntakeMode mode = IntakeMode.HOLD_IN;
 
     // positions in rotations
-    private static final double armInPos = -0.005;
-    private static final double armStartWheelPos = -0.11;
-    private static final double armOutPos = -0.199;
+    private static final double armInPos = 0.25;
+    private static final double armStartWheelPos = 0.11;
+    private static final double armOutPos = 0.005;
     private static final double armTol = 0.04;
 
     private static final double wheelSpeed = 0.7;

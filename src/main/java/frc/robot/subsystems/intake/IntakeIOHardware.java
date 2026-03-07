@@ -69,7 +69,7 @@ public class IntakeIOHardware implements IntakeIO {
         intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);
         var encCfg = new CANcoderConfiguration();
         encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        encCfg.MagnetSensor.MagnetOffset = 0;
+        encCfg.MagnetSensor.MagnetOffset = -0.66;
         encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
         intakeAbsEnc.getConfigurator().apply(encCfg);
 

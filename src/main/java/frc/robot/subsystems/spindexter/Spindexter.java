@@ -22,6 +22,8 @@ public class Spindexter extends SubsystemBase {
     double gateSpeed = 2000;
     double spinSpeed = 1500;
 
+    boolean spinLatch = false;
+
     private final SpindexterIO io;
     private final SpindexterIOInputsAutoLogged inputs = new SpindexterIOInputsAutoLogged();
 
@@ -70,6 +72,7 @@ public class Spindexter extends SubsystemBase {
                 () -> {
                     io.spinPower(0);
                     io.gatePower(0);
+                    spinLatch = false;
                 },
                 this);
     }
@@ -82,12 +85,9 @@ public class Spindexter extends SubsystemBase {
         // io.gateSpeed(gateSpeed);
         double gateSetpoint = gateSet.getDouble(gateSpeed);
         io.gateSpeed(gateSetpoint);
-        if (r.shooter.wontMiss(r.drive.getPose()) && r.drive.wontMiss(r.shooter)) {
-            if (Math.abs(inputs.gateVelocity - gateSetpoint) < 100) {
-                io.spinSpeed(spinSet.getDouble(spinSpeed));
-            } else {
-                io.spinPower(0);
-            }
+        if (spinLatch || r.shooter.wontMiss(r.drive.getPose()) && r.drive.wontMiss(r.shooter)) {
+            spinLatch = true;
+            io.spinSpeed(spinSet.getDouble(spinSpeed));
         } else {
             io.spinPower(0);
         }

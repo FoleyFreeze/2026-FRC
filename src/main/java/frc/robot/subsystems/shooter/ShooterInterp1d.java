@@ -13,19 +13,17 @@ public class ShooterInterp1d {
     public static record DataPoint(
             double rpm, double angle, double hood, double time, double turretVel, double dist) {}
 
-    private static final double[] distAxis = {0, 1.524, 3.048, 4.572, 6.096};
-
-    private static final double[] distAxisPassing = {3, 6, 9, 12, 15, 18, 21};
-
-    // with modeled drag
-    private static final double[] rpmTableReal = {1507, 1794, 2021, 2314, 2874};
-    private static final double[] hoodAngleTableReal = {73.2, 58.7, 53.4, 50.8, 49.1};
-    private static final double[] timeTableReal = {0.58, 0.78, 0.96, 1.12, 1.27};
+    // based on quick testing
+    private static final double[] rpmTableReal = {2500, 2700, 3050};
+    private static final double[] hoodAngleTableReal = {70, 55, 49.5};
+    private static final double[] timeTableReal = {0.58, 0.78, 0.96};
+    private static final double[] distAxisReal = {1.317, 2.75, 3.54};
 
     // for sim without drag
     private static final double[] rpmTableSim = {2860, 3403, 3963, 4473, 4938};
     private static final double[] hoodAngleTableSim = {73.3, 59.2, 54.1, 51.6, 50.2};
     private static final double[] timeTableSim = {0.29, 0.42, 0.64, 0.85, 1.0};
+    private static final double[] distAxisSim = {0, 1.524, 3.048, 4.572, 6.096};
 
     // real passes with drag
     private static final double[] rpmTableRealPassing = {1000, 1600, 2200, 2800, 3400, 4000, 4600};
@@ -33,6 +31,7 @@ public class ShooterInterp1d {
     private static final double[] timeTableRealPassing = {
         0.214, 0.367, 0.527, 0.686, 0.854, 1.059, 1.19
     };
+    private static final double[] distAxisPassingReal = {3, 6, 9, 12, 15, 18, 21};
 
     // for sim passing
     private static final double[] rpmTableSimPassing = {2600, 3400, 4200, 5000, 6000, 7100, 8200};
@@ -40,30 +39,37 @@ public class ShooterInterp1d {
     private static final double[] timeTableSimPassing = {
         0.214, 0.367, 0.527, 0.686, 0.854, 1.059, 1.19
     };
+    private static final double[] distAxisPassingSim = {3, 6, 9, 12, 15, 18, 21};
 
     private static double[] rpmTable;
     private static double[] hoodAngleTable;
     private static double[] timeTable;
+    private static double[] distAxis;
 
     private static double[] rpmTablePass;
     private static double[] hoodAngleTablePass;
     private static double[] timeTablePass;
+    private static double[] distAxisPassing;
 
     public ShooterInterp1d() {
         if (Robot.isReal()) {
             rpmTable = rpmTableReal;
             hoodAngleTable = hoodAngleTableReal;
             timeTable = timeTableReal;
+            distAxis = distAxisReal;
             rpmTablePass = rpmTableRealPassing;
             hoodAngleTablePass = hoodAngleTableRealPassing;
             timeTablePass = timeTableRealPassing;
+            distAxisPassing = distAxisPassingReal;
         } else {
             rpmTable = rpmTableSim;
             hoodAngleTable = hoodAngleTableSim;
             timeTable = timeTableSim;
+            distAxis = distAxisSim;
             rpmTablePass = rpmTableSimPassing;
             hoodAngleTablePass = hoodAngleTableSimPassing;
             timeTablePass = timeTableSimPassing;
+            distAxisPassing = distAxisPassingSim;
         }
     }
 

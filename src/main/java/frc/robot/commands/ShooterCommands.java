@@ -66,7 +66,9 @@ public class ShooterCommands {
         Thing<Double> velocityThing = new Thing<>(); // thing2
 
         // complex use of debounce, but we are looking for if time has elapsed since shooting a ball
-        Debouncer shotDebounce = new Debouncer(0.75, DebounceType.kFalling);
+        double waitTimeBeforeUnjam = 0.75;
+        double unjamTime = 0.75;
+        Debouncer shotDebounce = new Debouncer(waitTimeBeforeUnjam, DebounceType.kFalling);
 
         // index sequence
         SequentialCommandGroup indexerSequence = new SequentialCommandGroup();
@@ -76,9 +78,10 @@ public class ShooterCommands {
         indexerSequence.addCommands(
                 r.spindexter
                         .smartSpinCmd(r.shooter, r.drive)
-                        .until(() -> shotDebounce.calculate(r.shooter.ballShotEdge)));
+                        .until(() -> !shotDebounce.calculate(r.shooter.ballShotEdge)));
         // then run the unjam sequence
-        indexerSequence.addCommands(r.spindexter.smartUnjam().withDeadline(new WaitCommand(0.5)));
+        indexerSequence.addCommands(
+                r.spindexter.smartUnjam().withDeadline(new WaitCommand(unjamTime)));
 
         // run shoot, drive, and index in parallel
         ParallelCommandGroup parallelGroup = new ParallelCommandGroup();

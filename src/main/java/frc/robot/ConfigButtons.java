@@ -1,10 +1,8 @@
 package frc.robot;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
@@ -25,7 +23,7 @@ public class ConfigButtons {
                         () -> -controller.getRightX()));
         r.shooter.setDefaultCommand(r.shooter.stop());
         r.spindexter.setDefaultCommand(r.spindexter.stop());
-        r.intake.setDefaultCommand(r.intake.runIntake());
+        r.intake.setDefaultCommand(r.intake.stopIntake());
 
         // add drive over trench
         controller
@@ -87,13 +85,23 @@ public class ConfigButtons {
         // shoot hub RT
         controller
                 .rightTrigger()
-                .whileTrue(ShooterCommands.smartShoot(r, controller, FieldConstants.Hub.center));
+                .whileTrue(ShooterCommands.smarterShoot(r, controller, FieldConstants.Hub.center));
 
         // set manual shot positions (X Y B)
 
+        // controller
+        //         .x()
+        //         .and(controller.leftTrigger())
+        //         .whileTrue(
+        //                 new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.CLIMB))
+        //                         .andThen(
+        //                                 r.shooter
+        //                                         .manualShot()
+        //                                         .alongWith(
+        //                                                 r.spindexter.smartSpinCmd(
+        //                                                         r.shooter, r.drive))));
         controller
-                .x()
-                .and(controller.leftTrigger())
+                .povDown()
                 .whileTrue(
                         new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.CLIMB))
                                 .andThen(
@@ -102,9 +110,18 @@ public class ConfigButtons {
                                                 .alongWith(
                                                         r.spindexter.smartSpinCmd(
                                                                 r.shooter, r.drive))));
+        // controller
+        //         .y()
+        //         .and(controller.leftTrigger())
+        //         .whileTrue(
+        //                 new InstantCommand(() ->
+        // r.shooter.setManualGoal(ManualShotLoc.FRONT_HUB))
+        //                         .andThen(
+        //                                 r.shooter
+        //                                         .manualShot()
+        //                                         .alongWith(r.spindexter.smarterSpinCmd())));
         controller
-                .y()
-                .and(controller.leftTrigger())
+                .povUp()
                 .whileTrue(
                         new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.FRONT_HUB))
                                 .andThen(
@@ -117,36 +134,37 @@ public class ConfigButtons {
 
         // climb functions
         // dpad + X drive then climb
-        controller
-                .x()
-                .and(controller.povLeft())
-                .whileTrue(
-                        ClimbCommands.autoClimb(
-                                r,
-                                () ->
-                                        FieldConstants.flipIfRed(
-                                                FieldConstants.Locations.towerLeftFrontPose2d),
-                                Units.inchesToMeters(12)));
-        controller
-                .x()
-                .and(controller.povRight())
-                .whileTrue(
-                        ClimbCommands.autoClimb(
-                                r,
-                                () ->
-                                        FieldConstants.flipIfRed(
-                                                FieldConstants.Locations.towerRightFrontPose2d),
-                                Units.inchesToMeters(12)));
+        // controller
+        //         .x()
+        //         .and(controller.povLeft())
+        //         .whileTrue(
+        //                 ClimbCommands.autoClimb(
+        //                         r,
+        //                         () ->
+        //                                 FieldConstants.flipIfRed(
+        //                                         FieldConstants.Locations.towerLeftFrontPose2d),
+        //                         Units.inchesToMeters(12)));
+        // controller
+        //         .x()
+        //         .and(controller.povRight())
+        //         .whileTrue(
+        //                 ClimbCommands.autoClimb(
+        //                         r,
+        //                         () ->
+        //                                 FieldConstants.flipIfRed(
+        //                                         FieldConstants.Locations.towerRightFrontPose2d),
+        //                         Units.inchesToMeters(12)));
         // dpad just climb
-        controller.povUp().whileTrue(r.climber.autoExtendCmd());
+        // controller.povUp().whileTrue(r.climber.autoExtendCmd());
 
         // dpad down to declimb
-        controller.povDown().onTrue(ClimbCommands.autoDown(r));
+        // controller.povDown().onTrue(ClimbCommands.autoDown(r));
 
         // operator board
         // mode sw (idk what we want this to do yet)
         // jogs (shoot speed, angle, etc)
 
+        controller.leftTrigger().whileTrue(r.intake.smartIntake());
     }
 
     public static double trackButtons() {

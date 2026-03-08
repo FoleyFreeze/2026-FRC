@@ -65,19 +65,19 @@ public class IntakeIOHardware implements IntakeIO {
         var cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfg.Slot0.kP = 14;
-        cfg.Slot0.kS = 10;
-        cfg.Slot0.kV = 0.17;
-        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
-        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-        cfg.MotionMagic.MotionMagicAcceleration = 180;
+        cfg.Slot0.kP = 12;
+        cfg.Slot0.kS = 4;
+        cfg.Slot0.kV = 0.01;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 50;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -50;
+        cfg.MotionMagic.MotionMagicAcceleration = 250;
         cfg.MotionMagic.MotionMagicJerk = 1000;
         wheel.getConfigurator().apply(cfg);
 
         intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);
         var encCfg = new CANcoderConfiguration();
         encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        encCfg.MagnetSensor.MagnetOffset = -0.66;
+        encCfg.MagnetSensor.MagnetOffset = -0.67;
         encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
         intakeAbsEnc.getConfigurator().apply(encCfg);
 
@@ -85,20 +85,20 @@ public class IntakeIOHardware implements IntakeIO {
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 80;
-        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -25;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 50;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -50;
         cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         cfg.Feedback.FeedbackRemoteSensorID = 2;
         cfg.Feedback.RotorToSensorRatio = 52.0 / 16.0 * 52.0 / 24.0 * 54.0 / 18.0;
         cfg.Feedback.SensorToMechanismRatio = 38.0 / 22.0;
         cfg.Slot1.GravityType = GravityTypeValue.Arm_Cosine;
-        cfg.Slot1.GravityArmPositionOffset = 0.2;
-        cfg.Slot1.kG = 40;
-        cfg.Slot1.kP = 120;
+        cfg.Slot1.GravityArmPositionOffset = 0.0;
+        cfg.Slot1.kG = 0;
+        cfg.Slot1.kP = 800;
         cfg.Slot1.kD = 5;
         cfg.Slot1.kV = 0;
-        cfg.Slot1.kA = 20;
-        cfg.MotionMagic.MotionMagicCruiseVelocity = 0.1;
+        cfg.Slot1.kA = 60;
+        cfg.MotionMagic.MotionMagicCruiseVelocity = 0.2;
         cfg.MotionMagic.MotionMagicAcceleration = 0.5;
         intakeBar.getConfigurator().apply(cfg);
 
@@ -165,7 +165,7 @@ public class IntakeIOHardware implements IntakeIO {
 
     @Override
     public void wheelSpeed(double speed) {
-        wheel.setControl(velocityRequestWheel.withVelocity(speed));
+        wheel.setControl(velocityRequestWheel.withVelocity(speed / 60));
     }
 
     @Override
@@ -180,6 +180,6 @@ public class IntakeIOHardware implements IntakeIO {
 
     @Override
     public void armMotion(double rotations) {
-        // intakeBar.setControl(motionRequestArm.withPosition(rotations));
+        intakeBar.setControl(motionRequestArm.withPosition(rotations));
     }
 }

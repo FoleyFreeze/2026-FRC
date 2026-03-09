@@ -57,11 +57,9 @@ public class ConfigButtons {
 
         controller
                 .b()
-                .debounce(0.2)
                 .onTrue(
                         new InstantCommand(
-                                r.intake::retract)); // require holding button but only for a tiny
-        // bit
+                                r.intake::retract));
 
         // camera gather M5
         // unjam back

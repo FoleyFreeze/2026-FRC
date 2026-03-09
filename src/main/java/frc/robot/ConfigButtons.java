@@ -85,7 +85,17 @@ public class ConfigButtons {
         // shoot hub RT
         controller
                 .rightTrigger()
-                .whileTrue(ShooterCommands.smarterShoot(r, controller, FieldConstants.Hub.center));
+                .and(controller.leftTrigger().negate())
+                .whileTrue(
+                        ShooterCommands.smarterShootNoGather(
+                                r, controller, FieldConstants.Hub.center));
+
+        controller
+                .rightTrigger()
+                .and(controller.leftTrigger())
+                .whileTrue(
+                        ShooterCommands.smarterShootAndGather(
+                                r, controller, FieldConstants.Hub.center));
 
         // set manual shot positions (X Y B)
 
@@ -164,7 +174,10 @@ public class ConfigButtons {
         // mode sw (idk what we want this to do yet)
         // jogs (shoot speed, angle, etc)
 
-        controller.leftTrigger().whileTrue(r.intake.smartIntake());
+        controller
+                .leftTrigger()
+                .and(controller.rightTrigger().negate())
+                .whileTrue(r.intake.smartIntake());
     }
 
     public static double trackButtons() {

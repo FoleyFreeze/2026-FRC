@@ -22,9 +22,9 @@ public class Intake extends SubsystemBase {
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
     // positions in rotations
-    private static final double armInPos = 0.681; // 0.793;
+    private static final double armInPos = 0.09; // 0.18;
     private static final double armStartWheelPos = 0.61;
-    private static final double armOutPos = 0.566;
+    private static final double armOutPos = -0.019; // intentionally below zero
     private static final double armTol = 0.04;
 
     private static final double wheelSpeed = 1500; // rpm
@@ -123,7 +123,7 @@ public class Intake extends SubsystemBase {
     public Command smartIntake() {
         // using same debounce logic as for shooter unjam
         double waitTimeBeforeUnjam = 0.75;
-        double unjamTime = 0.5;
+        double unjamTime = 0.75;
         double rpmOffset = 400;
         Debouncer intakeDebounce = new Debouncer(waitTimeBeforeUnjam, DebounceType.kRising);
 

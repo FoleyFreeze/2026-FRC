@@ -18,7 +18,7 @@ import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ShooterCommands.Thing;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
-import frc.robot.util.Util;
+import frc.robot.util.Util2;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -320,7 +320,7 @@ public class Shooter extends SubsystemBase {
 
     public void manageTurretWrap(double angle, double velocity) {
         double trueAngle = angle - Constants.turretAngleOffset;
-        double normAngle = Util.floorMod(trueAngle, 360);
+        double normAngle = Util2.floorMod(trueAngle, 360);
         double delta = normAngle - (inputs.turretPositionDeg % 360);
 
         double shortDelta;

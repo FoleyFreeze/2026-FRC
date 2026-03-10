@@ -55,11 +55,7 @@ public class ConfigButtons {
 
         controller.a().onTrue(new InstantCommand(r.intake::extend));
 
-        controller
-                .b()
-                .onTrue(
-                        new InstantCommand(
-                                r.intake::retract));
+        controller.b().onTrue(new InstantCommand(r.intake::retract));
 
         // camera gather M5
         // unjam back

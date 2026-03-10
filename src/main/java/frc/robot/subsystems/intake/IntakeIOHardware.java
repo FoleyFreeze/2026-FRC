@@ -71,14 +71,14 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 50;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -50;
         cfg.MotionMagic.MotionMagicAcceleration = 250;
-        cfg.MotionMagic.MotionMagicJerk = 1000;
+        cfg.MotionMagic.MotionMagicJerk = 1500;
         wheel.getConfigurator().apply(cfg);
 
         intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);
         var encCfg = new CANcoderConfiguration();
         encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         encCfg.MagnetSensor.MagnetOffset = -0.67;
-        encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
+        encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.7;
         intakeAbsEnc.getConfigurator().apply(encCfg);
 
         intakeBar = new TalonFX(2, TunerConstants.kCANBus);
@@ -95,11 +95,11 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.Slot1.GravityArmPositionOffset = 0.0;
         cfg.Slot1.kG = 0;
         cfg.Slot1.kP = 800;
-        cfg.Slot1.kD = 5;
+        cfg.Slot1.kD = 10;
         cfg.Slot1.kV = 0;
-        cfg.Slot1.kA = 60;
-        cfg.MotionMagic.MotionMagicCruiseVelocity = 0.2;
-        cfg.MotionMagic.MotionMagicAcceleration = 0.5;
+        cfg.Slot1.kA = 30;
+        cfg.MotionMagic.MotionMagicCruiseVelocity = 0.5;
+        cfg.MotionMagic.MotionMagicAcceleration = 1;
         intakeBar.getConfigurator().apply(cfg);
 
         positionWheel = wheel.getPosition();

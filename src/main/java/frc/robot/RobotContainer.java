@@ -43,7 +43,7 @@ public class RobotContainer {
     // Subsystems
     public final Drive drive;
     public final Vision vision;
-    public final FuelVision fuelVision;
+    public FuelVision fuelVision;
     public final Spindexter spindexter;
     public final Shooter shooter;
     public final Intake intake;
@@ -76,7 +76,7 @@ public class RobotContainer {
         stats = new StatsSubsystem(this);
         drive = Drive.create(this, driveSimulation);
         vision = Vision.create(this, drive, driveSimulation);
-        fuelVision = FuelVision.create(this);
+        // fuelVision = FuelVision.create(this);
         spindexter = Spindexter.create(this, spinSim);
         shooter = Shooter.create(this, shootSim);
         intake = Intake.create(this, iis);

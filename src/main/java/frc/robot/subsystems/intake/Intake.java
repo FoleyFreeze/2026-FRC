@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
@@ -22,7 +21,7 @@ public class Intake extends SubsystemBase {
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
     // positions in rotations
-    private static final double armInPos = 0.09; // 0.18;
+    private static final double armInPos = 0.18;
     private static final double armStartWheelPos = 0.61;
     private static final double armOutPos = -0.019; // intentionally below zero
     private static final double armTol = 0.04;
@@ -122,9 +121,9 @@ public class Intake extends SubsystemBase {
 
     public Command smartIntake() {
         // using same debounce logic as for shooter unjam
-        double waitTimeBeforeUnjam = 0.75;
-        double unjamTime = 0.75;
-        double rpmOffset = 400;
+        double waitTimeBeforeUnjam = 1.0;
+        double unjamTime = 0.4;
+        double rpmOffset = 1000;
         Debouncer intakeDebounce = new Debouncer(waitTimeBeforeUnjam, DebounceType.kRising);
 
         var intakeSequence = new SequentialCommandGroup();
@@ -136,9 +135,16 @@ public class Intake extends SubsystemBase {
                                         intakeDebounce.calculate(
                                                 Math.abs(velSetpoint - inputs.wheelVelocity)
                                                         > rpmOffset)));
-        intakeSequence.addCommands(unjamIntake().withDeadline(new WaitCommand(unjamTime)));
+        intakeSequence.addCommands(
+                unjamIntake().withTimeout(unjamTime).until(() -> inputs.wheelVelocity < -200));
 
-        return intakeSequence.repeatedly();
+        return intakeSequence
+                .repeatedly()
+                // this uses a higher current limit for open loop control to help it get started
+                .beforeStarting(
+                        new RunCommand(() -> io.wheelPower(1))
+                                .withTimeout(0.75)
+                                .until(() -> inputs.wheelVelocity > velSetpoint));
     }
 
     public double getAngle() {

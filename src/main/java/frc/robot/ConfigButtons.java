@@ -59,7 +59,11 @@ public class ConfigButtons {
 
         // camera gather M5
         // unjam back
-        controller.back().whileTrue(new RunCommand(() -> r.spindexter.unjam(), r.spindexter));
+        controller
+                .back()
+                .whileTrue(
+                        new RunCommand(() -> r.spindexter.unjam(), r.spindexter)
+                                .alongWith(r.intake.unjamIntake()));
 
         // shoot functions
         // pass left LB

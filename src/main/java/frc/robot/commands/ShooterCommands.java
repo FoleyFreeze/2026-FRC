@@ -87,7 +87,7 @@ public class ShooterCommands {
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.extend()));
         shakeTheIntake.addCommands(new WaitCommand(1.5));
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.retract()));
-        shakeTheIntake.addCommands(new WaitCommand(1.5));
+        shakeTheIntake.addCommands(new WaitCommand(0.75));
 
         // run shoot, drive, and index in parallel
         ParallelCommandGroup parallelGroup = new ParallelCommandGroup();
@@ -100,8 +100,8 @@ public class ShooterCommands {
         parallelGroup.addCommands(
                 DriveCommands.driveAtAngleFFw(
                         r.drive,
-                        () -> -controller.getLeftY(),
-                        () -> -controller.getLeftX(),
+                        () -> -controller.getLeftY() * 0.87, // 0.87 is 0.7^2.5
+                        () -> -controller.getLeftX() * 0.87,
                         rotationThing,
                         velocityThing));
         parallelGroup.addCommands(indexerSequence.repeatedly());

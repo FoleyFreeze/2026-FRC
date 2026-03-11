@@ -68,10 +68,12 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.Slot0.kP = 12;
         cfg.Slot0.kS = 4;
         cfg.Slot0.kV = 0.01;
-        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 50;
-        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -50;
-        cfg.MotionMagic.MotionMagicAcceleration = 250;
-        cfg.MotionMagic.MotionMagicJerk = 1500;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 60;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -60;
+        cfg.MotionMagic.MotionMagicAcceleration = 600;
+        cfg.MotionMagic.MotionMagicJerk = 0;
+        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+        cfg.CurrentLimits.StatorCurrentLimit = 120;
         wheel.getConfigurator().apply(cfg);
 
         intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);

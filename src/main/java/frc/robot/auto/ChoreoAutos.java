@@ -5,9 +5,15 @@ import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
+import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.util.Util2;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -69,5 +75,53 @@ public class ChoreoAutos {
         r.drive.runVelocity(speeds);
     }
 
-    public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {}
+    public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
+        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
+        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
+        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
+        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
+        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
+    }
+
+    public Command buildLeftDoubleScoop() {
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        // first drop the intake as fast as possible
+        sequence.addCommands(r.intake.fastDrop());
+        // drive the profile while intaking
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("circleleft.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+        // shoot the balls while driving to the second start point
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, null, FieldConstants.Hub.center)
+                        .withTimeout(10)
+                        .alongWith(
+                                DriveCommands.driveToPoint(
+                                                r,
+                                                () ->
+                                                        FieldConstants.flipIfRed(
+                                                                FieldConstants.Locations
+                                                                        .trenchLeftStart
+                                                                        .plus(
+                                                                                new Transform2d(
+                                                                                        1.5,
+                                                                                        0,
+                                                                                        Rotation2d
+                                                                                                .kZero))))
+                                        .andThen(
+                                                DriveCommands.driveToPoint(
+                                                        r,
+                                                        () ->
+                                                                FieldConstants.flipIfRed(
+                                                                        FieldConstants.Locations
+                                                                                .trenchLeftStart)))));
+        // drive the second profile while intaking
+        parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("circleleft2.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+        // shoot again for the remaining time
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, null, FieldConstants.Hub.center));
+        return sequence;
+    }
 }

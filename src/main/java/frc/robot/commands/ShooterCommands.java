@@ -97,13 +97,16 @@ public class ShooterCommands {
                                 r.shooter.newPrime(
                                         target, r.drive.getPose(), rotationThing, velocityThing),
                         r.shooter));
-        parallelGroup.addCommands(
-                DriveCommands.driveAtAngleFFw(
-                        r.drive,
-                        () -> -controller.getLeftY() * 0.87, // 0.87 is 0.7^2.5
-                        () -> -controller.getLeftX() * 0.87,
-                        rotationThing,
-                        velocityThing));
+        // only drive if a controller was provided
+        if (controller != null) {
+            parallelGroup.addCommands(
+                    DriveCommands.driveAtAngleFFw(
+                            r.drive,
+                            () -> -controller.getLeftY() * 0.87, // 0.87 is 0.7^2.5
+                            () -> -controller.getLeftX() * 0.87,
+                            rotationThing,
+                            velocityThing));
+        }
         parallelGroup.addCommands(indexerSequence.repeatedly());
         parallelGroup.addCommands(shakeTheIntake.repeatedly());
         parallelGroup.addCommands(r.intake.smartIntake());

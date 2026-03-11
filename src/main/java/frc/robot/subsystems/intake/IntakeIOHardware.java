@@ -102,6 +102,8 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.Slot1.kA = 30;
         cfg.MotionMagic.MotionMagicCruiseVelocity = 0.5;
         cfg.MotionMagic.MotionMagicAcceleration = 1;
+        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+        cfg.CurrentLimits.StatorCurrentLimit = 60;
         intakeBar.getConfigurator().apply(cfg);
 
         positionWheel = wheel.getPosition();

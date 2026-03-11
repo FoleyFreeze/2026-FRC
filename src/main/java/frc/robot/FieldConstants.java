@@ -101,6 +101,10 @@ public class FieldConstants {
                         Tower.towerRightFront.getX(),
                         Tower.towerRightFront.getY() - Constants.robotLength / 2,
                         Rotation2d.fromDegrees(-90));
+
+        public static Pose2d trenchLeftStart = new Pose2d(4.15, 7.41, Rotation2d.k180deg);
+        public static Pose2d trenchRightStart =
+                new Pose2d(4.15, fieldWidth - 7.41, Rotation2d.k180deg);
     }
 
     // flip a red coord to blue or blue to red

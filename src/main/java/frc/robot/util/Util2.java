@@ -3,7 +3,7 @@ package frc.robot.util;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
-public class Util {
+public class Util2 {
 
     public static double floorMod(double a, double b) {
         // the google ai suggestion

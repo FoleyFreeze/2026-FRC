@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
-import frc.robot.util.Util;
+import frc.robot.util.Util2;
 import org.littletonrobotics.junction.Logger;
 
 public class ChoreoAutos {
@@ -62,7 +62,7 @@ public class ChoreoAutos {
         speeds =
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                         speeds,
-                        Util.isRedAlliance()
+                        Util2.isRedAlliance()
                                 ? r.drive.getRotation().plus(new Rotation2d(Math.PI))
                                 : r.drive.getRotation());
         r.drive.runVelocity(speeds);

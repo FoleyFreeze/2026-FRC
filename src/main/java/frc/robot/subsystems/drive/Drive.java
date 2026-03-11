@@ -47,7 +47,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShootMode;
 import frc.robot.util.LocalADStarAK;
-import frc.robot.util.Util;
+import frc.robot.util.Util2;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -464,7 +464,7 @@ public class Drive extends SubsystemBase {
 
     public void zeroDrive() {
         Rotation2d zero = Rotation2d.kZero;
-        if (Util.isRedAlliance()) {
+        if (Util2.isRedAlliance()) {
             zero = Rotation2d.k180deg;
         }
         poseEstimator.resetRotation(zero);
@@ -519,13 +519,13 @@ public class Drive extends SubsystemBase {
 
     public Rotation2d getBumpAngle() {
         Rotation2d botAngle = getRotation();
-        double targetAngle = Util.wrapAngle(botAngle.getDegrees() + 45, 90) - 45;
+        double targetAngle = Util2.wrapAngle(botAngle.getDegrees() + 45, 90) - 45;
         return Rotation2d.fromDegrees(targetAngle);
     }
 
     public Rotation2d getTrenchAngle() {
         Rotation2d botAngle = getRotation();
-        double targetAngle = Util.wrapAngle(botAngle.getDegrees(), 90);
+        double targetAngle = Util2.wrapAngle(botAngle.getDegrees(), 90);
         return Rotation2d.fromDegrees(targetAngle);
     }
 }

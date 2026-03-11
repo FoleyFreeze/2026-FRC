@@ -12,8 +12,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
 import frc.robot.auto.ChoreoAutos;
+import frc.robot.commands.DriveTuning;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.fuelvision.FuelVision;
@@ -66,6 +68,7 @@ public class RobotContainer {
             driveSimulation =
                     new SwerveDriveSimulation(
                             Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+            SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
             spinSim = new SpindexterIOSim();
             iis = new IntakeIOSim(driveSimulation);
             shootSim = new ShooterIOSim(iis, driveSimulation, spinSim);
@@ -90,29 +93,26 @@ public class RobotContainer {
 
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         // Set up auto routines
-        // autoChooser = new LoggedDashboardChooser<>("Auto Choices",
-        // AutoBuilder.buildAutoChooser());
-        // autoChooser.addOption("TestAutoLeft", chAutos.loadTraj("TestAutoLeft"));
+        chAutos.buildAutos(autoChooser);
 
-        // // Set up SysId routines
-        // autoChooser.addOption(
-        //         "Drive Wheel Radius Characterization",
-        //         DriveTuning.wheelRadiusCharacterization(drive));
-        // autoChooser.addOption(
-        //         "Drive Simple FF Characterization",
-        // DriveTuning.feedforwardCharacterization(drive));
-        // autoChooser.addOption(
-        //         "Drive SysId (Quasistatic Forward)",
-        //         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        // autoChooser.addOption(
-        //         "Drive SysId (Quasistatic Reverse)",
-        //         drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        // autoChooser.addOption(
-        //         "Drive SysId (Dynamic Forward)",
-        //         drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        // autoChooser.addOption(
-        //         "Drive SysId (Dynamic Reverse)",
-        //         drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        // Set up SysId routines
+        autoChooser.addOption(
+                "Drive Wheel Radius Characterization",
+                DriveTuning.wheelRadiusCharacterization(drive));
+        autoChooser.addOption(
+                "Drive Simple FF Characterization", DriveTuning.feedforwardCharacterization(drive));
+        autoChooser.addOption(
+                "Drive SysId (Quasistatic Forward)",
+                drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+                "Drive SysId (Quasistatic Reverse)",
+                drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption(
+                "Drive SysId (Dynamic Forward)",
+                drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+                "Drive SysId (Dynamic Reverse)",
+                drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
         ConfigButtons.config(this);
     }

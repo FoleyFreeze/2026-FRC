@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.util.Util2;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class ChoreoAutos {
     RobotContainer r;
@@ -67,4 +68,6 @@ public class ChoreoAutos {
                                 : r.drive.getRotation());
         r.drive.runVelocity(speeds);
     }
+
+    public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {}
 }

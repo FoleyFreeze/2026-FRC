@@ -82,10 +82,6 @@ public class ChoreoAutos {
                         r,
                         () -> r.drive.getPose().plus(new Transform2d(3, 0, Rotation2d.k180deg))));
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
-        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
-        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
-        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
-        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
     }
 
     public Command buildLeftDoubleScoop() {

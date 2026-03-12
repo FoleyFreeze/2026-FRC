@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -115,6 +116,8 @@ public class RobotContainer {
                 drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
         ConfigButtons.config(this);
+
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     /**

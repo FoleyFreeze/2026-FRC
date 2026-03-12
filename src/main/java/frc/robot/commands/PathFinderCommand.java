@@ -19,6 +19,8 @@ public class PathFinderCommand extends Command {
     public PathFinderCommand(RobotContainer r, Supplier<Pose2d> poseSupplier) {
         this.r = r;
         this.poseSupplier = poseSupplier;
+
+        this.addRequirements(r.drive);
     }
 
     @Override

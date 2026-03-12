@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.PathFinderCommand;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.util.Util2;
 import org.littletonrobotics.junction.Logger;
@@ -74,6 +75,12 @@ public class ChoreoAutos {
     }
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
+
+        autoChooser.addOption(
+                "TestMode",
+                new PathFinderCommand(
+                        r,
+                        () -> r.drive.getPose().plus(new Transform2d(3, 0, Rotation2d.k180deg))));
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());

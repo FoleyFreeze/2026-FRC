@@ -18,11 +18,11 @@ public class Intake extends SubsystemBase {
     public static final boolean isDisabled = false;
 
     private final IntakeIO io;
-    private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+    public final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
     // positions in rotations
     private static final double armInPos = 0.18;
-    private static final double armStartWheelPos = 0.61;
+    public static final double armStartWheelPos = 0.07;
     private static final double armOutPos = -0.019; // intentionally below zero
     private static final double armWontHitTrenchPos = 0;
     private static final double armTol = 0.04;
@@ -145,13 +145,12 @@ public class Intake extends SubsystemBase {
         intakeSequence.addCommands(
                 unjamIntake().withTimeout(unjamTime).until(() -> inputs.wheelVelocity < -200));
 
-        return intakeSequence
-                .repeatedly()
-                // this uses a higher current limit for open loop control to help it get started
-                .beforeStarting(
-                        new RunCommand(() -> io.wheelPower(1))
-                                .withTimeout(0.75)
-                                .until(() -> inputs.wheelVelocity > velSetpoint));
+        return intakeSequence.repeatedly()
+        // this uses a higher current limit for open loop control to help it get started
+        /*.beforeStarting(
+        new RunCommand(() -> io.wheelPower(1))
+                .withTimeout(0.5)
+                .until(() -> inputs.wheelVelocity > velSetpoint))*/ ;
     }
 
     public double getAngle() {

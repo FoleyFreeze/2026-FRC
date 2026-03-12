@@ -16,7 +16,7 @@ public class ConfigButtons {
 
         // drive functions
         r.drive.setDefaultCommand(
-                DriveCommands.joystickDrive(
+                DriveCommands.joystickDriveTurnOut(
                         r.drive,
                         () -> -controller.getLeftY(),
                         () -> -controller.getLeftX(),

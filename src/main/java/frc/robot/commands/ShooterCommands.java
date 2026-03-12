@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -65,29 +63,12 @@ public class ShooterCommands {
         Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
         Thing<Double> velocityThing = new Thing<>(); // thing2
 
-        // complex use of debounce, but we are looking for if time has elapsed since shooting a ball
-        double waitTimeBeforeUnjam = 0.75;
-        double unjamTime = 0.75;
-        Debouncer shotDebounce = new Debouncer(waitTimeBeforeUnjam, DebounceType.kFalling);
-
-        // index sequence
-        SequentialCommandGroup indexerSequence = new SequentialCommandGroup();
-        // first reset debouncer as if we have just made a shot
-        indexerSequence.addCommands(new InstantCommand(() -> shotDebounce.calculate(true)));
-        // then run indexer until it gets jammed
-        indexerSequence.addCommands(
-                r.spindexter
-                        .smartSpinCmd(r.shooter, r.drive)
-                        .until(() -> !shotDebounce.calculate(r.shooter.ballShotEdge)));
-        // then run the unjam sequence
-        indexerSequence.addCommands(
-                r.spindexter.smartUnjam().withDeadline(new WaitCommand(unjamTime)));
-
         SequentialCommandGroup shakeTheIntake = new SequentialCommandGroup();
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.extend()));
+        shakeTheIntake.addCommands(r.intake.stopIntake());
         shakeTheIntake.addCommands(new WaitCommand(1.5));
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.retract()));
-        shakeTheIntake.addCommands(new WaitCommand(0.75));
+        shakeTheIntake.addCommands(r.intake.smartIntake().withTimeout(0.75));
 
         // run shoot, drive, and index in parallel
         ParallelCommandGroup parallelGroup = new ParallelCommandGroup();
@@ -107,9 +88,8 @@ public class ShooterCommands {
                             rotationThing,
                             velocityThing));
         }
-        parallelGroup.addCommands(indexerSequence.repeatedly());
+        parallelGroup.addCommands(r.spindexter.smarterSpinCmd());
         parallelGroup.addCommands(shakeTheIntake.repeatedly());
-        parallelGroup.addCommands(r.intake.smartIntake());
 
         return parallelGroup;
     }
@@ -118,24 +98,6 @@ public class ShooterCommands {
             RobotContainer r, CommandXboxController controller, Translation2d target) {
         Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
         Thing<Double> velocityThing = new Thing<>(); // thing2
-
-        // complex use of debounce, but we are looking for if time has elapsed since shooting a ball
-        double waitTimeBeforeUnjam = 0.75;
-        double unjamTime = 0.75;
-        Debouncer shotDebounce = new Debouncer(waitTimeBeforeUnjam, DebounceType.kFalling);
-
-        // index sequence
-        SequentialCommandGroup indexerSequence = new SequentialCommandGroup();
-        // first reset debouncer as if we have just made a shot
-        indexerSequence.addCommands(new InstantCommand(() -> shotDebounce.calculate(true)));
-        // then run indexer until it gets jammed
-        indexerSequence.addCommands(
-                r.spindexter
-                        .smartSpinCmd(r.shooter, r.drive)
-                        .until(() -> !shotDebounce.calculate(r.shooter.ballShotEdge)));
-        // then run the unjam sequence
-        indexerSequence.addCommands(
-                r.spindexter.smartUnjam().withDeadline(new WaitCommand(unjamTime)));
 
         // run shoot, drive, and index in parallel
         ParallelCommandGroup parallelGroup = new ParallelCommandGroup();
@@ -148,11 +110,11 @@ public class ShooterCommands {
         parallelGroup.addCommands(
                 DriveCommands.driveAtAngleFFw(
                         r.drive,
-                        () -> -controller.getLeftY(),
-                        () -> -controller.getLeftX(),
+                        () -> -controller.getLeftY() * 0.87, // 0.87 is 0.7^2.5
+                        () -> -controller.getLeftX() * 0.87,
                         rotationThing,
                         velocityThing));
-        parallelGroup.addCommands(indexerSequence.repeatedly());
+        parallelGroup.addCommands(r.spindexter.smarterSpinCmd());
         parallelGroup.addCommands(r.intake.smartIntake());
 
         return parallelGroup;

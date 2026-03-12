@@ -75,7 +75,7 @@ public class ChoreoAutos {
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
-        autoChooser.addOption("LeftDoubleScoopTrench", buildTrenchLeftDoubleScoop());
+        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());

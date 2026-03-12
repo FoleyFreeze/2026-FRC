@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
@@ -90,6 +89,7 @@ public class Spindexter extends SubsystemBase {
     public Command smarterSpinCmd() {
         // complex use of debounce, but we are looking for if time has elapsed since shooting a ball
         Debouncer shotDebounce = new Debouncer(0.75, DebounceType.kFalling);
+        double unjamTime = 0.15;
 
         // index sequence
         SequentialCommandGroup indexerSequence = new SequentialCommandGroup();
@@ -99,9 +99,12 @@ public class Spindexter extends SubsystemBase {
         indexerSequence.addCommands(
                 r.spindexter
                         .smartSpinCmd(r.shooter, r.drive)
-                        .until(() -> !shotDebounce.calculate(r.shooter.ballShotEdge)));
+                        .until(
+                                () ->
+                                        !shotDebounce.calculate(
+                                                r.shooter.ballShotEdge || !spinLatch)));
         // then run the unjam sequence
-        indexerSequence.addCommands(r.spindexter.smartUnjam().withDeadline(new WaitCommand(0.5)));
+        indexerSequence.addCommands(r.spindexter.smartUnjam().withTimeout(unjamTime));
 
         return indexerSequence.repeatedly();
     }
@@ -120,7 +123,8 @@ public class Spindexter extends SubsystemBase {
             spinLatch = true;
             io.spinSpeed(spinSet.getDouble(spinSpeed));
         } else {
-            io.spinPower(0);
+            // io.spinPower(0);
+            io.spinSpeed(-500);
         }
     }
 

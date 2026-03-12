@@ -62,8 +62,8 @@ public class SpindexterIOHardware implements SpindexterIO {
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-        cfg.MotionMagic.MotionMagicAcceleration = 250;
-        cfg.MotionMagic.MotionMagicJerk = 1000;
+        cfg.MotionMagic.MotionMagicAcceleration = 280;
+        cfg.MotionMagic.MotionMagicJerk = 1500;
         spin.getConfigurator().apply(cfg);
 
         gate = new TalonFX(17, TunerConstants.kCANBus);

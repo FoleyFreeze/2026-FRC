@@ -44,6 +44,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.ShootMode;
 import frc.robot.util.LocalADStarAK;
@@ -314,6 +315,7 @@ public class Drive extends SubsystemBase {
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
     }
 
+    Translation2d rotationPoint = new Translation2d(Units.inchesToMeters(8), 0);
     /**
      * Runs the drive at the desired velocity.
      *
@@ -322,7 +324,34 @@ public class Drive extends SubsystemBase {
     public void runVelocity(ChassisSpeeds speeds) {
         // Calculate module setpoints
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+        SwerveModuleState[] setpointStates;
+        setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
+
+        // Log unoptimized setpoints and setpoint speeds
+        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+
+        // Send setpoints to modules
+        for (int i = 0; i < 4; i++) {
+            modules[i].runSetpoint(setpointStates[i]);
+        }
+
+        // Log optimized setpoints (runSetpoint mutates each state)
+        Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+
+    public void runVelocityTurnOut(ChassisSpeeds speeds) {
+        // Calculate module setpoints
+        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+        SwerveModuleState[] setpointStates;
+        if (r.intake.inputs.armPosition < Intake.armStartWheelPos) {
+            setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds, rotationPoint);
+        } else {
+            setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+        }
+
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
         // Log unoptimized setpoints and setpoint speeds

@@ -69,15 +69,13 @@ public class ChoreoAutos {
         speeds =
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                         speeds,
-                        Util2.isRedAlliance()
-                                ? r.drive.getRotation().plus(new Rotation2d(Math.PI))
-                                : r.drive.getRotation());
+                        r.drive.getRotation());
         r.drive.runVelocity(speeds);
     }
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
-        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
+        autoChooser.addOption("LeftDoubleScoopTrench", buildTrenchLeftDoubleScoop());
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
@@ -115,6 +113,32 @@ public class ChoreoAutos {
                                                                 FieldConstants.flipIfRed(
                                                                         FieldConstants.Locations
                                                                                 .trenchLeftStart)))));
+        // drive the second profile while intaking
+        parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("circleleft2.traj"), r.intake.smartIntake());
+        sequence.addCommands(r.intake.fastDrop());
+        sequence.addCommands(parallelGroup);
+        // shoot again for the remaining time
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, null, FieldConstants.Hub.center));
+        return sequence;
+    }
+
+    public Command buildTrenchLeftDoubleScoop() {
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        // first drop the intake as fast as possible
+        sequence.addCommands(r.intake.fastDrop());
+        // drive the profile while intaking
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("lefttrench.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+        // shoot the balls while driving to the second start point
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, null, FieldConstants.Hub.center)
+                        .withTimeout(10));
+        sequence.addCommands(r.intake.fastDrop());
+
+        sequence.addCommands(DriveCommands.driveToPoint(r,() ->FieldConstants.flipIfRed(FieldConstants.Locations.trenchLeftStart)));
         // drive the second profile while intaking
         parallelGroup =
                 new ParallelDeadlineGroup(loadTraj("circleleft2.traj"), r.intake.smartIntake());

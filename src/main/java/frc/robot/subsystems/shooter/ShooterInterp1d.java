@@ -48,7 +48,6 @@ public class ShooterInterp1d {
     2550 188 308
     2400 172 255
     2200 148 183
-
     */
 
     // for sim passing
@@ -299,10 +298,19 @@ public class ShooterInterp1d {
     }
 
     public DataPoint getPass(Translation2d goal, Pose2d pos, ChassisSpeeds vel) {
-        return getReps(
-                goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass, timeTablePass);
-        // return getHV(
-        //         goal, pos, vel, distAxisPassing, rpmTablePass, hoodAngleTablePass,
-        // timeTablePass);
+        DataPoint data =
+                getReps(
+                        goal,
+                        pos,
+                        vel,
+                        distAxisPassing,
+                        rpmTablePass,
+                        hoodAngleTablePass,
+                        timeTablePass);
+
+        // create one of 2 passes depending on control board input
+        // if(ConfigButtons.driveStation.button(0))
+
+        return data;
     }
 }

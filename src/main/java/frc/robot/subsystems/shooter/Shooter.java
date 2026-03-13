@@ -40,6 +40,13 @@ public class Shooter extends SubsystemBase {
     public static final double minHoodAngle = 48;
     public static final double maxHoodAngle = 87;
 
+    private double jogHubRpm = 0;
+    private double jogHubAngle = 0;
+    private double jogPassRpm = 0;
+    private double jogPassAngle = 0;
+    private double jogRpmAmount = 25;
+    private double jogAngleAmount = 2;
+
     public static enum ShootMode {
         HUB,
         PASS,
@@ -113,6 +120,11 @@ public class Shooter extends SubsystemBase {
         rpmSet.getDouble(0);
         hoodSet.setDouble(55);
         hoodSet.getDouble(0);
+
+        Logger.recordOutput("Jogs/HubRpm", jogHubRpm);
+        Logger.recordOutput("Jogs/PassRpm", jogPassRpm);
+        Logger.recordOutput("Jogs/HubAngle", jogHubAngle);
+        Logger.recordOutput("Jogs/PassAngle", jogPassAngle);
     }
 
     @Override
@@ -554,5 +566,69 @@ public class Shooter extends SubsystemBase {
             prevRpm = 0;
             sharpDrop = false;
         }
+    }
+
+    public Command jogHubRpmUp() {
+        return new InstantCommand(
+                () -> {
+                    jogHubRpm += jogRpmAmount;
+                    Logger.recordOutput("Jogs/HubRpm", jogHubRpm);
+                });
+    }
+
+    public Command jogHubRpmDn() {
+        return new InstantCommand(
+                () -> {
+                    jogHubRpm -= jogRpmAmount;
+                    Logger.recordOutput("Jogs/HubRpm", jogHubRpm);
+                });
+    }
+
+    public Command jogPassRpmUp() {
+        return new InstantCommand(
+                () -> {
+                    jogPassRpm += jogRpmAmount;
+                    Logger.recordOutput("Jogs/PassRpm", jogPassRpm);
+                });
+    }
+
+    public Command jogPassRpmDn() {
+        return new InstantCommand(
+                () -> {
+                    jogPassRpm -= jogRpmAmount;
+                    Logger.recordOutput("Jogs/PassRpm", jogPassRpm);
+                });
+    }
+
+    public Command jogHubAngleUp() {
+        return new InstantCommand(
+                () -> {
+                    jogHubAngle += jogAngleAmount;
+                    Logger.recordOutput("Jogs/HubAngle", jogHubAngle);
+                });
+    }
+
+    public Command jogHubAngleDn() {
+        return new InstantCommand(
+                () -> {
+                    jogHubAngle -= jogAngleAmount;
+                    Logger.recordOutput("Jogs/HubAngle", jogHubAngle);
+                });
+    }
+
+    public Command jogPassAngleUp() {
+        return new InstantCommand(
+                () -> {
+                    jogPassAngle += jogAngleAmount;
+                    Logger.recordOutput("Jogs/PassAngle", jogPassAngle);
+                });
+    }
+
+    public Command jogPassAngleDn() {
+        return new InstantCommand(
+                () -> {
+                    jogPassAngle -= jogAngleAmount;
+                    Logger.recordOutput("Jogs/PassAngle", jogPassAngle);
+                });
     }
 }

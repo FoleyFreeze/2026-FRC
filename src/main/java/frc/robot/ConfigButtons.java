@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
@@ -11,6 +12,9 @@ public class ConfigButtons {
 
     // Controller
     private static final CommandXboxController controller = new CommandXboxController(0);
+    public static final CommandJoystick driveStation = new CommandJoystick(3);
+    private static final CommandJoystick driveStation2 = new CommandJoystick(4);
+    // note that xbox controller takes the first 3 spots
 
     public static void config(RobotContainer r) {
 
@@ -56,6 +60,12 @@ public class ConfigButtons {
         controller.a().onTrue(new InstantCommand(r.intake::extend));
 
         controller.b().onTrue(new InstantCommand(r.intake::retract));
+
+        // intake spin
+        controller
+                .leftTrigger()
+                .and(controller.rightTrigger().negate())
+                .whileTrue(r.intake.smartIntake());
 
         // camera gather M5
         // unjam back
@@ -175,10 +185,39 @@ public class ConfigButtons {
         // mode sw (idk what we want this to do yet)
         // jogs (shoot speed, angle, etc)
 
-        controller
-                .leftTrigger()
-                .and(controller.rightTrigger().negate())
-                .whileTrue(r.intake.smartIntake());
+        // driveStation
+        //         .axisLessThan(1, -0.5)
+        //         .and(driveStation2.button(12))
+        //         .onTrue(r.shooter.jogPassRpmUp());
+        // driveStation
+        //         .axisLessThan(1, -0.5)
+        //         .and(driveStation2.button(12).negate())
+        //         .onTrue(r.shooter.jogHubRpmUp());
+        // driveStation
+        //         .axisGreaterThan(1, 0.5)
+        //         .and(driveStation2.button(12))
+        //         .onTrue(r.shooter.jogPassRpmDn());
+        // driveStation
+        //         .axisGreaterThan(1, 0.5)
+        //         .and(driveStation2.button(12).negate())
+        //         .onTrue(r.shooter.jogHubRpmDn());
+
+        // driveStation
+        //         .axisLessThan(0, -0.5)
+        //         .and(driveStation2.button(12))
+        //         .onTrue(r.shooter.jogPassAngleDn());
+        // driveStation
+        //         .axisLessThan(0, -0.5)
+        //         .and(driveStation2.button(12).negate())
+        //         .onTrue(r.shooter.jogHubAngleDn());
+        // driveStation
+        //         .axisGreaterThan(0, 0.5)
+        //         .and(driveStation2.button(12))
+        //         .onTrue(r.shooter.jogPassAngleUp());
+        // driveStation
+        //         .axisGreaterThan(0, 0.5)
+        //         .and(driveStation2.button(12).negate())
+        //         .onTrue(r.shooter.jogHubAngleUp());
     }
 
     public static double trackButtons() {

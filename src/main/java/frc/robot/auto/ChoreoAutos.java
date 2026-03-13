@@ -31,8 +31,8 @@ public class ChoreoAutos {
         autoFactory =
                 new AutoFactory(
                         r.drive::getPose, // A function that returns the current robot pose
-                        (pose) -> {}, //dont reset the pose for now
-                        //r.drive::setPose, // A function that resets the current robot pose to the
+                        (pose) -> {}, // dont reset the pose for now
+                        // r.drive::setPose, // A function that resets the current robot pose to the
                         // provided Pose2d
                         this::followTrajectory, // The drive subsystem trajectory follower
                         true, // If alliance flipping should be enabled
@@ -172,7 +172,7 @@ public class ChoreoAutos {
         return sequence;
     }
 
-public Command buildTrenchRightDoubleScoop() {
+    public Command buildTrenchRightDoubleScoop() {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible
         sequence.addCommands(r.intake.fastDrop());
@@ -199,21 +199,37 @@ public Command buildTrenchRightDoubleScoop() {
         return sequence;
     }
 
-    private Command buildSitStillAndShoot(){
+    private Command buildSitStillAndShoot() {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
-                sequence.addCommands(
+        sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
                         .withTimeout(8));
         return sequence;
     }
 
-    private Command buildShootWithDepot(){
+    private Command buildShootWithDepot() {
         double offset = Units.inchesToMeters(27);
         SequentialCommandGroup sequence = new SequentialCommandGroup();
-        sequence.addCommands(new PathFinderCommand(r, ()->new Pose2d(FieldConstants.Locations.depot, Rotation2d.k180deg)));
+        sequence.addCommands(
+                new PathFinderCommand(
+                        r, () -> new Pose2d(FieldConstants.Locations.depot, Rotation2d.k180deg)));
         sequence.addCommands(r.intake.fastDrop());
-        sequence.addCommands(new ParallelDeadlineGroup(DriveCommands.driveToPoint(r, ()-> r.drive.getPose().plus(new Transform2d(Units.inchesToMeters(offset+Constants.robotLength/2.0),0.0,Rotation2d.kZero)))));
+        sequence.addCommands(
+                new ParallelDeadlineGroup(
+                        DriveCommands.driveToPoint(
+                                r,
+                                () ->
+                                        r.drive
+                                                .getPose()
+                                                .plus(
+                                                        new Transform2d(
+                                                                Units.inchesToMeters(
+                                                                        offset
+                                                                                + Constants
+                                                                                                .robotLength
+                                                                                        / 2.0),
+                                                                0.0,
+                                                                Rotation2d.kZero)))));
         return sequence;
     }
-
 }

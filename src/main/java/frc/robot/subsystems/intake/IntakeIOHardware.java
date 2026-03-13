@@ -87,8 +87,8 @@ public class IntakeIOHardware implements IntakeIO {
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 50;
-        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -50;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 60;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -60;
         cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         cfg.Feedback.FeedbackRemoteSensorID = 2;
         cfg.Feedback.RotorToSensorRatio = 52.0 / 16.0 * 52.0 / 24.0 * 54.0 / 18.0;

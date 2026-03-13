@@ -14,10 +14,11 @@ public class ShooterInterp1d {
             double rpm, double angle, double hood, double time, double turretVel, double dist) {}
 
     // based on quick testing
-    private static final double[] rpmTableReal = {2500, 2700, 3050};
-    private static final double[] hoodAngleTableReal = {70, 55, 49.5};
-    private static final double[] timeTableReal = {0.58, 0.78, 0.96};
-    private static final double[] distAxisReal = {1.317, 2.75, 3.54};
+    private static final double[] rpmTableReal = {2500, 2700, 3050, 3200, 3400, 3600, 3800, 4000};
+    private static final double[] hoodAngleTableReal = {70, 55, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5};
+    private static final double[] timeTableReal = {0.58, 0.78, 0.91, 1.04, 1.30, 1.37, 1.44, 1.50};
+    private static final double[] distAxisReal = {1.317, 2.75, 3.54, 3.91, 4.42, 5.03, 5.18, 5.79};
+    //                                                         139in 154in 180in 204in 17ft  19ft
 
     // for sim without drag
     private static final double[] rpmTableSim = {2860, 3403, 3963, 4473, 4938};
@@ -32,6 +33,23 @@ public class ShooterInterp1d {
         0.214, 0.367, 0.527, 0.686, 0.854, 1.059, 1.19
     };
     private static final double[] distAxisPassingReal = {3, 6, 9, 12, 15, 18, 21};
+    // 49.5 for all
+    // pairs
+    /*3750rpm, 247in landed, 141in roll
+    3700 244 102
+    3600 238 134
+    3400 233 189
+    3200 232 218
+    3000 218 260
+    2800 201 300
+    2650 195 339
+    2600 190 352
+    2600 188 368
+    2550 188 308
+    2400 172 255
+    2200 148 183
+
+    */
 
     // for sim passing
     private static final double[] rpmTableSimPassing = {2600, 3400, 4200, 5000, 6000, 7100, 8200};

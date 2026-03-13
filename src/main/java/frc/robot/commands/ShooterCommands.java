@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class ShooterCommands {
@@ -59,16 +60,17 @@ public class ShooterCommands {
     }
 
     public static Command smarterShootNoGather(
-            RobotContainer r, CommandXboxController controller, Translation2d target) {
+            RobotContainer r, DoubleSupplier driveX, DoubleSupplier driveY, Translation2d target) {
         Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
         Thing<Double> velocityThing = new Thing<>(); // thing2
 
         SequentialCommandGroup shakeTheIntake = new SequentialCommandGroup();
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.extend()));
         shakeTheIntake.addCommands(r.intake.stopIntake());
-        shakeTheIntake.addCommands(new WaitCommand(1.5));
+        shakeTheIntake.addCommands(new WaitCommand(0.35));
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.retract()));
-        shakeTheIntake.addCommands(r.intake.smartIntake().withTimeout(0.75));
+        shakeTheIntake.addCommands(r.intake.smartIntake().withTimeout(1.5));
+        Command shakeCommand = shakeTheIntake.repeatedly().finallyDo(() -> r.intake.extend());
 
         // run shoot, drive, and index in parallel
         ParallelCommandGroup parallelGroup = new ParallelCommandGroup();
@@ -78,18 +80,11 @@ public class ShooterCommands {
                                 r.shooter.newPrime(
                                         target, r.drive.getPose(), rotationThing, velocityThing),
                         r.shooter));
-        // only drive if a controller was provided
-        if (controller != null) {
-            parallelGroup.addCommands(
-                    DriveCommands.driveAtAngleFFw(
-                            r.drive,
-                            () -> -controller.getLeftY() * 0.87, // 0.87 is 0.7^2.5
-                            () -> -controller.getLeftX() * 0.87,
-                            rotationThing,
-                            velocityThing));
-        }
+        parallelGroup.addCommands(
+                DriveCommands.driveAtAngleFFw(
+                        r.drive, driveX, driveY, rotationThing, velocityThing));
         parallelGroup.addCommands(r.spindexter.smarterSpinCmd());
-        parallelGroup.addCommands(shakeTheIntake.repeatedly());
+        parallelGroup.addCommands(shakeCommand);
 
         return parallelGroup;
     }

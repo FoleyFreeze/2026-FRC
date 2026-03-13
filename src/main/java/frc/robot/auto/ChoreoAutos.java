@@ -15,7 +15,6 @@ import frc.robot.RobotContainer;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.PathFinderCommand;
 import frc.robot.commands.ShooterCommands;
-import frc.robot.util.Util2;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -67,10 +66,7 @@ public class ChoreoAutos {
                                         pose.getRotation().getRadians(), sample.heading));
 
         // Apply the generated speeds
-        speeds =
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        speeds,
-                        r.drive.getRotation());
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, r.drive.getRotation());
         r.drive.runVelocity(speeds);
     }
 
@@ -79,8 +75,23 @@ public class ChoreoAutos {
         autoChooser.addOption(
                 "TestMode",
                 new PathFinderCommand(
-                        r,
-                        () -> r.drive.getPose().plus(new Transform2d(3, 0, Rotation2d.k180deg))));
+                                r,
+                                () ->
+                                        r.drive
+                                                .getPose()
+                                                .plus(new Transform2d(3, 0, Rotation2d.k180deg)))
+                        .andThen(
+                                ShooterCommands.smarterShootNoGather(
+                                                r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                                        .withTimeout(10)
+                                        .finallyDo(
+                                                () -> {
+                                                    r.shooter.stop().execute();
+                                                    r.spindexter.stop().execute();
+                                                    r.intake.extend();
+                                                    r.intake.stopIntake().execute();
+                                                })));
+
         autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
     }
 
@@ -94,28 +105,28 @@ public class ChoreoAutos {
         sequence.addCommands(parallelGroup);
         // shoot the balls while driving to the second start point
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, null, FieldConstants.Hub.center)
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
                         .withTimeout(10)
-                        .alongWith(
+                /*.alongWith(
+                DriveCommands.driveToPoint(
+                                r,
+                                () ->
+                                        FieldConstants.flipIfRed(
+                                                FieldConstants.Locations
+                                                        .trenchLeftStart
+                                                        .plus(
+                                                                new Transform2d(
+                                                                        1.5,
+                                                                        0,
+                                                                        Rotation2d
+                                                                                .kZero))))
+                        .andThen(
                                 DriveCommands.driveToPoint(
-                                                r,
-                                                () ->
-                                                        FieldConstants.flipIfRed(
-                                                                FieldConstants.Locations
-                                                                        .trenchLeftStart
-                                                                        .plus(
-                                                                                new Transform2d(
-                                                                                        1.5,
-                                                                                        0,
-                                                                                        Rotation2d
-                                                                                                .kZero))))
-                                        .andThen(
-                                                DriveCommands.driveToPoint(
-                                                        r,
-                                                        () ->
-                                                                FieldConstants.flipIfRed(
-                                                                        FieldConstants.Locations
-                                                                                .trenchLeftStart)))));
+                                        r,
+                                        () ->
+                                                FieldConstants.flipIfRed(
+                                                        FieldConstants.Locations
+                                                                .trenchLeftStart))))*/ );
         // drive the second profile while intaking
         parallelGroup =
                 new ParallelDeadlineGroup(loadTraj("circleleft2.traj"), r.intake.smartIntake());
@@ -123,7 +134,8 @@ public class ChoreoAutos {
         sequence.addCommands(parallelGroup);
         // shoot again for the remaining time
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, null, FieldConstants.Hub.center));
+                ShooterCommands.smarterShootNoGather(
+                        r, () -> 0, () -> 0, FieldConstants.Hub.center));
         return sequence;
     }
 
@@ -137,18 +149,22 @@ public class ChoreoAutos {
         sequence.addCommands(parallelGroup);
         // shoot the balls while driving to the second start point
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, null, FieldConstants.Hub.center)
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
                         .withTimeout(10));
         sequence.addCommands(r.intake.fastDrop());
 
-        sequence.addCommands(DriveCommands.driveToPoint(r,() ->FieldConstants.flipIfRed(FieldConstants.Locations.trenchLeftStart)));
+        sequence.addCommands(
+                DriveCommands.driveToPoint(
+                        r,
+                        () -> FieldConstants.flipIfRed(FieldConstants.Locations.trenchLeftStart)));
         // drive the second profile while intaking
         parallelGroup =
                 new ParallelDeadlineGroup(loadTraj("circleleft2.traj"), r.intake.smartIntake());
         sequence.addCommands(parallelGroup);
         // shoot again for the remaining time
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, null, FieldConstants.Hub.center));
+                ShooterCommands.smarterShootNoGather(
+                        r, () -> 0, () -> 0, FieldConstants.Hub.center));
         return sequence;
     }
 }

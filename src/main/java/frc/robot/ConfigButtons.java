@@ -20,7 +20,7 @@ public class ConfigButtons {
                         r.drive,
                         () -> -controller.getLeftY(),
                         () -> -controller.getLeftX(),
-                        () -> -controller.getRightX()));
+                        () -> -controller.getRightX() * 0.75));
         r.shooter.setDefaultCommand(r.shooter.stop());
         r.spindexter.setDefaultCommand(r.spindexter.stop());
         r.intake.setDefaultCommand(r.intake.stopIntake());
@@ -31,8 +31,8 @@ public class ConfigButtons {
                 .whileTrue(
                         DriveCommands.joystickDriveAtAngle(
                                 r.drive,
-                                () -> -controller.getLeftY(),
-                                () -> -controller.getLeftX(),
+                                () -> -controller.getLeftY() * 0.65,
+                                () -> -controller.getLeftX() * 0.65,
                                 r.drive::getTrenchAngle));
         // add drive through bump
         controller
@@ -40,8 +40,8 @@ public class ConfigButtons {
                 .whileTrue(
                         DriveCommands.joystickDriveAtAngle(
                                 r.drive,
-                                () -> -controller.getLeftY(),
-                                () -> -controller.getLeftX(),
+                                () -> -controller.getLeftY() * 0.65,
+                                () -> -controller.getLeftX() * 0.65,
                                 r.drive::getBumpAngle));
 
         // zero drive
@@ -60,7 +60,7 @@ public class ConfigButtons {
         // camera gather M5
         // unjam back
         controller
-                .back()
+                .x()
                 .whileTrue(
                         new RunCommand(() -> r.spindexter.unjam(), r.spindexter)
                                 .alongWith(r.intake.unjamIntake()));
@@ -86,7 +86,10 @@ public class ConfigButtons {
                 .and(controller.leftTrigger().negate())
                 .whileTrue(
                         ShooterCommands.smarterShootNoGather(
-                                r, controller, FieldConstants.Hub.center));
+                                r,
+                                () -> -controller.getLeftY() * 0.87,
+                                () -> -controller.getLeftX() * 0.87,
+                                FieldConstants.Hub.center));
 
         controller
                 .rightTrigger()

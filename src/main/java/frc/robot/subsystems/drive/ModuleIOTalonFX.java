@@ -13,11 +13,11 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -57,7 +57,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     // Voltage control requests
     protected final VoltageOut voltageRequest = new VoltageOut(0);
     protected final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
-    protected final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
+    protected final MotionMagicVelocityVoltage velocityVoltageRequest =
+            new MotionMagicVelocityVoltage(0.0);
 
     // Torque-current control requests
     protected final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
@@ -111,6 +112,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        driveConfig.MotionMagic.MotionMagicAcceleration = 14;
         driveConfig.MotorOutput.Inverted =
                 constants.DriveMotorInverted
                         ? InvertedValue.Clockwise_Positive

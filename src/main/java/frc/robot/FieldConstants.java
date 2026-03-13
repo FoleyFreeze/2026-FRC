@@ -105,6 +105,7 @@ public class FieldConstants {
         public static Pose2d trenchLeftStart = new Pose2d(4.15, 7.41, Rotation2d.k180deg);
         public static Pose2d trenchRightStart =
                 new Pose2d(4.15, fieldWidth - 7.41, Rotation2d.k180deg);
+        public static Translation2d depot = new Translation2d(Constants.robotLength+Units.inchesToMeters(27),fieldWidth*3/4.0);
     }
 
     // flip a red coord to blue or blue to red

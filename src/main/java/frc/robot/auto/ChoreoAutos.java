@@ -7,9 +7,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveCommands;
@@ -29,7 +31,8 @@ public class ChoreoAutos {
         autoFactory =
                 new AutoFactory(
                         r.drive::getPose, // A function that returns the current robot pose
-                        r.drive::setPose, // A function that resets the current robot pose to the
+                        (pose) -> {}, //dont reset the pose for now
+                        //r.drive::setPose, // A function that resets the current robot pose to the
                         // provided Pose2d
                         this::followTrajectory, // The drive subsystem trajectory follower
                         true, // If alliance flipping should be enabled
@@ -92,7 +95,10 @@ public class ChoreoAutos {
                                                     r.intake.stopIntake().execute();
                                                 })));
 
-        autoChooser.addOption("LeftDoubleScoopBump", buildLeftDoubleScoop());
+        autoChooser.addOption("LeftTrenchDoubleScoop", buildTrenchLeftDoubleScoop());
+        autoChooser.addOption("RightTrenchDoubleScoop", buildTrenchRightDoubleScoop());
+        autoChooser.addOption("JustShoot", buildSitStillAndShoot());
+        autoChooser.addOption("LeftBumpDoubleScoop", buildLeftDoubleScoop());
     }
 
     public Command buildLeftDoubleScoop() {
@@ -147,24 +153,67 @@ public class ChoreoAutos {
         ParallelDeadlineGroup parallelGroup =
                 new ParallelDeadlineGroup(loadTraj("lefttrench.traj"), r.intake.smartIntake());
         sequence.addCommands(parallelGroup);
-        // shoot the balls while driving to the second start point
+
+        // shoot the balls while stationary
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(10));
+                        .withTimeout(8));
         sequence.addCommands(r.intake.fastDrop());
 
-        sequence.addCommands(
-                DriveCommands.driveToPoint(
-                        r,
-                        () -> FieldConstants.flipIfRed(FieldConstants.Locations.trenchLeftStart)));
         // drive the second profile while intaking
         parallelGroup =
-                new ParallelDeadlineGroup(loadTraj("circleleft2.traj"), r.intake.smartIntake());
+                new ParallelDeadlineGroup(loadTraj("trenchleft_pt2.traj"), r.intake.smartIntake());
         sequence.addCommands(parallelGroup);
+
         // shoot again for the remaining time
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(
                         r, () -> 0, () -> 0, FieldConstants.Hub.center));
         return sequence;
     }
+
+public Command buildTrenchRightDoubleScoop() {
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        // first drop the intake as fast as possible
+        sequence.addCommands(r.intake.fastDrop());
+        // drive the profile while intaking
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("righttrench.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        // shoot the balls while stationary
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(8));
+        sequence.addCommands(r.intake.fastDrop());
+
+        // drive the second profile while intaking
+        parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("righttrench_pt2.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        // shoot again for the remaining time
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(
+                        r, () -> 0, () -> 0, FieldConstants.Hub.center));
+        return sequence;
+    }
+
+    private Command buildSitStillAndShoot(){
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+                sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(8));
+        return sequence;
+    }
+
+    private Command buildShootWithDepot(){
+        double offset = Units.inchesToMeters(27);
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        sequence.addCommands(new PathFinderCommand(r, ()->new Pose2d(FieldConstants.Locations.depot, Rotation2d.k180deg)));
+        sequence.addCommands(r.intake.fastDrop());
+        sequence.addCommands(new ParallelDeadlineGroup(DriveCommands.driveToPoint(r, ()-> r.drive.getPose().plus(new Transform2d(Units.inchesToMeters(offset+Constants.robotLength/2.0),0.0,Rotation2d.kZero)))));
+        return sequence;
+    }
+
 }

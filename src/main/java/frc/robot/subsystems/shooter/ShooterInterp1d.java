@@ -50,7 +50,7 @@ public class ShooterInterp1d {
     2400 172 255
     2200 148 183
 
-    5500 396 
+    5500 396
     5000 372
     4500 360
     */
@@ -177,20 +177,20 @@ public class ShooterInterp1d {
         double turretVel;
         DataPoint data;
 
-        //determine if pass or hub shot by comparison of timeTable reference
-        if(timeTable == timeTableRealPassing || timeTable == timeTableSimPassing){
-            //select far or close pass based on control board switch
-            //using the "field orient" switch (7)
-            double[] passData; //contains rpm, angle, airtime
-            if(ConfigButtons.driveStation.getHID().getRawButton(7)){
-                //on is long pass that rolls back
+        // determine if pass or hub shot by comparison of timeTable reference
+        if (timeTable == timeTableRealPassing || timeTable == timeTableSimPassing) {
+            // select far or close pass based on control board switch
+            // using the "field orient" switch (7)
+            double[] passData; // contains rpm, angle, airtime
+            if (ConfigButtons.driveStation.getHID().getRawButton(7)) {
+                // on is long pass that rolls back
                 passData = passLongData;
             } else {
-                //off is short pass that rolls forward
+                // off is short pass that rolls forward
                 passData = passShortData;
             }
-            
-            //pass shot
+
+            // pass shot
             velocityOffset = turretVelocity.times(passData[2]);
             Logger.recordOutput("Shooter/velocityOffset", velocityOffset);
 
@@ -204,7 +204,8 @@ public class ShooterInterp1d {
                             .plus(Rotation2d.kCCW_90deg)
                             .minus(
                                     Rotation2d.fromRadians(
-                                            Math.atan2(turretVelocity.getY(), turretVelocity.getX())))
+                                            Math.atan2(
+                                                    turretVelocity.getY(), turretVelocity.getX())))
                             .getRadians(); // tangent angle (b)
             tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
             turretVel = Math.toDegrees(tangentVelocity / dist);
@@ -219,13 +220,20 @@ public class ShooterInterp1d {
                             timeTable,
                             turretVel);
             */
-            //double rpm, double angle, double hood, double time, double turretVel, double dist
-            data = new DataPoint(passData[0], vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(), 
-                    passData[1], passData[2], turretVel, dist);
-            
+            // double rpm, double angle, double hood, double time, double turretVel, double dist
+            data =
+                    new DataPoint(
+                            passData[0],
+                            vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(),
+                            passData[1],
+                            passData[2],
+                            turretVel,
+                            dist);
+
         } else {
-            //hub shot
-            //    b: offset goal based on turret velocity (initial time guess is the lowest shot time)
+            // hub shot
+            //    b: offset goal based on turret velocity (initial time guess is the lowest shot
+            // time)
             velocityOffset = turretVelocity.times(-timeTable[0]);
             Logger.recordOutput("Shooter/velocityOffset", velocityOffset);
 
@@ -251,7 +259,8 @@ public class ShooterInterp1d {
                             .plus(Rotation2d.kCCW_90deg)
                             .minus(
                                     Rotation2d.fromRadians(
-                                            Math.atan2(turretVelocity.getY(), turretVelocity.getX())))
+                                            Math.atan2(
+                                                    turretVelocity.getY(), turretVelocity.getX())))
                             .getRadians(); // tangent angle (b)
             tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
             turretVel = Math.toDegrees(tangentVelocity / dist);
@@ -268,8 +277,6 @@ public class ShooterInterp1d {
             double timeError = data.time - time;
             Logger.recordOutput("Shooter/TimeError", timeError);
         }
-
-        
 
         return data;
     }

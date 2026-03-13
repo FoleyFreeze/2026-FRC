@@ -185,39 +185,39 @@ public class ConfigButtons {
         // mode sw (idk what we want this to do yet)
         // jogs (shoot speed, angle, etc)
 
-        // driveStation
-        //         .axisLessThan(1, -0.5)
-        //         .and(driveStation2.button(12))
-        //         .onTrue(r.shooter.jogPassRpmUp());
-        // driveStation
-        //         .axisLessThan(1, -0.5)
-        //         .and(driveStation2.button(12).negate())
-        //         .onTrue(r.shooter.jogHubRpmUp());
-        // driveStation
-        //         .axisGreaterThan(1, 0.5)
-        //         .and(driveStation2.button(12))
-        //         .onTrue(r.shooter.jogPassRpmDn());
-        // driveStation
-        //         .axisGreaterThan(1, 0.5)
-        //         .and(driveStation2.button(12).negate())
-        //         .onTrue(r.shooter.jogHubRpmDn());
+        driveStation
+                .axisLessThan(1, -0.5)
+                .and(driveStation2.button(12))
+                .onTrue(r.shooter.jogPassRpmUp());
+        driveStation
+                .axisLessThan(1, -0.5)
+                .and(driveStation2.button(12).negate())
+                .onTrue(r.shooter.jogHubRpmUp());
+        driveStation
+                .axisGreaterThan(1, 0.5)
+                .and(driveStation2.button(12))
+                .onTrue(r.shooter.jogPassRpmDn());
+        driveStation
+                .axisGreaterThan(1, 0.5)
+                .and(driveStation2.button(12).negate())
+                .onTrue(r.shooter.jogHubRpmDn());
 
-        // driveStation
-        //         .axisLessThan(0, -0.5)
-        //         .and(driveStation2.button(12))
-        //         .onTrue(r.shooter.jogPassAngleDn());
-        // driveStation
-        //         .axisLessThan(0, -0.5)
-        //         .and(driveStation2.button(12).negate())
-        //         .onTrue(r.shooter.jogHubAngleDn());
-        // driveStation
-        //         .axisGreaterThan(0, 0.5)
-        //         .and(driveStation2.button(12))
-        //         .onTrue(r.shooter.jogPassAngleUp());
-        // driveStation
-        //         .axisGreaterThan(0, 0.5)
-        //         .and(driveStation2.button(12).negate())
-        //         .onTrue(r.shooter.jogHubAngleUp());
+        driveStation
+                .axisLessThan(0, -0.5)
+                .and(driveStation2.button(12))
+                .onTrue(r.shooter.jogPassAngleDn());
+        driveStation
+                .axisLessThan(0, -0.5)
+                .and(driveStation2.button(12).negate())
+                .onTrue(r.shooter.jogHubAngleDn());
+        driveStation
+                .axisGreaterThan(0, 0.5)
+                .and(driveStation2.button(12))
+                .onTrue(r.shooter.jogPassAngleUp());
+        driveStation
+                .axisGreaterThan(0, 0.5)
+                .and(driveStation2.button(12).negate())
+                .onTrue(r.shooter.jogHubAngleUp());
     }
 
     public static double trackButtons() {

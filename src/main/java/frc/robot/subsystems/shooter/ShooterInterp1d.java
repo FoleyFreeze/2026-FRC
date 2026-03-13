@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.ConfigButtons;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import org.littletonrobotics.junction.Logger;
@@ -48,7 +49,13 @@ public class ShooterInterp1d {
     2550 188 308
     2400 172 255
     2200 148 183
+
+    5500 396 
+    5000 372
+    4500 360
     */
+    private static final double[] passLongData = {5000, 49.5, 1.5};
+    private static final double[] passShortData = {2600, 49.5, 0.8};
 
     // for sim passing
     private static final double[] rpmTableSimPassing = {2600, 3400, 4200, 5000, 6000, 7100, 8200};
@@ -162,48 +169,107 @@ public class ShooterInterp1d {
         Translation2d turretVelocity = botVelXY.plus(turretXYfromRot);
         Logger.recordOutput("Shooter/turretVelocity", turretVelocity);
 
-        //    b: offset goal based on turret velocity (initial time guess is the lowest shot time)
-        Translation2d velocityOffset = turretVelocity.times(-timeTable[0]);
-        Logger.recordOutput("Shooter/velocityOffset", velocityOffset);
+        Translation2d velocityOffset;
+        Translation2d vecToTarget;
+        double dist;
+        double tangentAngle;
+        double tangentVelocity;
+        double turretVel;
+        DataPoint data;
 
-        // rep 1
-        double dist = goal.plus(velocityOffset).minus(turretPos).getNorm();
-        double time = getTime(dist, distAxis, timeTable);
-        // rep 2 - x
-        for (int i = 1; i < reps - 1; i++) {
-            velocityOffset = turretVelocity.times(-time);
+        //determine if pass or hub shot by comparison of timeTable reference
+        if(timeTable == timeTableRealPassing || timeTable == timeTableSimPassing){
+            //select far or close pass based on control board switch
+            //using the "field orient" switch (7)
+            double[] passData; //contains rpm, angle, airtime
+            if(ConfigButtons.driveStation.getHID().getRawButton(7)){
+                //on is long pass that rolls back
+                passData = passLongData;
+            } else {
+                //off is short pass that rolls forward
+                passData = passShortData;
+            }
+            
+            //pass shot
+            velocityOffset = turretVelocity.times(passData[2]);
+            Logger.recordOutput("Shooter/velocityOffset", velocityOffset);
 
+            vecToTarget = goal.plus(velocityOffset).minus(turretPos);
+            dist = vecToTarget.getNorm();
+
+            // calc the turret angular vel from the tangential turret velocity
+            tangentAngle =
+                    vecToTarget
+                            .getAngle()
+                            .plus(Rotation2d.kCCW_90deg)
+                            .minus(
+                                    Rotation2d.fromRadians(
+                                            Math.atan2(turretVelocity.getY(), turretVelocity.getX())))
+                            .getRadians(); // tangent angle (b)
+            tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
+            turretVel = Math.toDegrees(tangentVelocity / dist);
+
+            /*data =
+                    get(
+                            dist,
+                            vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(),
+                            distAxis,
+                            rpmTable,
+                            hoodAngleTable,
+                            timeTable,
+                            turretVel);
+            */
+            //double rpm, double angle, double hood, double time, double turretVel, double dist
+            data = new DataPoint(passData[0], vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(), 
+                    passData[1], passData[2], turretVel, dist);
+            
+        } else {
+            //hub shot
+            //    b: offset goal based on turret velocity (initial time guess is the lowest shot time)
+            velocityOffset = turretVelocity.times(-timeTable[0]);
+            Logger.recordOutput("Shooter/velocityOffset", velocityOffset);
+
+            // rep 1
             dist = goal.plus(velocityOffset).minus(turretPos).getNorm();
-            time = getTime(dist, distAxis, timeTable);
+            double time = getTime(dist, distAxis, timeTable);
+            // rep 2 - x
+            for (int i = 1; i < reps - 1; i++) {
+                velocityOffset = turretVelocity.times(-time);
+
+                dist = goal.plus(velocityOffset).minus(turretPos).getNorm();
+                time = getTime(dist, distAxis, timeTable);
+            }
+            // rep x+1
+            velocityOffset = turretVelocity.times(-time);
+            vecToTarget = goal.plus(velocityOffset).minus(turretPos);
+            dist = vecToTarget.getNorm();
+
+            // calc the turret angular vel from the tangential turret velocity
+            tangentAngle =
+                    vecToTarget
+                            .getAngle()
+                            .plus(Rotation2d.kCCW_90deg)
+                            .minus(
+                                    Rotation2d.fromRadians(
+                                            Math.atan2(turretVelocity.getY(), turretVelocity.getX())))
+                            .getRadians(); // tangent angle (b)
+            tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
+            turretVel = Math.toDegrees(tangentVelocity / dist);
+
+            data =
+                    get(
+                            dist,
+                            vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(),
+                            distAxis,
+                            rpmTable,
+                            hoodAngleTable,
+                            timeTable,
+                            turretVel);
+            double timeError = data.time - time;
+            Logger.recordOutput("Shooter/TimeError", timeError);
         }
-        // rep x+1
-        velocityOffset = turretVelocity.times(-time);
-        Translation2d vecToTarget = goal.plus(velocityOffset).minus(turretPos);
-        dist = vecToTarget.getNorm();
 
-        // calc the turret angular vel from the tangential turret velocity
-        double tangentAngle =
-                vecToTarget
-                        .getAngle()
-                        .plus(Rotation2d.kCCW_90deg)
-                        .minus(
-                                Rotation2d.fromRadians(
-                                        Math.atan2(turretVelocity.getY(), turretVelocity.getX())))
-                        .getRadians(); // tangent angle (b)
-        double tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
-        double turretVel = Math.toDegrees(tangentVelocity / dist);
-
-        DataPoint data =
-                get(
-                        dist,
-                        vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(),
-                        distAxis,
-                        rpmTable,
-                        hoodAngleTable,
-                        timeTable,
-                        turretVel);
-        double timeError = data.time - time;
-        Logger.recordOutput("Shooter/TimeError", timeError);
+        
 
         return data;
     }
@@ -307,9 +373,6 @@ public class ShooterInterp1d {
                         rpmTablePass,
                         hoodAngleTablePass,
                         timeTablePass);
-
-        // create one of 2 passes depending on control board input
-        // if(ConfigButtons.driveStation.button(0))
 
         return data;
     }

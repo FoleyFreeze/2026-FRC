@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase {
     // positions in rotations
     private static final double armInPos = 0.18;
     public static final double armStartWheelPos = 0.07;
-    private static final double armOutPos = -0.019; // intentionally below zero
+    private static final double armOutPos = -0.035; // intentionally below zero, actual is -0.013
     private static final double armWontHitTrenchPos = 0.05;
     private static final double armTol = 0.04;
 

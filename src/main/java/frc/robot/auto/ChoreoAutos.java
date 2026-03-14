@@ -104,6 +104,7 @@ public class ChoreoAutos {
     }
 
     double firstStepShootTime = 3.8;
+
     public Command buildLeftDoubleScoop() {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible

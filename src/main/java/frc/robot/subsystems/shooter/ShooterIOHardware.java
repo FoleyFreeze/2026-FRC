@@ -108,8 +108,8 @@ public class ShooterIOHardware implements ShooterIO {
         hoodAbsEnc = new CANcoder(15, TunerConstants.kCANBus);
         var encCfg = new CANcoderConfiguration();
         encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg.MagnetSensor.MagnetOffset = 0.34228515625;
+        encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.8;
+        encCfg.MagnetSensor.MagnetOffset = 0.84228515625;
         hoodAbsEnc.getConfigurator().apply(encCfg);
 
         hood = new TalonFX(15, TunerConstants.kCANBus);

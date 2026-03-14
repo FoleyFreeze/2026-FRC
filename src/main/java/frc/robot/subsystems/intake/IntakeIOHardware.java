@@ -183,7 +183,7 @@ public class IntakeIOHardware implements IntakeIO {
 
     @Override
     public void armAngle(double rotations) {
-        // intakeBar.setControl(positionRequestArm.withPosition(rotations));
+        intakeBar.setControl(positionRequestArm.withPosition(rotations));
     }
 
     @Override

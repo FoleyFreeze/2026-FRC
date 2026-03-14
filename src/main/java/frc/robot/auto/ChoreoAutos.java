@@ -54,10 +54,11 @@ public class ChoreoAutos {
         Pose2d pose = r.drive.getPose();
 
         // log the error data stuff
-        Logger.recordOutput("Choreo/Xerr", pose.getX() - sample.getPose().getX());
-        Logger.recordOutput("Choreo/Yerr", pose.getY() - sample.getPose().getY());
+        Logger.recordOutput("Choreo/Target", sample.getPose());
+        Logger.recordOutput("Choreo/Xerr", pose.getX() - sample.x);
+        Logger.recordOutput("Choreo/Yerr", pose.getY() - sample.y);
         Logger.recordOutput(
-                "Choreo/Rerr", pose.getRotation().minus(sample.getPose().getRotation()));
+                "Choreo/Rerr", pose.getRotation().minus(Rotation2d.fromRadians(sample.heading)));
 
         // Generate the next speeds for the robot
         ChassisSpeeds speeds =

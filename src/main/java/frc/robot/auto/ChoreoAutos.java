@@ -100,6 +100,7 @@ public class ChoreoAutos {
         autoChooser.addOption("RightTrenchDoubleScoop", buildTrenchRightDoubleScoop());
         autoChooser.addOption("JustShoot", buildSitStillAndShoot());
         autoChooser.addOption("LeftBumpDoubleScoop", buildLeftDoubleScoop());
+        autoChooser.addOption("JustDrop", buildJustDrop());
     }
 
     public Command buildLeftDoubleScoop() {
@@ -259,6 +260,11 @@ public class ChoreoAutos {
                                                                                         / 2.0),
                                                                 0.0,
                                                                 Rotation2d.kZero)))));
+        return sequence;
+    }
+    private Command buildJustDrop(){
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        sequence.addCommands(r.intake.fastDrop());
         return sequence;
     }
 }

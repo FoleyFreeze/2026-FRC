@@ -316,7 +316,8 @@ public class Drive extends SubsystemBase {
         robotVelocity = kinematics.toChassisSpeeds(getModuleStates());
 
         Pose2d botPose = getPose();
-        Logger.recordOutput("Drive/WorldCoords", String.format("%.2f, %.2f", botPose.getX(), botPose.getY()));
+        Logger.recordOutput(
+                "Drive/WorldCoords", String.format("%.2f, %.2f", botPose.getX(), botPose.getY()));
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);

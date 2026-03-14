@@ -125,7 +125,7 @@ public class IntakeIOSim implements IntakeIO {
     @Override
     public void armAngle(double rotations) {
         armClosedLoop = true;
-        armController.setSetpoint(-rotations + 0.25);
+        armController.setSetpoint(rotations);
     }
 
     @Override

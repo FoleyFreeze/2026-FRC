@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
@@ -79,8 +80,7 @@ public class Intake extends SubsystemBase {
     public Command fastDrop() {
         return new RunCommand(() -> io.armAngle(armOutPos), this)
                 .until(() -> inputs.armPosition < armWontHitTrenchPos)
-                .withTimeout(0.5)
-                .andThen(new InstantCommand(this::extend, this));
+                .finallyDo(this::extend).alongWith(new WaitCommand(1));
     }
 
     public Command runIntake() {

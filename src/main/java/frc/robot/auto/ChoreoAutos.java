@@ -113,6 +113,13 @@ public class ChoreoAutos {
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
                         .withTimeout(10)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                })
                 /*.alongWith(
                 DriveCommands.driveToPoint(
                                 r,
@@ -157,7 +164,14 @@ public class ChoreoAutos {
         // shoot the balls while stationary
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(8));
+                        .withTimeout(8)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
         sequence.addCommands(r.intake.fastDrop());
 
         // drive the second profile while intaking
@@ -184,7 +198,14 @@ public class ChoreoAutos {
         // shoot the balls while stationary
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(8));
+                        .withTimeout(8)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
         sequence.addCommands(r.intake.fastDrop());
 
         // drive the second profile while intaking
@@ -203,7 +224,14 @@ public class ChoreoAutos {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(8));
+                        .withTimeout(8)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
         return sequence;
     }
 

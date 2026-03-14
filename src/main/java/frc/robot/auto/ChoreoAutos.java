@@ -103,6 +103,7 @@ public class ChoreoAutos {
         autoChooser.addOption("JustDrop", buildJustDrop());
     }
 
+    double firstStepShootTime = 3.8;
     public Command buildLeftDoubleScoop() {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible
@@ -114,7 +115,7 @@ public class ChoreoAutos {
         // shoot the balls while driving to the second start point
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(10)
+                        .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();
@@ -166,7 +167,7 @@ public class ChoreoAutos {
         // shoot the balls while stationary
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(5)
+                        .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();
@@ -200,7 +201,7 @@ public class ChoreoAutos {
         // shoot the balls while stationary
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(5)
+                        .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();
@@ -226,7 +227,7 @@ public class ChoreoAutos {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(5)
+                        .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();

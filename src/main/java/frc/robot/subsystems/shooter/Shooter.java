@@ -116,7 +116,7 @@ public class Shooter extends SubsystemBase {
         this.io = io;
         this.r = r;
 
-        rpmSet.setDouble(100);
+        rpmSet.setDouble(500);
         rpmSet.getDouble(0);
         hoodSet.setDouble(55);
         hoodSet.getDouble(0);

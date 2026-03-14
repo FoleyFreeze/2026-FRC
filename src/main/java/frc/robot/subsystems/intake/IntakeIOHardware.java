@@ -75,7 +75,7 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.MotionMagic.MotionMagicAcceleration = 600;
         cfg.MotionMagic.MotionMagicJerk = 0;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
-        cfg.CurrentLimits.StatorCurrentLimit = 120;
+        cfg.CurrentLimits.StatorCurrentLimit = 60;
         wheel.getConfigurator().apply(cfg);
 
         intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);

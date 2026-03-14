@@ -166,7 +166,7 @@ public class ChoreoAutos {
         // shoot the balls while stationary
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(8)
+                        .withTimeout(5)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();
@@ -184,7 +184,7 @@ public class ChoreoAutos {
         // shoot again for the remaining time
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(
-                        r, () -> 0, () -> 0, FieldConstants.Hub.center));
+                        r, () -> 0, () -> 0, FieldConstants.Hub.center).withTimeout(5));
         return sequence;
     }
 
@@ -200,7 +200,7 @@ public class ChoreoAutos {
         // shoot the balls while stationary
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(8)
+                        .withTimeout(5)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();
@@ -226,7 +226,7 @@ public class ChoreoAutos {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         sequence.addCommands(
                 ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(8)
+                        .withTimeout(5)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();

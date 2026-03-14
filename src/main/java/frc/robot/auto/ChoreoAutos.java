@@ -183,8 +183,8 @@ public class ChoreoAutos {
 
         // shoot again for the remaining time
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(
-                        r, () -> 0, () -> 0, FieldConstants.Hub.center).withTimeout(5));
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(5));
         return sequence;
     }
 

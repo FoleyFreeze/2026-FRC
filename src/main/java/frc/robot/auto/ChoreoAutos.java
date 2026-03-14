@@ -262,7 +262,8 @@ public class ChoreoAutos {
                                                                 Rotation2d.kZero)))));
         return sequence;
     }
-    private Command buildJustDrop(){
+
+    private Command buildJustDrop() {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         sequence.addCommands(r.intake.fastDrop());
         return sequence;

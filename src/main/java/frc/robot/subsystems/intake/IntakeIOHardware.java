@@ -35,7 +35,9 @@ public class IntakeIOHardware implements IntakeIO {
     private final TalonFX intakeBar;
     private final CANcoder intakeAbsEnc;
 
-    private final VoltageOut voltageRequestWheel = new VoltageOut(0);
+    //NOTE: disabled FOC on intake wheel based on this thread:
+    // https://www.chiefdelphi.com/t/kraken-x60-limp-mode-behavior/515080/95
+    private final VoltageOut voltageRequestWheel = new VoltageOut(0).withEnableFOC(false);
     private final VoltageOut voltageRequestArm = new VoltageOut(0);
 
     private final MotionMagicVelocityTorqueCurrentFOC velocityRequestWheel =

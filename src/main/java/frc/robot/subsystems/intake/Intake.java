@@ -12,6 +12,9 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
+//NOTE: replaced all io.wheelSpeed() calls with io.wheelPower() due to weird issue with kraken limp mode
+// see this thread: https://www.chiefdelphi.com/t/kraken-x60-limp-mode-behavior/515080/95 
+
 public class Intake extends SubsystemBase {
     RobotContainer r;
 
@@ -83,7 +86,8 @@ public class Intake extends SubsystemBase {
                 () -> {
                     if (!armDisabled || overrideToSpinWheels) {
                         if (inputs.armPosition <= armStartWheelPos) {
-                            io.wheelSpeed(wheelSpeed);
+                            //io.wheelSpeed(wheelSpeed);
+                            io.wheelPower(1);
                         } else {
                             io.wheelPower(0);
                         }
@@ -99,11 +103,13 @@ public class Intake extends SubsystemBase {
     }
 
     public Command dumbIntake() {
-        return new RunCommand(() -> io.wheelSpeed(wheelSpeed), this);
+        //return new RunCommand(() -> io.wheelSpeed(wheelSpeed), this);
+        return new RunCommand(() -> io.wheelPower(1), this);
     }
 
     public Command unjamIntake() {
-        return new RunCommand(() -> io.wheelSpeed(unjamWheelSpeed), this);
+        //return new RunCommand(() -> io.wheelSpeed(unjamWheelSpeed), this);
+        return new RunCommand(() -> io.wheelPower(-0.5), this);
     }
 
     double velSetpoint = 0;
@@ -121,7 +127,8 @@ public class Intake extends SubsystemBase {
                                     * reductionRatio;
                     velSetpoint = speed - velReduction;
                     Logger.recordOutput("Intake/VelSepoint", velSetpoint);
-                    io.wheelSpeed(velSetpoint);
+                    //io.wheelSpeed(velSetpoint);
+                    io.wheelPower(1);
                 },
                 this);
     }

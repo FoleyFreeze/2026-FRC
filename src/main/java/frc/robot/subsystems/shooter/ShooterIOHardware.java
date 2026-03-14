@@ -40,8 +40,8 @@ public class ShooterIOHardware implements ShooterIO {
     // total angle range of 32.4deg
     public static final double hoodMinAngle = 49.5; // deg
     public static final double hoodMaxAngle = 81.4;
-    public static final double hoodMinRot = -0.0756; // rotations
-    public static final double hoodMaxRot = 0.01425;
+    public static final double hoodMinRot = 0; // rotations
+    public static final double hoodMaxRot = 0.0915;
 
     private final TalonFX wheel;
     private final TalonFX wheel2;

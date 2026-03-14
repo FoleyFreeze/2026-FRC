@@ -142,7 +142,7 @@ public class ChoreoAutos {
                                                                 .trenchLeftStart))))*/ );
         // drive the second profile while intaking
         parallelGroup =
-                new ParallelDeadlineGroup(loadTraj("circleleft2.traj"), r.intake.smartIntake());
+                new ParallelDeadlineGroup(loadTraj("circleleft_pt2.traj"), r.intake.smartIntake());
         sequence.addCommands(r.intake.fastDrop());
         sequence.addCommands(parallelGroup);
         // shoot again for the remaining time
@@ -210,7 +210,7 @@ public class ChoreoAutos {
 
         // drive the second profile while intaking
         parallelGroup =
-                new ParallelDeadlineGroup(loadTraj("righttrench_pt2.traj"), r.intake.smartIntake());
+                new ParallelDeadlineGroup(loadTraj("trenchright_pt2.traj"), r.intake.smartIntake());
         sequence.addCommands(parallelGroup);
 
         // shoot again for the remaining time

@@ -445,7 +445,7 @@ public class Shooter extends SubsystemBase {
     public boolean wontMiss(Pose2d botLoc) {
         // allow wider thresholds for passing
         double speedThresh = shootMode == ShootMode.HUB ? 100 : 300;
-        double angleThresh = shootMode == ShootMode.HUB ? 2.5 : 5;
+        double angleThresh = shootMode == ShootMode.HUB ? 3 : 5;
 
         if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;

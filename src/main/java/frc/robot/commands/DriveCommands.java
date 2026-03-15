@@ -100,15 +100,21 @@ public class DriveCommands {
                                     linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                                     linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                                     omega * drive.getMaxAngularSpeedRadPerSec());
-                    boolean isFlipped =
-                            DriverStation.getAlliance().isPresent()
-                                    && DriverStation.getAlliance().get() == Alliance.Red;
-                    drive.runVelocity(
-                            ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    speeds,
-                                    isFlipped
-                                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                                            : drive.getRotation()));
+
+                    if (drive.gyroInputs.connected) {
+                        boolean isFlipped =
+                                DriverStation.getAlliance().isPresent()
+                                        && DriverStation.getAlliance().get() == Alliance.Red;
+                        drive.runVelocity(
+                                ChassisSpeeds.fromFieldRelativeSpeeds(
+                                        speeds,
+                                        isFlipped
+                                                ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                                                : drive.getRotation()));
+                    } else {
+                        // revert to bot relative
+                        drive.runVelocity(speeds);
+                    }
                 },
                 drive);
     }
@@ -137,15 +143,21 @@ public class DriveCommands {
                                     linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                                     linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                                     omega * drive.getMaxAngularSpeedRadPerSec());
-                    boolean isFlipped =
-                            DriverStation.getAlliance().isPresent()
-                                    && DriverStation.getAlliance().get() == Alliance.Red;
-                    drive.runVelocityTurnOut(
-                            ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    speeds,
-                                    isFlipped
-                                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                                            : drive.getRotation()));
+
+                    if (drive.gyroInputs.connected) {
+                        boolean isFlipped =
+                                DriverStation.getAlliance().isPresent()
+                                        && DriverStation.getAlliance().get() == Alliance.Red;
+                        drive.runVelocityTurnOut(
+                                ChassisSpeeds.fromFieldRelativeSpeeds(
+                                        speeds,
+                                        isFlipped
+                                                ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                                                : drive.getRotation()));
+                    } else {
+                        // revert to bot relative
+                        drive.runVelocity(speeds);
+                    }
                 },
                 drive);
     }
@@ -199,16 +211,22 @@ public class DriveCommands {
                                             linearVelocity.getY()
                                                     * drive.getMaxLinearSpeedMetersPerSec(),
                                             omega);
-                            boolean isFlipped =
-                                    DriverStation.getAlliance().isPresent()
-                                            && DriverStation.getAlliance().get() == Alliance.Red;
-                            drive.runVelocityTurretCenter(
-                                    ChassisSpeeds.fromFieldRelativeSpeeds(
-                                            speeds,
-                                            isFlipped
-                                                    ? drive.getRotation()
-                                                            .plus(new Rotation2d(Math.PI))
-                                                    : drive.getRotation()));
+                            if (drive.gyroInputs.connected) {
+                                boolean isFlipped =
+                                        DriverStation.getAlliance().isPresent()
+                                                && DriverStation.getAlliance().get()
+                                                        == Alliance.Red;
+                                drive.runVelocityTurretCenter(
+                                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                                                speeds,
+                                                isFlipped
+                                                        ? drive.getRotation()
+                                                                .plus(new Rotation2d(Math.PI))
+                                                        : drive.getRotation()));
+                            } else {
+                                // revert to bot relative
+                                drive.runVelocityTurretCenter(speeds);
+                            }
                         },
                         drive)
 
@@ -267,16 +285,23 @@ public class DriveCommands {
                                             linearVelocity.getY()
                                                     * drive.getMaxLinearSpeedMetersPerSec(),
                                             omega);
-                            boolean isFlipped =
-                                    DriverStation.getAlliance().isPresent()
-                                            && DriverStation.getAlliance().get() == Alliance.Red;
-                            drive.runVelocity(
-                                    ChassisSpeeds.fromFieldRelativeSpeeds(
-                                            speeds,
-                                            isFlipped
-                                                    ? drive.getRotation()
-                                                            .plus(new Rotation2d(Math.PI))
-                                                    : drive.getRotation()));
+
+                            if (drive.gyroInputs.connected) {
+                                boolean isFlipped =
+                                        DriverStation.getAlliance().isPresent()
+                                                && DriverStation.getAlliance().get()
+                                                        == Alliance.Red;
+                                drive.runVelocity(
+                                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                                                speeds,
+                                                isFlipped
+                                                        ? drive.getRotation()
+                                                                .plus(new Rotation2d(Math.PI))
+                                                        : drive.getRotation()));
+                            } else {
+                                // revert to bot relative
+                                drive.runVelocity(speeds);
+                            }
                         },
                         drive)
 
@@ -323,10 +348,15 @@ public class DriveCommands {
                             yVel = MathUtil.clamp(yVel, -POS_MAX_VEL, POS_MAX_VEL);
 
                             // TODO: run angle PID in parallel
-                            r.drive.runVelocity(
-                                    ChassisSpeeds.fromFieldRelativeSpeeds(
-                                            new ChassisSpeeds(xVel, yVel, 0),
-                                            r.drive.getRotation()));
+                            if (r.drive.gyroInputs.connected) {
+                                r.drive.runVelocity(
+                                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                                                new ChassisSpeeds(xVel, yVel, 0),
+                                                r.drive.getRotation()));
+                            } else {
+                                // revert to bot relative
+                                r.drive.runVelocity(new ChassisSpeeds(xVel, yVel, 0));
+                            }
                         },
                         r.drive)
                 .until(() -> error[0] < POS_TOL || timer.hasElapsed(POS_MAX_TIME))

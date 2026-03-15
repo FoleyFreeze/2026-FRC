@@ -121,7 +121,9 @@ public class Drive extends SubsystemBase {
 
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
-    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private final GyroIO gyroIO2;
+    public final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    public final GyroIOInputsAutoLogged gyroInputs2 = new GyroIOInputsAutoLogged();
     public final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
@@ -157,6 +159,7 @@ public class Drive extends SubsystemBase {
             return new Drive(
                     r,
                     new GyroIO() {},
+                    new GyroIO() {},
                     new ModuleIO() {},
                     new ModuleIO() {},
                     new ModuleIO() {},
@@ -168,7 +171,8 @@ public class Drive extends SubsystemBase {
             case REAL:
                 return new Drive(
                         r,
-                        new GyroIOPigeon2(),
+                        new GyroIOPigeon2(0),
+                        new GyroIO() {},
                         new ModuleIOTalonFX(TunerConstants.FrontLeft),
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
@@ -179,6 +183,7 @@ public class Drive extends SubsystemBase {
                 return new Drive(
                         r,
                         new GyroIOSim(driveSim.getGyroSimulation()),
+                        new GyroIOSim(driveSim.getGyroSimulation()),
                         new ModuleIOSim(driveSim.getModules()[0]),
                         new ModuleIOSim(driveSim.getModules()[1]),
                         new ModuleIOSim(driveSim.getModules()[2]),
@@ -188,6 +193,7 @@ public class Drive extends SubsystemBase {
             default:
                 return new Drive(
                         r,
+                        new GyroIO() {},
                         new GyroIO() {},
                         new ModuleIO() {},
                         new ModuleIO() {},
@@ -200,6 +206,7 @@ public class Drive extends SubsystemBase {
     public Drive(
             RobotContainer r,
             GyroIO gyroIO,
+            GyroIO gyroIO2,
             ModuleIO flModuleIO,
             ModuleIO frModuleIO,
             ModuleIO blModuleIO,
@@ -207,6 +214,7 @@ public class Drive extends SubsystemBase {
             Consumer<Pose2d> resetSimulationPoseCallBack) {
         this.r = r;
         this.gyroIO = gyroIO;
+        this.gyroIO2 = gyroIO2;
         this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
         modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
         modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);

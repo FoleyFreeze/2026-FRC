@@ -37,9 +37,9 @@ public class DriveCommands {
 
     private static double DEADBAND = 0.1;
     private static double ANGLE_KP = 7.0;
-    private static double ANGLE_KD = 1.8;
+    private static double ANGLE_KD = 0.4;
     private static double ANGLE_MAX_VELOCITY = 8.0;
-    private static double ANGLE_MAX_ACCELERATION = 20.0;
+    private static double ANGLE_MAX_ACCELERATION = 10.0;
 
     private DriveCommands() {}
 

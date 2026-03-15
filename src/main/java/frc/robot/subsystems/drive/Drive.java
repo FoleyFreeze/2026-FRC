@@ -275,7 +275,7 @@ public class Drive extends SubsystemBase {
         gyroIO.updateInputs(gyroInputs);
         gyroIO2.updateInputs(gyroInputs2);
         Logger.processInputs("Drive/Gyro", gyroInputs);
-        Logger.processInputs("Drive/Gyro", gyroInputs2);
+        Logger.processInputs("Drive/Gyro2", gyroInputs2);
         for (var module : modules) {
             module.periodic();
         }

@@ -190,7 +190,7 @@ public class ChoreoAutos {
         sequence.addCommands(
                 ShooterCommands.smarterShootAndGather(
                                 r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(1.0)
+                        .withTimeout(1.2)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();
@@ -269,7 +269,7 @@ public class ChoreoAutos {
         sequence.addCommands(
                 ShooterCommands.smarterShootAndGather(
                                 r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(1.0)
+                        .withTimeout(1.2)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();

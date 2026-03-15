@@ -101,7 +101,7 @@ public class DriveCommands {
                                     linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                                     omega * drive.getMaxAngularSpeedRadPerSec());
 
-                    if (drive.gyroInputs.connected) {
+                    if (drive.gyroInputs.connected && drive.gyroInputs2.connected) {
                         boolean isFlipped =
                                 DriverStation.getAlliance().isPresent()
                                         && DriverStation.getAlliance().get() == Alliance.Red;
@@ -144,7 +144,7 @@ public class DriveCommands {
                                     linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                                     omega * drive.getMaxAngularSpeedRadPerSec());
 
-                    if (drive.gyroInputs.connected) {
+                    if (drive.gyroInputs.connected && drive.gyroInputs2.connected) {
                         boolean isFlipped =
                                 DriverStation.getAlliance().isPresent()
                                         && DriverStation.getAlliance().get() == Alliance.Red;
@@ -211,7 +211,7 @@ public class DriveCommands {
                                             linearVelocity.getY()
                                                     * drive.getMaxLinearSpeedMetersPerSec(),
                                             omega);
-                            if (drive.gyroInputs.connected) {
+                            if (drive.gyroInputs.connected && drive.gyroInputs2.connected) {
                                 boolean isFlipped =
                                         DriverStation.getAlliance().isPresent()
                                                 && DriverStation.getAlliance().get()
@@ -286,7 +286,7 @@ public class DriveCommands {
                                                     * drive.getMaxLinearSpeedMetersPerSec(),
                                             omega);
 
-                            if (drive.gyroInputs.connected) {
+                            if (drive.gyroInputs.connected && drive.gyroInputs2.connected) {
                                 boolean isFlipped =
                                         DriverStation.getAlliance().isPresent()
                                                 && DriverStation.getAlliance().get()
@@ -348,7 +348,7 @@ public class DriveCommands {
                             yVel = MathUtil.clamp(yVel, -POS_MAX_VEL, POS_MAX_VEL);
 
                             // TODO: run angle PID in parallel
-                            if (r.drive.gyroInputs.connected) {
+                            if (r.drive.gyroInputs.connected && r.drive.gyroInputs2.connected) {
                                 r.drive.runVelocity(
                                         ChassisSpeeds.fromFieldRelativeSpeeds(
                                                 new ChassisSpeeds(xVel, yVel, 0),

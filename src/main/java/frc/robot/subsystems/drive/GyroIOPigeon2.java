@@ -30,8 +30,11 @@ public class GyroIOPigeon2 implements GyroIO {
 
     public GyroIOPigeon2(int id) {
         if (TunerConstants.DrivetrainConstants.Pigeon2Configs != null) {
-            var cfg = TunerConstants.DrivetrainConstants.Pigeon2Configs;
-            pigeon.getConfigurator().apply(cfg);
+            if (id == 0) {
+                pigeon.getConfigurator().apply(TunerConstants.DrivetrainConstants.Pigeon2Configs);
+            } else {
+                pigeon.getConfigurator().apply(TunerConstants.DrivetrainConstants2.Pigeon2Configs);
+            }
         } else {
             pigeon.getConfigurator().apply(new Pigeon2Configuration());
         }

@@ -127,6 +127,8 @@ public class Drive extends SubsystemBase {
     public final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
+            new Alert("Disconnected gyro, using other gyro as fallback.", AlertType.kError);
+    private final Alert gyroDisconnectedAlert2 =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
@@ -172,7 +174,7 @@ public class Drive extends SubsystemBase {
                 return new Drive(
                         r,
                         new GyroIOPigeon2(0),
-                        new GyroIO() {},
+                        new GyroIOPigeon2(1),
                         new ModuleIOTalonFX(TunerConstants.FrontLeft),
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
@@ -183,7 +185,7 @@ public class Drive extends SubsystemBase {
                 return new Drive(
                         r,
                         new GyroIOSim(driveSim.getGyroSimulation()),
-                        new GyroIOSim(driveSim.getGyroSimulation()),
+                        new GyroIO() {},
                         new ModuleIOSim(driveSim.getModules()[0]),
                         new ModuleIOSim(driveSim.getModules()[1]),
                         new ModuleIOSim(driveSim.getModules()[2]),
@@ -271,7 +273,9 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         odometryLock.lock(); // Prevents odometry updates while reading data
         gyroIO.updateInputs(gyroInputs);
+        gyroIO2.updateInputs(gyroInputs2);
         Logger.processInputs("Drive/Gyro", gyroInputs);
+        Logger.processInputs("Drive/Gyro", gyroInputs2);
         for (var module : modules) {
             module.periodic();
         }
@@ -312,6 +316,8 @@ public class Drive extends SubsystemBase {
             if (gyroInputs.connected) {
                 // Use the real gyro angle
                 rawGyroRotation = gyroInputs.odometryYawPositions[i];
+            } else if (gyroInputs2.connected) {
+                rawGyroRotation = gyroInputs2.odometryYawPositions[i];
             } else {
                 // Use the angle delta from the kinematics and module deltas
                 Twist2d twist = kinematics.toTwist2d(moduleDeltas);
@@ -329,6 +335,7 @@ public class Drive extends SubsystemBase {
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+        gyroDisconnectedAlert2.set(!gyroInputs2.connected && Constants.currentMode != Mode.SIM);
     }
 
     Translation2d rotationPoint = new Translation2d(Units.inchesToMeters(8), 0);

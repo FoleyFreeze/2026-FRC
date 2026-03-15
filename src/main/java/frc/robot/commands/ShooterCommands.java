@@ -113,7 +113,9 @@ public class ShooterCommands {
                         rotationThing,
                         velocityThing));
         parallelGroup.addCommands(r.spindexter.smarterSpinCmd());
-        parallelGroup.addCommands(r.intake.smartIntake());
+        parallelGroup.addCommands(
+            new InstantCommand(r.intake::extend, r.intake).andThen(
+            r.intake.smartIntake()));
 
         return parallelGroup;
     }

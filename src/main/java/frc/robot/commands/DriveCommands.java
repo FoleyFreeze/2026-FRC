@@ -16,7 +16,10 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -32,13 +35,28 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
 
-    private static final double DEADBAND = 0.1;
-    private static final double ANGLE_KP = 7.0;
-    private static final double ANGLE_KD = 1.8;
-    private static final double ANGLE_MAX_VELOCITY = 8.0;
-    private static final double ANGLE_MAX_ACCELERATION = 20.0;
+    private static double DEADBAND = 0.1;
+    private static double ANGLE_KP = 7.0;
+    private static double ANGLE_KD = 1.8;
+    private static double ANGLE_MAX_VELOCITY = 8.0;
+    private static double ANGLE_MAX_ACCELERATION = 20.0;
 
     private DriveCommands() {}
+
+    static NetworkTableEntry angleKpSet =
+            NetworkTableInstance.getDefault().getTable("Tuning").getEntry("AngleKpSet");
+    static NetworkTableEntry angleKdSet =
+            NetworkTableInstance.getDefault().getTable("Tuning").getEntry("AngleKdSet");
+    static NetworkTableEntry angleMaxVSet =
+            NetworkTableInstance.getDefault().getTable("Tuning").getEntry("AngleMaxVSet");
+    static NetworkTableEntry angleMaxASet =
+            NetworkTableInstance.getDefault().getTable("Tuning").getEntry("AngleMaxASet");
+    public static void initDriveCommands(){
+        angleKpSet.setDouble(ANGLE_KP);
+        angleKdSet.setDouble(ANGLE_KD);
+        angleMaxVSet.setDouble(ANGLE_MAX_VELOCITY);
+        angleMaxASet.setDouble(ANGLE_MAX_ACCELERATION);
+    }
 
     private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
         // Apply deadband
@@ -194,7 +212,14 @@ public class DriveCommands {
                         drive)
 
                 // Reset PID controller when command starts
-                .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+                .beforeStarting(() -> {
+                    angleController.reset(drive.getRotation().getRadians());
+                    angleController.setPID(angleKpSet.getDouble(ANGLE_KP),
+                    0,                
+                    angleKdSet.getDouble(ANGLE_KD));
+                    angleController.setConstraints(new Constraints(angleMaxVSet.getDouble(ANGLE_MAX_VELOCITY), angleMaxASet.getDouble(ANGLE_MAX_ACCELERATION)));
+                }
+                    );
     }
 
     public static Command joystickDriveAtAngle(
@@ -251,7 +276,13 @@ public class DriveCommands {
                         drive)
 
                 // Reset PID controller when command starts
-                .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+                .beforeStarting(() -> {
+                    angleController.reset(drive.getRotation().getRadians());
+                    angleController.setPID(angleKpSet.getDouble(ANGLE_KP),
+                    0,                
+                    angleKdSet.getDouble(ANGLE_KD));
+                    angleController.setConstraints(new Constraints(angleMaxVSet.getDouble(ANGLE_MAX_VELOCITY), angleMaxASet.getDouble(ANGLE_MAX_ACCELERATION)));
+                });
     }
 
     public static Command driveToPoint(RobotContainer r, Supplier<Pose2d> supplier) {

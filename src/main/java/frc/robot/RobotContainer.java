@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
 import frc.robot.auto.ChoreoAutos;
+import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveTuning;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.Drive;
@@ -116,6 +117,7 @@ public class RobotContainer {
                 drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
         ConfigButtons.config(this);
+        DriveCommands.initDriveCommands();
 
         PathfindingCommand.warmupCommand().schedule();
     }

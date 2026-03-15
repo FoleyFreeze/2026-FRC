@@ -51,7 +51,8 @@ public class DriveCommands {
             NetworkTableInstance.getDefault().getTable("Tuning").getEntry("AngleMaxVSet");
     static NetworkTableEntry angleMaxASet =
             NetworkTableInstance.getDefault().getTable("Tuning").getEntry("AngleMaxASet");
-    public static void initDriveCommands(){
+
+    public static void initDriveCommands() {
         angleKpSet.setDouble(ANGLE_KP);
         angleKdSet.setDouble(ANGLE_KD);
         angleMaxVSet.setDouble(ANGLE_MAX_VELOCITY);
@@ -212,14 +213,18 @@ public class DriveCommands {
                         drive)
 
                 // Reset PID controller when command starts
-                .beforeStarting(() -> {
-                    angleController.reset(drive.getRotation().getRadians());
-                    angleController.setPID(angleKpSet.getDouble(ANGLE_KP),
-                    0,                
-                    angleKdSet.getDouble(ANGLE_KD));
-                    angleController.setConstraints(new Constraints(angleMaxVSet.getDouble(ANGLE_MAX_VELOCITY), angleMaxASet.getDouble(ANGLE_MAX_ACCELERATION)));
-                }
-                    );
+                .beforeStarting(
+                        () -> {
+                            angleController.reset(drive.getRotation().getRadians());
+                            angleController.setPID(
+                                    angleKpSet.getDouble(ANGLE_KP),
+                                    0,
+                                    angleKdSet.getDouble(ANGLE_KD));
+                            angleController.setConstraints(
+                                    new Constraints(
+                                            angleMaxVSet.getDouble(ANGLE_MAX_VELOCITY),
+                                            angleMaxASet.getDouble(ANGLE_MAX_ACCELERATION)));
+                        });
     }
 
     public static Command joystickDriveAtAngle(
@@ -276,13 +281,18 @@ public class DriveCommands {
                         drive)
 
                 // Reset PID controller when command starts
-                .beforeStarting(() -> {
-                    angleController.reset(drive.getRotation().getRadians());
-                    angleController.setPID(angleKpSet.getDouble(ANGLE_KP),
-                    0,                
-                    angleKdSet.getDouble(ANGLE_KD));
-                    angleController.setConstraints(new Constraints(angleMaxVSet.getDouble(ANGLE_MAX_VELOCITY), angleMaxASet.getDouble(ANGLE_MAX_ACCELERATION)));
-                });
+                .beforeStarting(
+                        () -> {
+                            angleController.reset(drive.getRotation().getRadians());
+                            angleController.setPID(
+                                    angleKpSet.getDouble(ANGLE_KP),
+                                    0,
+                                    angleKdSet.getDouble(ANGLE_KD));
+                            angleController.setConstraints(
+                                    new Constraints(
+                                            angleMaxVSet.getDouble(ANGLE_MAX_VELOCITY),
+                                            angleMaxASet.getDouble(ANGLE_MAX_ACCELERATION)));
+                        });
     }
 
     public static Command driveToPoint(RobotContainer r, Supplier<Pose2d> supplier) {

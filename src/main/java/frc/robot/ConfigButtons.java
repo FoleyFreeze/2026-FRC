@@ -106,7 +106,10 @@ public class ConfigButtons {
                 .and(controller.leftTrigger())
                 .whileTrue(
                         ShooterCommands.smarterShootAndGather(
-                                r, controller, FieldConstants.Hub.center));
+                                r,
+                                () -> -controller.getLeftY(),
+                                () -> -controller.getLeftX(),
+                                FieldConstants.Hub.center));
 
         // set manual shot positions (X Y B)
 

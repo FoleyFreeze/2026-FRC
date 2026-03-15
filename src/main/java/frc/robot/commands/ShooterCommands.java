@@ -90,7 +90,10 @@ public class ShooterCommands {
     }
 
     public static Command smarterShootAndGather(
-            RobotContainer r, CommandXboxController controller, Translation2d target) {
+            RobotContainer r,
+            DoubleSupplier xSupplier,
+            DoubleSupplier ySupplier,
+            Translation2d target) {
         Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
         Thing<Double> velocityThing = new Thing<>(); // thing2
 
@@ -105,8 +108,8 @@ public class ShooterCommands {
         parallelGroup.addCommands(
                 DriveCommands.driveAtAngleFFw(
                         r.drive,
-                        () -> -controller.getLeftY() * 0.87, // 0.87 is 0.7^2.5
-                        () -> -controller.getLeftX() * 0.87,
+                        () -> xSupplier.getAsDouble() * 0.87, // 0.87 is 0.7^2.5
+                        () -> ySupplier.getAsDouble() * 0.87,
                         rotationThing,
                         velocityThing));
         parallelGroup.addCommands(r.spindexter.smarterSpinCmd());

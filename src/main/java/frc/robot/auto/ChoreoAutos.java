@@ -78,24 +78,18 @@ public class ChoreoAutos {
 
         autoChooser.addOption(
                 "TestMode",
-                new PathFinderCommand(
-                                r,
-                                () ->
-                                        r.drive
-                                                .getPose()
-                                                .plus(new Transform2d(3, 0, Rotation2d.k180deg)))
-                        .andThen(
-                                ShooterCommands.smarterShootNoGather(
-                                                r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                                        .withTimeout(10)
-                                        .finallyDo(
-                                                () -> {
-                                                    r.shooter.stop().execute();
-                                                    r.spindexter.stop().execute();
-                                                    r.intake.extend();
-                                                    r.intake.stopIntake().execute();
-                                                })));
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(10)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
 
+        autoChooser.addOption("ShootLeftTrenchDoubleScoop", buildShootTrenchLeftDoubleScoop());
+        autoChooser.addOption("ShootRightTrenchDoubleScoop", buildShootTrenchRightDoubleScoop());
         autoChooser.addOption("LeftTrenchDoubleScoop", buildTrenchLeftDoubleScoop());
         autoChooser.addOption("RightTrenchDoubleScoop", buildTrenchRightDoubleScoop());
         autoChooser.addOption("JustShoot", buildSitStillAndShoot());
@@ -190,10 +184,100 @@ public class ChoreoAutos {
         return sequence;
     }
 
+    public Command buildShootTrenchLeftDoubleScoop() {
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        // first drop the intake as fast as possible
+        sequence.addCommands(
+                ShooterCommands.smarterShootAndGather(
+                                r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(1.0)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
+
+        // drive the profile while intaking
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("lefttrench.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        // shoot the balls while stationary
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(firstStepShootTime)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
+        sequence.addCommands(r.intake.fastDrop());
+
+        // drive the second profile while intaking
+        parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("trenchleft_pt2.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        // shoot again for the remaining time
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(5));
+        return sequence;
+    }
+
     public Command buildTrenchRightDoubleScoop() {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible
         sequence.addCommands(r.intake.fastDrop());
+        // drive the profile while intaking
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("righttrench.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        // shoot the balls while stationary
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(firstStepShootTime)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
+        sequence.addCommands(r.intake.fastDrop());
+
+        // drive the second profile while intaking
+        parallelGroup =
+                new ParallelDeadlineGroup(loadTraj("trenchright_pt2.traj"), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        // shoot again for the remaining time
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(
+                        r, () -> 0, () -> 0, FieldConstants.Hub.center));
+        return sequence;
+    }
+
+    public Command buildShootTrenchRightDoubleScoop() {
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        // first drop the intake as fast as possible while shooting the preload
+        sequence.addCommands(
+                ShooterCommands.smarterShootAndGather(
+                                r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(1.0)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
+
         // drive the profile while intaking
         ParallelDeadlineGroup parallelGroup =
                 new ParallelDeadlineGroup(loadTraj("righttrench.traj"), r.intake.smartIntake());

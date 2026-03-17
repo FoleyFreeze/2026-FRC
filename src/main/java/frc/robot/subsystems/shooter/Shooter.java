@@ -490,10 +490,10 @@ public class Shooter extends SubsystemBase {
                 this);
     }
 
-    public double getAngleCRT(double e1, double e2) {
-        final double t_teeth = 400;
-        final double e1_teeth = 25;
-        final double e2_teeth = 27;
+    public double getAngleCRT(double e1Deg, double e2Deg) {
+        final double t_teeth = 220;
+        final double e1_teeth = 19;
+        final double e2_teeth = 21;
         final double maxTurretDegrees = 400;
         // maximum number of e1 & e2 rotations worth considering (dependent on how many degrees of
         // turret angle you can measure)
@@ -515,8 +515,8 @@ public class Shooter extends SubsystemBase {
 
         // fills arrays e1 & e2 with possible turretAngles
         for (int i = 0; i < arraySize; i++) {
-            e1PossibleAngles[i] = (i + (e1 / 360)) * (e1_teeth / t_teeth) * 360;
-            e2PossibleAngles[i] = (i + (e2 / 360)) * (e2_teeth / t_teeth) * 360;
+            e1PossibleAngles[i] = (i + (e1Deg / 360)) * (e1_teeth / t_teeth) * 360;
+            e2PossibleAngles[i] = (i + (e2Deg / 360)) * (e2_teeth / t_teeth) * 360;
         }
         // searching for the angle that both encoders agree on
         for (int i_e1 = 0; i_e1 < arraySize; i_e1++) {

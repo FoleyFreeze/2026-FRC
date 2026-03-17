@@ -13,9 +13,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
 import frc.robot.auto.ChoreoAutos;
+import frc.robot.auto.PathAutos;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveTuning;
 import frc.robot.subsystems.climber.Climber;
@@ -55,6 +57,7 @@ public class RobotContainer {
     public final StatsSubsystem stats;
 
     public final ChoreoAutos chAutos;
+    public final PathAutos pathAutos;
 
     private SwerveDriveSimulation driveSimulation;
 
@@ -92,34 +95,20 @@ public class RobotContainer {
         }
 
         chAutos = new ChoreoAutos(this);
+        pathAutos = new PathAutos(this);
 
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         // Set up auto routines
+        pathAutos.buildAutos(autoChooser);
         chAutos.buildAutos(autoChooser);
 
         // Set up SysId routines
-        autoChooser.addOption(
-                "Drive Wheel Radius Characterization",
-                DriveTuning.wheelRadiusCharacterization(drive));
-        autoChooser.addOption(
-                "Drive Simple FF Characterization", DriveTuning.feedforwardCharacterization(drive));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Forward)",
-                drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Reverse)",
-                drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption(
-                "Drive SysId (Dynamic Forward)",
-                drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Dynamic Reverse)",
-                drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        DriveTuning.buildSysIdAutos(autoChooser, this);
 
         ConfigButtons.config(this);
         DriveCommands.initDriveCommands();
 
-        PathfindingCommand.warmupCommand().schedule();
+        CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     }
 
     /**

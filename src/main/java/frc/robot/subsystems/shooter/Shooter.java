@@ -491,9 +491,9 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getAngleCRT(double e1Deg, double e2Deg) {
-        final double t_teeth = 220;
-        final double e1_teeth = 19;
-        final double e2_teeth = 21;
+        final double t_teeth = 172;
+        final double e1_teeth = 27;
+        final double e2_teeth = 29;
         final double maxTurretDegrees = 400;
         // maximum number of e1 & e2 rotations worth considering (dependent on how many degrees of
         // turret angle you can measure)
@@ -510,7 +510,6 @@ public class Shooter extends SubsystemBase {
 
         double minError =
                 1e6; // set to a rly big number so it will not be less than the new min error
-        // (ln260)
         double turretAngle = 0;
 
         // fills arrays e1 & e2 with possible turretAngles

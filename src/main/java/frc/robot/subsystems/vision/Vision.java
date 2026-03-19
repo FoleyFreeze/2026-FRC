@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,17 +41,18 @@ public class Vision extends SubsystemBase {
     private final Alert[] disconnectedAlerts;
 
     public static Vision create(
-            RobotContainer r, Drive drive, SwerveDriveSimulation driveSimulation) {
+            RobotContainer r, Drive drive, Shooter shoot, SwerveDriveSimulation driveSimulation) {
         if (isDisabled) {
             return new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
         switch (Constants.currentMode) {
             case REAL:
+                //TODO: add shoot::getTurretAngle to turret camera (cam0) when turret is installed
                 return new Vision(
                         drive::addVisionMeasurement,
-                        new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                        new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
+                        new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation, VisionConstants.robotToCamera0),
+                        new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation, VisionConstants.robotToCamera1));
 
             case SIM:
                 return new Vision(

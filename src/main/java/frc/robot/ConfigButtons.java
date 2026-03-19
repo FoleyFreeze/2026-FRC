@@ -29,7 +29,12 @@ public class ConfigButtons {
         r.spindexter.setDefaultCommand(r.spindexter.stop());
         r.intake.setDefaultCommand(r.intake.stopIntake());
 
-        // add drive over trench
+
+        // drive over trench
+        //0.65 ^ 2.5 is 0.35
+        //0.69 ^ 2.5 is 0.40
+        //0.76 ^ 2.5 is 0.50
+        //0.82 ^ 2.5 is 0.60
         controller
                 .leftStick()
                 .whileTrue(

@@ -10,20 +10,26 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.util.LimelightHelpers;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOLimelight implements VisionIO {
+    private final String name;
     private final Supplier<Rotation2d> rotationSupplier;
     private final DoubleArrayPublisher orientationPublisher;
 
@@ -33,13 +39,17 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleArraySubscriber megatag1Subscriber;
     private final DoubleArraySubscriber megatag2Subscriber;
 
+    private final DoubleSupplier cameraRotationSupplier;
+    private final Pose3d initialCameraPose;
+
     /**
      * Creates a new VisionIOLimelight.
      *
      * @param name The configured name of the Limelight.
      * @param rotationSupplier Supplier for the current estimated rotation, used for MegaTag 2.
      */
-    public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier) {
+    public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier, Transform3d robotToCamXform, DoubleSupplier cameraRotationSupplier) {
+        this.name = name;
         var table = NetworkTableInstance.getDefault().getTable(name);
         this.rotationSupplier = rotationSupplier;
         orientationPublisher = table.getDoubleArrayTopic("robot_orientation_set").publish();
@@ -50,6 +60,13 @@ public class VisionIOLimelight implements VisionIO {
                 table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber =
                 table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+
+        initialCameraPose = Pose3d.kZero.transformBy(robotToCamXform);
+        this.cameraRotationSupplier = cameraRotationSupplier;
+    }
+
+    public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier, Transform3d robotToCamXform){
+        this(name, rotationSupplier, robotToCamXform, null);
     }
 
     @Override
@@ -66,6 +83,18 @@ public class VisionIOLimelight implements VisionIO {
                         Rotation2d.fromDegrees(tySubscriber.get()));
 
         // Update orientation for MegaTag 2
+        if(cameraRotationSupplier != null){
+            Pose3d finalCamPose = initialCameraPose.transformBy(
+                new Transform3d(Translation3d.kZero, 
+                    new Rotation3d(0, 0, Math.toRadians(cameraRotationSupplier.getAsDouble()))));
+            LimelightHelpers.setCameraPose_RobotSpace(name, 
+                finalCamPose.getX(), 
+                finalCamPose.getY(), 
+                finalCamPose.getZ(), 
+                finalCamPose.getRotation().getX(), 
+                finalCamPose.getRotation().getY(), 
+                finalCamPose.getRotation().getZ());
+        }
         orientationPublisher.accept(
                 new double[] {rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0});
         NetworkTableInstance.getDefault()

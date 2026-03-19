@@ -83,10 +83,10 @@ public class RobotContainer {
 
         stats = new StatsSubsystem(this);
         drive = Drive.create(this, driveSimulation);
-        vision = Vision.create(this, drive, driveSimulation);
         // fuelVision = FuelVision.create(this);
         spindexter = Spindexter.create(this, spinSim);
         shooter = Shooter.create(this, shootSim);
+        vision = Vision.create(this, drive, shooter, driveSimulation);
         intake = Intake.create(this, iis);
         climber = Climber.create(this);
 

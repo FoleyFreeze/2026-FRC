@@ -61,11 +61,20 @@ public Supplier<Pose2d> poseMaker(double x, double y, double theta){
     );
 }
     public Command leftTrenchOutsideLoop(){
+        return twoScoopAuto(rightSideToNeutralZone, leftSideToNeutralZone);
+    }
+
+    public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
+        double initialShootWait = 1.2;
+        double firstShootTime = 3.8;
+        double secondShootTime = 5;
+
         SequentialCommandGroup sequence = new SequentialCommandGroup();
+        // first drop the intake as fast as possible
         sequence.addCommands(
                 ShooterCommands.smarterShootAndGather(
                                 r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(1.2)
+                        .withTimeout(initialShootWait)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stop().execute();
@@ -73,7 +82,34 @@ public Supplier<Pose2d> poseMaker(double x, double y, double theta){
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
                                 }));
-        sequence.addCommands(AutoBuilder.followPath(leftSideToNeutralZone).alongWith(r.intake.smartIntake()));
+
+        // drive the profile while intaking
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(AutoBuilder.followPath(path1), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        // shoot the balls while stationary
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(firstShootTime)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stop().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
+        sequence.addCommands(r.intake.fastDrop());
+
+        // drive the second profile while intaking
+        parallelGroup =
+                new ParallelDeadlineGroup(AutoBuilder.followPath(path2), r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        // shoot again for the remaining time
+        sequence.addCommands(
+                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                        .withTimeout(secondShootTime));
         return sequence;
     }
 }

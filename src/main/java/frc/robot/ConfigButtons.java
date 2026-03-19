@@ -50,7 +50,7 @@ public class ConfigButtons {
 
         // zero drive
         // TODO: blink LEDs or something
-        controller.start().debounce(2).onTrue(new InstantCommand(() -> r.drive.zeroDrive()));
+        controller.start().debounce(0.5).onTrue(new InstantCommand(() -> r.drive.zeroDrive()));
 
         // intake functions
         // TODO: Victor

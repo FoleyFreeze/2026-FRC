@@ -550,6 +550,7 @@ public class Drive extends SubsystemBase {
             zero = Rotation2d.k180deg;
         }
         poseEstimator.resetRotation(zero);
+        System.out.println("-------------Zero'd Swerve-------------");
     }
 
     /** Adds a new timestamped vision measurement. */

@@ -14,15 +14,14 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class DriveTuning {
 
-    public static void buildSysIdAutos(LoggedDashboardChooser<Command> autoChooser, RobotContainer r){
+    public static void buildSysIdAutos(
+            LoggedDashboardChooser<Command> autoChooser, RobotContainer r) {
         autoChooser.addOption(
-                "Drive Wheel Radius Characterization",
-                wheelRadiusCharacterization(r.drive));
+                "Drive Wheel Radius Characterization", wheelRadiusCharacterization(r.drive));
         autoChooser.addOption(
                 "Drive Simple FF Characterization", feedforwardCharacterization(r.drive));
         autoChooser.addOption(

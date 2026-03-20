@@ -19,7 +19,6 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
-
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -262,12 +261,17 @@ public class Drive extends SubsystemBase {
                                     .getDistance(this.getPose().getTranslation()));
                 });
 
-        //config swerve setpoint generator
-        previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
-        setpointGenerator = new SwerveSetpointGenerator(
-            PP_CONFIG, // The robot configuration. 
-            Units.rotationsToRadians(10.0) // The max rotation velocity of a swerve module in radians per second.
-        );
+        // config swerve setpoint generator
+        previousSetpoint =
+                new SwerveSetpoint(
+                        getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+        setpointGenerator =
+                new SwerveSetpointGenerator(
+                        PP_CONFIG, // The robot configuration.
+                        Units.rotationsToRadians(
+                                10.0) // The max rotation velocity of a swerve module in radians per
+                        // second.
+                        );
 
         // Configure SysId
         sysId =
@@ -423,19 +427,24 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
 
-    //auton driving function
+    // auton driving function
     public void driveRobotRelative(ChassisSpeeds speeds) {
         // Note: it is important to not discretize speeds before or after
         // using the setpoint generator, as it will discretize them for you
-        previousSetpoint = setpointGenerator.generateSetpoint(
-            previousSetpoint, // The previous setpoint
-            speeds, // The desired target speeds
-            0.02 // The loop time of the robot code, in seconds
-        );
-        setModuleStates(previousSetpoint.moduleStates()); // Method that will drive the robot given target module states
+        previousSetpoint =
+                setpointGenerator.generateSetpoint(
+                        previousSetpoint, // The previous setpoint
+                        speeds, // The desired target speeds
+                        0.02 // The loop time of the robot code, in seconds
+                        );
+        setModuleStates(
+                previousSetpoint
+                        .moduleStates()); // Method that will drive the robot given target module
+        // states
     }
-    public void setModuleStates(SwerveModuleState[] states){
-        for(int i=0;i<4;i++){
+
+    public void setModuleStates(SwerveModuleState[] states) {
+        for (int i = 0; i < 4; i++) {
             modules[i].runSetpoint(states[i]);
         }
     }

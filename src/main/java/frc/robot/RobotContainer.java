@@ -14,7 +14,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Mode;
 import frc.robot.auto.ChoreoAutos;
 import frc.robot.auto.PathAutos;
@@ -100,7 +99,7 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         // Set up auto routines
         pathAutos.buildAutos(autoChooser);
-        chAutos.buildAutos(autoChooser);
+        // chAutos.buildAutos(autoChooser);
 
         // Set up SysId routines
         DriveTuning.buildSysIdAutos(autoChooser, this);

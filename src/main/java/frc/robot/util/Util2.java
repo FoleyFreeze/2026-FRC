@@ -1,12 +1,11 @@
 package frc.robot.util;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import java.util.function.Supplier;
 
 public class Util2 {
 
@@ -46,10 +45,7 @@ public class Util2 {
         return setPoint;
     }
 
-    public Supplier<Pose2d> poseMaker(double x, double y, double theta){
-    return () -> new Pose2d(
-        new Translation2d(x, y),
-        new Rotation2d(theta)
-    );
-}
+    public Supplier<Pose2d> poseMaker(double x, double y, double theta) {
+        return () -> new Pose2d(new Translation2d(x, y), new Rotation2d(theta));
+    }
 }

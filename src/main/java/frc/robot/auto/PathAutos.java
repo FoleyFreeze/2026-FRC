@@ -1,67 +1,81 @@
 package frc.robot.auto;
 
-import java.util.List;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.RobotContainer;
 import frc.robot.FieldConstants;
-import frc.robot.FieldConstants.LeftTrench;
-import frc.robot.commands.PathFinderCommand;
+import frc.robot.RobotContainer;
 import frc.robot.commands.ShooterCommands;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class PathAutos {
     private RobotContainer r;
     public PathPlannerPath leftSideToNeutralZone = loadPath("LeftTrenchOutsideLoop");
-    public PathPlannerPath  rightSideToNeutralZone = leftSideToNeutralZone.flipPath(); 
-    public PathAutos(RobotContainer r){
+    public PathPlannerPath rightSideToNeutralZone = leftSideToNeutralZone.mirrorPath();
+    public PathPlannerPath leftSideTrenchToInside = loadPath("LeftTrenchInsideLoop");
+    public PathPlannerPath rightSideTrenchToInside = leftSideTrenchToInside.mirrorPath();
+    public PathPlannerPath leftDefenceDownCenter = loadPath("DefenceDownCenter");
+    public PathPlannerPath rightDefenceDownCenter = leftDefenceDownCenter.mirrorPath();
+    public PathPlannerPath leftBumpOutside = loadPath("LeftBumpOutsideLoop");
+    public PathPlannerPath rightBumpOutside = leftBumpOutside.mirrorPath();
+    public PathPlannerPath leftBumpInside = loadPath("LeftBumpInsideLoop");
+    public PathPlannerPath rightBumpInside = leftBumpInside.mirrorPath();
+
+    public PathAutos(RobotContainer r) {
         this.r = r;
     }
 
-    private PathPlannerPath loadPath(String name){
-        try{
+    private PathPlannerPath loadPath(String name) {
+        try {
             return PathPlannerPath.fromPathFile(name);
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Big oops:");
             System.out.println("Loading of path: " + name + " has failed:");
             e.printStackTrace();
 
             return new PathPlannerPath(
-                PathPlannerPath.waypointsFromPoses(new Pose2d()), 
-                new PathConstraints(0, 0, 0, 0), 
-                null, 
-                new GoalEndState(0, Rotation2d.kZero)
-            );
+                    PathPlannerPath.waypointsFromPoses(new Pose2d()),
+                    new PathConstraints(0, 0, 0, 0),
+                    null,
+                    new GoalEndState(0, Rotation2d.kZero));
         }
     }
-    
-    public void buildAutos(LoggedDashboardChooser<Command> autoChooser){
-        autoChooser.addOption("leftTrenchOneScoop", leftTrenchOutsideLoop());
+
+    public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
+        autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
+        autoChooser.addOption("RightTrenchOutside", rightTrenchOutsideLoop());
+        autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
+        autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
+
+
     }
 
-public Supplier<Pose2d> poseMaker(double x, double y, double theta){
-    return () -> new Pose2d(
-        new Translation2d(x, y),
-        new Rotation2d(theta)
-    );
-}
-    public Command leftTrenchOutsideLoop(){
-        return twoScoopAuto(rightSideToNeutralZone, leftSideToNeutralZone);
+    public Supplier<Pose2d> poseMaker(double x, double y, double theta) {
+        return () -> new Pose2d(new Translation2d(x, y), new Rotation2d(theta));
+    }
+
+    public Command leftTrenchOutsideLoop() {
+        return twoScoopAuto(leftSideToNeutralZone, leftSideTrenchToInside);
+    }
+
+    public Command rightTrenchOutsideLoop() {
+        return twoScoopAuto(rightSideToNeutralZone, rightSideTrenchToInside);
+    }
+
+    public Command leftBumpOutside() {
+        return twoScoopAuto(leftBumpOutside, leftBumpInside);
+    }
+
+    public Command rightBumpOutside() {
+        return twoScoopAuto(rightBumpOutside, rightBumpInside);
     }
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {

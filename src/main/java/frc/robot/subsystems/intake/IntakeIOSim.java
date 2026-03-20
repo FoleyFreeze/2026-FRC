@@ -38,7 +38,7 @@ public class IntakeIOSim implements IntakeIO {
                         Meters.of(
                                 Constants.frameWidth
                                         - Units.inchesToMeters(7)), // intake is 21 in wide
-                        Inches.of(10),
+                        Inches.of(6),
                         IntakeSide.FRONT,
                         hopperCapacity);
         intakeSimulation.addGamePiecesToIntake(100);

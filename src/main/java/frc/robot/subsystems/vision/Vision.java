@@ -48,11 +48,17 @@ public class Vision extends SubsystemBase {
 
         switch (Constants.currentMode) {
             case REAL:
-                //TODO: add shoot::getTurretAngle to turret camera (cam0) when turret is installed
+                // TODO: add shoot::getTurretAngle to turret camera (cam0) when turret is installed
                 return new Vision(
                         drive::addVisionMeasurement,
-                        new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation, VisionConstants.robotToCamera0),
-                        new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation, VisionConstants.robotToCamera1));
+                        new VisionIOLimelight(
+                                VisionConstants.camera0Name,
+                                drive::getRotation,
+                                VisionConstants.robotToCamera0),
+                        new VisionIOLimelight(
+                                VisionConstants.camera1Name,
+                                drive::getRotation,
+                                VisionConstants.robotToCamera1));
 
             case SIM:
                 return new Vision(

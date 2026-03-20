@@ -6,11 +6,11 @@ public interface FuelVisionIO {
 
     @AutoLog
     public static class FuelVisionIOInputs {
-        int seqNum;
-        float rioTime;
-        float imageTime;
-        FuelVisionData[] fuelData;
-        double now;
+        int seqNum = 0;
+        float rioTime = 0;
+        float imageTime = 0;
+        FuelVisionData[] fuelData = new FuelVisionData[0];
+        double now = 0;
     }
 
     public default void updateInputs(FuelVisionIOInputs inputs) {}

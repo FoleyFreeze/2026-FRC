@@ -74,4 +74,21 @@ public class FuelVision extends SubsystemBase {
         now.time = inputs.now;
         robotPoseBuffer.addFirst(now);
     }
+
+    public void getFuelPath(){
+        //return some kind of path that travels to the largest ball grouping and strafes into any smaller groups on the way
+        //we are thinking in straight-ish lines, either rays from the camera pov or lines along the field borders (plus bump/hub sides)
+        //estimate the ball count along these lines, and then drive the one with the most balls
+        
+        //define my lines
+            //8 field relative lines, 4 field borders, + 2 sides of red bump/hub + 2 sides of blue bump/hub
+            //N camera fov lines
+            //only allocate N lines, start at cam pov and when it intersects a field line, continue along that line
+        //for each ball group
+            //convert to field coords
+            //for each line
+
+        //keep track of the line with the most balls
+        //drive it
+    }
 }

@@ -106,8 +106,8 @@ public class IntakeIOHardware implements IntakeIO {
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 60;
-        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -60;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 70;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -70;
         cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         cfg.Feedback.FeedbackRemoteSensorID = 2;
         cfg.Feedback.RotorToSensorRatio = 52.0 / 16.0 * 52.0 / 24.0 * 54.0 / 18.0;
@@ -124,7 +124,7 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.Slot0.kP = 500;
         cfg.Slot0.kD = 120;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
-        cfg.CurrentLimits.StatorCurrentLimit = 60;
+        cfg.CurrentLimits.StatorCurrentLimit = 70;
         intakeBar.getConfigurator().apply(cfg);
 
         positionWheelL = wheelL.getPosition();

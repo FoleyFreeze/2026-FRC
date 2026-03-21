@@ -19,7 +19,7 @@ public class ConfigButtons {
     public static void config(RobotContainer r) {
 
         // drive functions
-        final double thetaReduction = Math.pow(0.75, 1.0 / DriveCommands.thetaExpo);
+        final double thetaReduction = Math.pow(0.65, 1.0 / DriveCommands.thetaExpo);
         r.drive.setDefaultCommand(
                 DriveCommands.joystickDriveTurnOut(
                         r.drive,

@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
 
 public class ConfigButtons {
@@ -19,12 +20,13 @@ public class ConfigButtons {
     public static void config(RobotContainer r) {
 
         // drive functions
+        final double thetaReduction = Math.pow(0.75, 1.0/DriveCommands.thetaExpo);
         r.drive.setDefaultCommand(
                 DriveCommands.joystickDriveTurnOut(
                         r.drive,
                         () -> -controller.getLeftY(),
                         () -> -controller.getLeftX(),
-                        () -> -controller.getRightX() * 0.75));
+                        () -> -controller.getRightX() * thetaReduction));
         r.shooter.setDefaultCommand(r.shooter.stop());
         r.spindexter.setDefaultCommand(r.spindexter.stop());
         r.intake.setDefaultCommand(r.intake.stopIntake());
@@ -34,13 +36,14 @@ public class ConfigButtons {
         // 0.69 ^ 2.5 is 0.40
         // 0.76 ^ 2.5 is 0.50
         // 0.82 ^ 2.5 is 0.60
+        final double xyReduce = Math.pow(0.4, 1.0/DriveCommands.xyExpo);
         controller
                 .leftStick()
                 .whileTrue(
                         DriveCommands.joystickDriveAtAngle(
                                 r.drive,
-                                () -> -controller.getLeftY() * 0.65,
-                                () -> -controller.getLeftX() * 0.65,
+                                () -> -controller.getLeftY() * xyReduce,
+                                () -> -controller.getLeftX() * xyReduce,
                                 r.drive::getTrenchAngle));
         // add drive through bump
         controller
@@ -48,8 +51,8 @@ public class ConfigButtons {
                 .whileTrue(
                         DriveCommands.joystickDriveAtAngle(
                                 r.drive,
-                                () -> -controller.getLeftY() * 0.65,
-                                () -> -controller.getLeftX() * 0.65,
+                                () -> -controller.getLeftY() * xyReduce,
+                                () -> -controller.getLeftX() * xyReduce,
                                 r.drive::getBumpAngle));
 
         // zero drive
@@ -95,14 +98,15 @@ public class ConfigButtons {
                                 r, controller, FieldConstants.Locations.passRight));
 
         // shoot hub RT
+        final double shootXyReduce = Math.pow(0.7, 1.0/DriveCommands.xyExpo);
         controller
                 .rightTrigger()
                 .and(controller.leftTrigger().negate())
                 .whileTrue(
                         ShooterCommands.smarterShootNoGather(
                                 r,
-                                () -> -controller.getLeftY() * 0.87,
-                                () -> -controller.getLeftX() * 0.87,
+                                () -> -controller.getLeftY() * shootXyReduce,
+                                () -> -controller.getLeftX() * shootXyReduce,
                                 FieldConstants.Hub.center));
 
         controller

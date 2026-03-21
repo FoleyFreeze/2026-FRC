@@ -617,7 +617,7 @@ public class Drive extends SubsystemBase {
 
     public Rotation2d getTrenchAngle() {
         Rotation2d botAngle = getRotation();
-        double targetAngle = Util2.wrapAngle(botAngle.getDegrees(), 90);
+        double targetAngle = Util2.wrapAngle(botAngle.getDegrees(), 180);
         return Rotation2d.fromDegrees(targetAngle);
     }
 }

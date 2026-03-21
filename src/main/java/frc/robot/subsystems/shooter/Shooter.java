@@ -237,11 +237,12 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
         Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
 
-        hoodTarget = setpoints.hood();
-        rpmTarget = setpoints.rpm();
+        // hoodTarget = setpoints.hood();
+        // rpmTarget = setpoints.rpm();
         manageTurretWrap(angleSetpoint, setpoints.turretVel());
-        io.setHoodAngle(setpoints.hood());
-        io.setSpeed(setpoints.rpm());
+        setShotSpeedAngle(setpoints.hood(), setpoints.rpm(), shootMode != ShootMode.HUB);
+        // io.setHoodAngle(setpoints.hood());
+        // io.setSpeed(setpoints.rpm());
     }
 
     // for the current no-turret
@@ -276,13 +277,15 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
         Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
 
-        hoodTarget = setpoints.hood();
-        rpmTarget = setpoints.rpm();
+        // hoodTarget = setpoints.hood();
+        // rpmTarget = setpoints.rpm();
         // manageTurretWrap(angleSetpoint, setpoints.turretVel());
         rotationThing.accept(Rotation2d.fromDegrees(angleSetpoint));
         velocityThing.accept(Math.toRadians(setpoints.turretVel()));
-        io.setHoodAngle(setpoints.hood());
-        io.setSpeed(setpoints.rpm());
+        setShotSpeedAngle(
+                setpoints.hood(), setpoints.rpm(), localgoal != FieldConstants.Hub.center);
+        // io.setHoodAngle(setpoints.hood());
+        // io.setSpeed(setpoints.rpm());
     }
 
     // for the eventual turret
@@ -312,11 +315,12 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
         Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
 
-        hoodTarget = setpoints.hood();
-        rpmTarget = setpoints.rpm();
+        // hoodTarget = setpoints.hood();
+        // rpmTarget = setpoints.rpm();
         manageTurretWrap(angleSetpoint, setpoints.turretVel());
-        io.setHoodAngle(setpoints.hood());
-        io.setSpeed(setpoints.rpm());
+        setShotSpeedAngle(setpoints.hood(), setpoints.rpm(), goal != FieldConstants.Hub.center);
+        // io.setHoodAngle(setpoints.hood());
+        // io.setSpeed(setpoints.rpm());
     }
 
     public void manualPrime(double rpm, double hoodAngle) {
@@ -488,6 +492,22 @@ public class Shooter extends SubsystemBase {
                     // io.turretPower(turretPower.getAsDouble());
                 },
                 this);
+    }
+
+    public void setShotSpeedAngle(double hoodAngle, double rpm, boolean isPass) {
+        if (isPass) {
+            hoodAngle += jogPassAngle;
+            rpm += jogHubRpm;
+        } else {
+            hoodAngle += jogHubAngle;
+            rpm += jogHubRpm;
+        }
+
+        hoodTarget = hoodAngle;
+        rpmTarget = rpm;
+
+        io.setHoodAngle(hoodAngle);
+        io.setSpeed(rpm);
     }
 
     public double getAngleCRT(double e1Deg, double e2Deg) {

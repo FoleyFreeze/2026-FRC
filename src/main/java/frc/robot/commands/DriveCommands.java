@@ -41,6 +41,9 @@ public class DriveCommands {
     private static double ANGLE_MAX_VELOCITY = 8.0;
     private static double ANGLE_MAX_ACCELERATION = 10.0;
 
+    public static double xyExpo = 2.5;
+    public static double thetaExpo = 3;
+
     private DriveCommands() {}
 
     static NetworkTableEntry angleKpSet =
@@ -65,7 +68,7 @@ public class DriveCommands {
         Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
         // Square magnitude for more precise control
-        linearMagnitude = Math.pow(linearMagnitude, 2.5);
+        linearMagnitude = Math.pow(linearMagnitude, xyExpo);
 
         // Return new linear velocity
         return new Pose2d(Translation2d.kZero, linearDirection)
@@ -92,7 +95,7 @@ public class DriveCommands {
                     double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
                     // Square rotation value for more precise control
-                    omega = Math.copySign(Math.pow(Math.abs(omega), 2.5), omega);
+                    omega = Math.copySign(Math.pow(Math.abs(omega), thetaExpo), omega);
 
                     // Convert to field relative speeds & send command
                     ChassisSpeeds speeds =
@@ -135,7 +138,7 @@ public class DriveCommands {
                     double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
                     // Square rotation value for more precise control
-                    omega = Math.copySign(Math.pow(Math.abs(omega), 2.5), omega);
+                    omega = Math.copySign(Math.pow(Math.abs(omega), thetaExpo), omega);
 
                     // Convert to field relative speeds & send command
                     ChassisSpeeds speeds =

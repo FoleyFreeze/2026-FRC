@@ -163,6 +163,16 @@ public class Intake extends SubsystemBase {
                 .until(() -> inputs.wheelVelocity > velSetpoint))*/ ;
     }
 
+    public Command shakeTheIntake(){
+        SequentialCommandGroup shakeTheIntake = new SequentialCommandGroup();
+        shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.extend()));
+        shakeTheIntake.addCommands(r.intake.stopIntake());
+        shakeTheIntake.addCommands(new WaitCommand(0.35));
+        shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.retract()));
+        shakeTheIntake.addCommands(r.intake.smartIntake().withTimeout(1.5));
+        return shakeTheIntake.repeatedly().finallyDo(() -> r.intake.extend());
+    }
+
     public double getAngle() {
         return Units.rotationsToDegrees(inputs.armPosition);
     }

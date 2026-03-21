@@ -64,14 +64,6 @@ public class ShooterCommands {
         Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
         Thing<Double> velocityThing = new Thing<>(); // thing2
 
-        SequentialCommandGroup shakeTheIntake = new SequentialCommandGroup();
-        shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.extend()));
-        shakeTheIntake.addCommands(r.intake.stopIntake());
-        shakeTheIntake.addCommands(new WaitCommand(0.35));
-        shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.retract()));
-        shakeTheIntake.addCommands(r.intake.smartIntake().withTimeout(1.5));
-        Command shakeCommand = shakeTheIntake.repeatedly().finallyDo(() -> r.intake.extend());
-
         // run shoot, drive, and index in parallel
         ParallelCommandGroup parallelGroup = new ParallelCommandGroup();
         parallelGroup.addCommands(
@@ -84,7 +76,7 @@ public class ShooterCommands {
                 DriveCommands.driveAtAngleFFw(
                         r.drive, driveX, driveY, rotationThing, velocityThing));
         parallelGroup.addCommands(r.spindexter.smarterSpinCmd());
-        parallelGroup.addCommands(shakeCommand);
+        parallelGroup.addCommands(r.intake.shakeTheIntake());
 
         return parallelGroup;
     }

@@ -35,6 +35,9 @@ public class Intake extends SubsystemBase {
     private static final double wheelSpeed = 1500; // rpm
     private static final double unjamWheelSpeed = -1000;
 
+    private static final double intakeInPower = 0.6;
+    private static final double intakeOutPower = -0.5;
+
     // TODO: set false when we are allowed to use arm again
     private boolean armDisabled = true;
     private boolean overrideToSpinWheels = false;
@@ -90,7 +93,7 @@ public class Intake extends SubsystemBase {
                     if (!armDisabled || overrideToSpinWheels) {
                         if (inputs.armPosition <= armStartWheelPos) {
                             // io.wheelSpeed(wheelSpeed);
-                            io.wheelPower(1);
+                            io.wheelPower(intakeInPower);
                         } else {
                             io.wheelPower(0);
                         }
@@ -107,12 +110,12 @@ public class Intake extends SubsystemBase {
 
     public Command dumbIntake() {
         // return new RunCommand(() -> io.wheelSpeed(wheelSpeed), this);
-        return new RunCommand(() -> io.wheelPower(1), this);
+        return new RunCommand(() -> io.wheelPower(intakeInPower), this);
     }
 
     public Command unjamIntake() {
         // return new RunCommand(() -> io.wheelSpeed(unjamWheelSpeed), this);
-        return new RunCommand(() -> io.wheelPower(-0.5), this);
+        return new RunCommand(() -> io.wheelPower(intakeOutPower), this);
     }
 
     double velSetpoint = 0;
@@ -131,7 +134,7 @@ public class Intake extends SubsystemBase {
                     velSetpoint = speed - velReduction;
                     Logger.recordOutput("Intake/VelSepoint", velSetpoint);
                     // io.wheelSpeed(velSetpoint);
-                    io.wheelPower(1);
+                    io.wheelPower(intakeInPower);
                 },
                 this);
     }
@@ -152,8 +155,9 @@ public class Intake extends SubsystemBase {
                                         intakeDebounce.calculate(
                                                 Math.abs(velSetpoint - inputs.wheelLVelocity)
                                                         > rpmOffset)));
-        intakeSequence.addCommands(
-                unjamIntake().withTimeout(unjamTime).until(() -> inputs.wheelLVelocity < -200));
+        // TODO: commented out until we return to speed control
+        // intakeSequence.addCommands(
+        //         unjamIntake().withTimeout(unjamTime).until(() -> inputs.wheelLVelocity < -200));
 
         return intakeSequence.repeatedly()
         // this uses a higher current limit for open loop control to help it get started

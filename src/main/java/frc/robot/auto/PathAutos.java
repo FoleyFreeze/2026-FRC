@@ -50,10 +50,10 @@ public class PathAutos {
     }
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
-        autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
-        autoChooser.addOption("RightTrenchOutside", rightTrenchOutsideLoop());
-        autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
-        autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
+        // autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
+        // autoChooser.addOption("RightTrenchOutside", rightTrenchOutsideLoop());
+        // autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
+        // autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
     }
 
     public Supplier<Pose2d> poseMaker(double x, double y, double theta) {

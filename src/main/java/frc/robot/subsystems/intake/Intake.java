@@ -150,10 +150,10 @@ public class Intake extends SubsystemBase {
                         .until(
                                 () ->
                                         intakeDebounce.calculate(
-                                                Math.abs(velSetpoint - inputs.wheelVelocity)
+                                                Math.abs(velSetpoint - inputs.wheelLVelocity)
                                                         > rpmOffset)));
         intakeSequence.addCommands(
-                unjamIntake().withTimeout(unjamTime).until(() -> inputs.wheelVelocity < -200));
+                unjamIntake().withTimeout(unjamTime).until(() -> inputs.wheelLVelocity < -200));
 
         return intakeSequence.repeatedly()
         // this uses a higher current limit for open loop control to help it get started
@@ -163,7 +163,7 @@ public class Intake extends SubsystemBase {
                 .until(() -> inputs.wheelVelocity > velSetpoint))*/ ;
     }
 
-    public Command shakeTheIntake(){
+    public Command shakeTheIntake() {
         SequentialCommandGroup shakeTheIntake = new SequentialCommandGroup();
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.extend()));
         shakeTheIntake.addCommands(r.intake.stopIntake());

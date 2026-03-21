@@ -8,6 +8,7 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
@@ -18,6 +19,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.filter.Debouncer;
@@ -31,7 +33,8 @@ import frc.robot.generated.TunerConstants;
 
 public class IntakeIOHardware implements IntakeIO {
 
-    private final TalonFX wheel;
+    private final TalonFX wheelL;
+    private final TalonFX wheelR;
     private final TalonFX intakeBar;
     private final CANcoder intakeAbsEnc;
 
@@ -47,23 +50,26 @@ public class IntakeIOHardware implements IntakeIO {
     private final MotionMagicTorqueCurrentFOC motionRequestArm =
             new MotionMagicTorqueCurrentFOC(0).withSlot(1);
 
-    private final StatusSignal<Angle> positionWheel;
+    private final StatusSignal<Angle> positionWheelL;
     private final StatusSignal<Angle> positionArm;
     private final StatusSignal<Angle> positionArmAbs;
-    private final StatusSignal<Voltage> voltageWheel;
+    private final StatusSignal<Voltage> voltageWheelL;
     private final StatusSignal<Voltage> voltageArm;
-    private final StatusSignal<Current> currentWheel;
+    private final StatusSignal<Current> currentWheelL;
     private final StatusSignal<Current> currentArm;
-    private final StatusSignal<Temperature> tempWheel;
+    private final StatusSignal<Temperature> tempWheelL;
     private final StatusSignal<Temperature> tempArm;
-    private final StatusSignal<AngularVelocity> angularVelocityWheel;
+    private final StatusSignal<AngularVelocity> angularVelocityWheelL;
     private final StatusSignal<AngularVelocity> angularVelocityArm;
+
+    private final StatusSignal<Current> currentWheelR;
+    private final StatusSignal<Temperature> tempWheelR;
 
     private final Debouncer wheelConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer armConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
     public IntakeIOHardware() {
-        wheel = new TalonFX(3, TunerConstants.kCANBus);
+        wheelL = new TalonFX(3, TunerConstants.kCANBus);
         var cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -76,7 +82,18 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.MotionMagic.MotionMagicJerk = 0;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
         cfg.CurrentLimits.StatorCurrentLimit = 60;
-        wheel.getConfigurator().apply(cfg);
+        wheelL.getConfigurator().apply(cfg);
+
+        wheelR = new TalonFX(16, TunerConstants.kCANBus);
+        cfg = new TalonFXConfiguration();
+        cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        cfg.TorqueCurrent.PeakForwardTorqueCurrent = 60;
+        cfg.TorqueCurrent.PeakReverseTorqueCurrent = -60;
+        cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+        cfg.CurrentLimits.StatorCurrentLimit = 60;
+        wheelR.getConfigurator().apply(cfg);
+        wheelR.setControl(new Follower(3, MotorAlignmentValue.Opposed));
 
         intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);
         var encCfg = new CANcoderConfiguration();
@@ -110,39 +127,50 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.CurrentLimits.StatorCurrentLimit = 60;
         intakeBar.getConfigurator().apply(cfg);
 
-        positionWheel = wheel.getPosition();
+        positionWheelL = wheelL.getPosition();
         positionArm = intakeBar.getPosition();
-        voltageWheel = wheel.getMotorVoltage();
+        voltageWheelL = wheelL.getMotorVoltage();
         voltageArm = intakeBar.getMotorVoltage();
-        currentWheel = wheel.getStatorCurrent();
+        currentWheelL = wheelL.getStatorCurrent();
         currentArm = intakeBar.getStatorCurrent();
-        tempWheel = wheel.getDeviceTemp();
+        tempWheelL = wheelL.getDeviceTemp();
         tempArm = intakeBar.getDeviceTemp();
-        angularVelocityWheel = wheel.getVelocity();
+        angularVelocityWheelL = wheelL.getVelocity();
         angularVelocityArm = intakeBar.getVelocity();
         positionArmAbs = intakeAbsEnc.getPosition();
 
+        currentWheelR = wheelR.getTorqueCurrent();
+        tempWheelR = wheelR.getDeviceTemp();
+
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50,
-                positionWheel,
+                positionWheelL,
                 positionArm,
-                voltageWheel,
+                voltageWheelL,
                 voltageArm,
-                currentWheel,
+                currentWheelL,
                 currentArm,
-                tempWheel,
+                tempWheelL,
                 tempArm,
-                angularVelocityWheel,
+                angularVelocityWheelL,
                 angularVelocityArm,
-                positionArmAbs);
-        ParentDevice.optimizeBusUtilizationForAll(wheel, intakeBar, intakeAbsEnc);
+                positionArmAbs,
+                currentWheelR,
+                tempWheelR);
+        ParentDevice.optimizeBusUtilizationForAll(wheelL, wheelR, intakeBar, intakeAbsEnc);
     }
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
         StatusCode wheelStatus =
                 BaseStatusSignal.refreshAll(
-                        positionWheel, voltageWheel, currentWheel, tempWheel, angularVelocityWheel);
+                        positionWheelL,
+                        voltageWheelL,
+                        currentWheelL,
+                        tempWheelL,
+                        angularVelocityWheelL,
+                        currentWheelR,
+                        tempWheelR);
         StatusCode armStatus =
                 BaseStatusSignal.refreshAll(
                         positionArm,
@@ -153,27 +181,30 @@ public class IntakeIOHardware implements IntakeIO {
                         positionArmAbs);
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
         inputs.armConnected = armConnectedDebounce.calculate(armStatus.isOK());
-        inputs.wheelPosition = positionWheel.getValue().in(Rotations);
+        inputs.wheelLPosition = positionWheelL.getValue().in(Rotations);
         inputs.armPosition = positionArm.getValue().in(Rotations);
-        inputs.wheelVoltage = voltageWheel.getValueAsDouble();
+        inputs.wheelLVoltage = voltageWheelL.getValueAsDouble();
         inputs.armVoltage = voltageArm.getValueAsDouble();
-        inputs.wheelCurrent = currentWheel.getValueAsDouble();
+        inputs.wheelLCurrent = currentWheelL.getValueAsDouble();
         inputs.armCurrent = currentArm.getValueAsDouble();
-        inputs.wheelTemp = tempWheel.getValueAsDouble();
+        inputs.wheelLTemp = tempWheelL.getValueAsDouble();
         inputs.armTemp = tempArm.getValueAsDouble();
-        inputs.wheelVelocity = angularVelocityWheel.getValue().in(RPM);
+        inputs.wheelLVelocity = angularVelocityWheelL.getValue().in(RPM);
         inputs.armVelocity = angularVelocityArm.getValue().in(RPM);
         inputs.armPositionAbs = positionArmAbs.getValue().in(Rotations);
+
+        inputs.wheelRCurrent = currentWheelR.getValueAsDouble();
+        inputs.wheelRTemp = tempWheelR.getValueAsDouble();
     }
 
     @Override
     public void wheelPower(double power) {
-        wheel.setControl(voltageRequestWheel.withOutput(power * 12));
+        wheelL.setControl(voltageRequestWheel.withOutput(power * 12));
     }
 
     @Override
     public void wheelSpeed(double speed) {
-        wheel.setControl(velocityRequestWheel.withVelocity(speed / 60));
+        wheelL.setControl(velocityRequestWheel.withVelocity(speed / 60));
     }
 
     @Override

@@ -54,8 +54,6 @@ public class PathAutos {
         autoChooser.addOption("RightTrenchOutside", rightTrenchOutsideLoop());
         autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
         autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
-
-
     }
 
     public Supplier<Pose2d> poseMaker(double x, double y, double theta) {

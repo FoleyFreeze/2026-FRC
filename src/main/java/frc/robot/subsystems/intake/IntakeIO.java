@@ -15,11 +15,14 @@ public interface IntakeIO {
         public double armPositionAbs = 0;
 
         public boolean wheelConnected = false;
-        public double wheelVoltage = 0;
-        public double wheelCurrent = 0;
-        public double wheelPosition = 0;
-        public double wheelVelocity = 0;
-        public double wheelTemp = 0;
+        public double wheelLVoltage = 0;
+        public double wheelLCurrent = 0;
+        public double wheelLPosition = 0;
+        public double wheelLVelocity = 0;
+        public double wheelLTemp = 0;
+
+        public double wheelRCurrent = 0;
+        public double wheelRTemp = 0;
     }
 
     public default void updateInputs(IntakeIOInputs inputs) {}

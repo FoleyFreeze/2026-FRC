@@ -97,12 +97,12 @@ public class IntakeIOSim implements IntakeIO {
         inputs.armTemp = 0;
 
         inputs.wheelConnected = true;
-        inputs.wheelVelocity =
+        inputs.wheelLVelocity =
                 Units.radiansPerSecondToRotationsPerMinute(wheel.getAngularVelocityRadPerSec());
-        inputs.wheelPosition += 0.02 * inputs.wheelVelocity / 60.0;
-        inputs.wheelVoltage = wheelControlVoltage;
-        inputs.wheelCurrent = wheel.getCurrentDrawAmps();
-        inputs.wheelTemp = 0;
+        inputs.wheelLPosition += 0.02 * inputs.wheelLVelocity / 60.0;
+        inputs.wheelLVoltage = wheelControlVoltage;
+        inputs.wheelLCurrent = wheel.getCurrentDrawAmps();
+        inputs.wheelLTemp = 0;
 
         // do sim things
         if (inputs.armPosition < Units.degreesToRadians(10)) {

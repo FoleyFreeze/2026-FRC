@@ -31,6 +31,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
+    private Command prevAuto;
     private RobotContainer robotContainer;
     private boolean lastPdhStatus = true;
     public PowerDistribution pdh;
@@ -113,21 +114,32 @@ public class Robot extends LoggedRobot {
     /** This function is called periodically when disabled. */
     @Override
     public void disabledPeriodic() {
-        if(DriverStation.isFMSAttached()){
-            if(lastPdhStatus){
+        if (DriverStation.isFMSAttached()) {
+            if (lastPdhStatus) {
 
             } else {
                 pdh.setSwitchableChannel(true);
                 lastPdhStatus = true;
             }
         } else {
-            if(lastPdhStatus){
+            if (lastPdhStatus) {
                 pdh.setSwitchableChannel(false);
                 lastPdhStatus = false;
             } else {
 
             }
         }
+
+        // rezero to the start point of the auton
+        // autonomousCommand = robotContainer.getAutonomousCommand();
+        // if (prevAuto != autonomousCommand) {
+        //     System.out.println("Updated auto");
+        //     if (robotContainer.pathAutos.pathMap.containsKey(autonomousCommand)) {
+        //         // this should zero to auton initial state
+        //         robotContainer.pathAutos.pathMap.get(autonomousCommand).run();
+        //     }
+        //     prevAuto = autonomousCommand;
+        // }
     }
 
     /**
@@ -155,7 +167,7 @@ public class Robot extends LoggedRobot {
     public void teleopInit() {
         pdh.setSwitchableChannel(true);
         lastPdhStatus = true;
-        
+
         // This makes sure that the autonomous stops running when
         // teleop starts running. If you want the autonomous to
         // continue until interrupted by another command, remove

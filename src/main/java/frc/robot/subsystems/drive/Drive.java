@@ -562,6 +562,14 @@ public class Drive extends SubsystemBase {
         System.out.println("-------------Zero'd Swerve-------------");
     }
 
+    public void setRotation(Rotation2d rotation) {
+        if (Util2.isRedAlliance()) {
+            poseEstimator.resetRotation(rotation.plus(Rotation2d.k180deg));
+        } else {
+            poseEstimator.resetRotation(rotation);
+        }
+    }
+
     /** Adds a new timestamped vision measurement. */
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters,

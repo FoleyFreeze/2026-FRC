@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ShooterCommands;
+import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -28,6 +29,8 @@ public class PathAutos {
     public PathPlannerPath rightBumpOutside = leftBumpOutside.mirrorPath();
     public PathPlannerPath leftBumpInside = loadPath("LeftBumpInsideLoop");
     public PathPlannerPath rightBumpInside = leftBumpInside.mirrorPath();
+
+    public HashMap<Command, Runnable> pathMap = new HashMap<>();
 
     public PathAutos(RobotContainer r) {
         this.r = r;
@@ -50,10 +53,10 @@ public class PathAutos {
     }
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
-        // autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
-        // autoChooser.addOption("RightTrenchOutside", rightTrenchOutsideLoop());
-        // autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
-        // autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
+        autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
+        autoChooser.addOption("RightTrenchOutside", rightTrenchOutsideLoop());
+        autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
+        autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
     }
 
     public Supplier<Pose2d> poseMaker(double x, double y, double theta) {
@@ -61,19 +64,37 @@ public class PathAutos {
     }
 
     public Command leftTrenchOutsideLoop() {
-        return twoScoopAuto(leftSideToNeutralZone, leftSideTrenchToInside);
+        Command auto = twoScoopAuto(leftSideToNeutralZone, leftSideTrenchToInside);
+        Runnable run =
+                () -> r.drive.setRotation(leftSideToNeutralZone.getIdealStartingState().rotation());
+        pathMap.put(auto, run);
+        return auto;
     }
 
     public Command rightTrenchOutsideLoop() {
-        return twoScoopAuto(rightSideToNeutralZone, rightSideTrenchToInside);
+        Command auto = twoScoopAuto(rightSideToNeutralZone, rightSideTrenchToInside);
+        Runnable run =
+                () ->
+                        r.drive.setRotation(
+                                rightSideToNeutralZone.getIdealStartingState().rotation());
+        pathMap.put(auto, run);
+        return auto;
     }
 
     public Command leftBumpOutside() {
-        return twoScoopAuto(leftBumpOutside, leftBumpInside);
+        Command auto = twoScoopAuto(leftBumpOutside, leftBumpInside);
+        Runnable run =
+                () -> r.drive.setRotation(leftBumpOutside.getIdealStartingState().rotation());
+        pathMap.put(auto, run);
+        return auto;
     }
 
     public Command rightBumpOutside() {
-        return twoScoopAuto(rightBumpOutside, rightBumpInside);
+        Command auto = twoScoopAuto(rightBumpOutside, rightBumpInside);
+        Runnable run =
+                () -> r.drive.setRotation(rightBumpOutside.getIdealStartingState().rotation());
+        pathMap.put(auto, run);
+        return auto;
     }
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {

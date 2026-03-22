@@ -11,6 +11,7 @@ public interface IntakeIO {
         public double armPosition = 0;
         public double armVelocity = 0;
         public double armTemp = 0;
+        public double armSupplyCurrent = 0;
 
         public double armPositionAbs = 0;
 
@@ -20,9 +21,11 @@ public interface IntakeIO {
         public double wheelLPosition = 0;
         public double wheelLVelocity = 0;
         public double wheelLTemp = 0;
+        public double wheelLSupplyCurrent = 0;
 
         public double wheelRCurrent = 0;
         public double wheelRTemp = 0;
+        public double wheelRSupplyCurrent = 0;
     }
 
     public default void updateInputs(IntakeIOInputs inputs) {}

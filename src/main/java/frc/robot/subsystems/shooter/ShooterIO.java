@@ -11,9 +11,11 @@ public interface ShooterIO {
         public double wheelPosition = 0;
         public double wheelVelocityRPM = 0;
         public double wheelTemp = 0;
+        public double wheelSupplyCurrent = 0;
 
         public double wheel2Temp = 0;
         public double wheel2Current = 0;
+        public double wheel2SupplyCurrent = 0;
 
         public boolean hoodConnected = false;
         public double hoodVoltage = 0;
@@ -22,6 +24,7 @@ public interface ShooterIO {
         public double hoodPositionRaw = 0;
         public double hoodVelocity = 0;
         public double hoodTemp = 0;
+        public double hoodSupplyCurrent = 0;
 
         public boolean turretConnected = false;
         public double turretVoltage = 0;
@@ -29,6 +32,7 @@ public interface ShooterIO {
         public double turretPositionDeg = 0;
         public double turretVelocity = 0;
         public double turretTemp = 0;
+        public double turretSupplyCurrent = 0;
 
         public double turretAbsEnc1Deg = 0;
         public double turretAbsEnc2Deg = 0;

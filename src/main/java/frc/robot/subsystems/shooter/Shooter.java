@@ -511,7 +511,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getAngleCRT(double e1Deg, double e2Deg) {
-        final double t_teeth = 172;
+        final double t_teeth = 220;
         final double e1_teeth = 27;
         final double e2_teeth = 29;
         final double maxTurretDegrees = 400;

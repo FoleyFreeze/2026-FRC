@@ -11,6 +11,7 @@ public interface SpindexterIO {
         public double gatePosition = 0;
         public double gateVelocity = 0;
         public double gateTemp = 0;
+        public double gateSupplyCurrent = 0;
 
         public boolean spinConnected = false;
         public double spinVoltage = 0;
@@ -18,6 +19,7 @@ public interface SpindexterIO {
         public double spinPosition = 0;
         public double spinVelocity = 0;
         public double spinTemp = 0;
+        public double spinSupplyCurrent = 0;
     }
 
     public default void updateInputs(SpindexterIOInputs inputs) {}

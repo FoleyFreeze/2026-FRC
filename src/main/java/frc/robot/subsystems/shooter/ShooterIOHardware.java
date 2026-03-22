@@ -62,23 +62,32 @@ public class ShooterIOHardware implements ShooterIO {
     private PositionTorqueCurrentFOC positionRequestTurret = new PositionTorqueCurrentFOC(0);
 
     private final StatusSignal<Angle> positionWheel;
-    private final StatusSignal<Angle> positionHood;
-    private StatusSignal<Angle> positionTurret;
     private final StatusSignal<Voltage> voltageWheel;
-    private final StatusSignal<Voltage> voltageHood;
-    private StatusSignal<Voltage> voltageTurret;
     private final StatusSignal<Current> currentWheel;
-    private final StatusSignal<Current> currentWheel2;
-    private final StatusSignal<Current> currentHood;
-    private StatusSignal<Current> currentTurret;
     private final StatusSignal<Temperature> tempWheel;
-    private final StatusSignal<Temperature> tempWheel2;
-    private final StatusSignal<Temperature> tempHood;
-    private StatusSignal<Temperature> tempTurret;
     private final StatusSignal<AngularVelocity> angularVelocityWheel;
+    private final StatusSignal<Current> supplyCurrentWheel;
+
+    private final StatusSignal<Current> currentWheel2;
+    private final StatusSignal<Temperature> tempWheel2;
+    private final StatusSignal<Current> supplyCurrentWheel2;
+
+    private final StatusSignal<Angle> positionHood;
+    private final StatusSignal<Voltage> voltageHood;
+    private final StatusSignal<Current> currentHood;
+    private final StatusSignal<Temperature> tempHood;
     private final StatusSignal<AngularVelocity> angularVelocityHood;
+    private final StatusSignal<Current> supplyCurrentHood;
+
+    private StatusSignal<Angle> positionTurret;
+    private StatusSignal<Voltage> voltageTurret;
+    private StatusSignal<Current> currentTurret;
+    private StatusSignal<Temperature> tempTurret;
     private StatusSignal<AngularVelocity> angularVelocityTurret;
+    private StatusSignal<Current> supplyCurrentTurret;
+    
     private final StatusSignal<Angle> positionHoodAbs;
+
 
     private final Debouncer wheelConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer hoodConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
@@ -130,25 +139,33 @@ public class ShooterIOHardware implements ShooterIO {
             turret = new TalonFX(0);
             // TODO: cfg
 
+            positionTurret = turret.getPosition();
             voltageTurret = turret.getMotorVoltage();
             currentTurret = turret.getTorqueCurrent();
             tempTurret = turret.getDeviceTemp();
             angularVelocityTurret = turret.getVelocity();
+            supplyCurrentTurret = turret.getSupplyCurrent();
         }
 
         positionWheel = wheel.getPosition();
-        positionHood = hood.getPosition();
         voltageWheel = wheel.getMotorVoltage();
-        voltageHood = hood.getMotorVoltage();
         currentWheel = wheel.getTorqueCurrent();
-        currentHood = hood.getTorqueCurrent();
         tempWheel = wheel.getDeviceTemp();
-        tempHood = hood.getDeviceTemp();
         angularVelocityWheel = wheel.getVelocity();
-        angularVelocityHood = hood.getVelocity();
-        positionHoodAbs = hoodAbsEnc.getAbsolutePosition();
+        supplyCurrentWheel = wheel.getSupplyCurrent();
+
         tempWheel2 = wheel2.getDeviceTemp();
         currentWheel2 = wheel2.getTorqueCurrent();
+        supplyCurrentWheel2 = wheel2.getSupplyCurrent();
+
+        positionHood = hood.getPosition();
+        voltageHood = hood.getMotorVoltage();
+        currentHood = hood.getTorqueCurrent();
+        tempHood = hood.getDeviceTemp();
+        angularVelocityHood = hood.getVelocity();
+        supplyCurrentHood = hood.getSupplyCurrent();
+        
+        positionHoodAbs = hoodAbsEnc.getAbsolutePosition();
 
         if (hasTurret) {
             BaseStatusSignal.setUpdateFrequencyForAll(
@@ -157,7 +174,8 @@ public class ShooterIOHardware implements ShooterIO {
                     voltageTurret,
                     currentTurret,
                     tempTurret,
-                    angularVelocityTurret);
+                    angularVelocityTurret,
+                    supplyCurrentTurret);
             ParentDevice.optimizeBusUtilizationForAll(turret);
         }
 
@@ -176,7 +194,10 @@ public class ShooterIOHardware implements ShooterIO {
                 angularVelocityHood,
                 positionHoodAbs,
                 currentWheel2,
-                tempWheel2);
+                tempWheel2,
+                supplyCurrentHood,
+                supplyCurrentWheel,
+                supplyCurrentWheel2);
         ParentDevice.optimizeBusUtilizationForAll(wheel, wheel2, hood, hoodAbsEnc);
     }
 
@@ -190,7 +211,9 @@ public class ShooterIOHardware implements ShooterIO {
                         tempWheel,
                         angularVelocityWheel,
                         tempWheel2,
-                        currentWheel2);
+                        currentWheel2,
+                        supplyCurrentWheel,
+                        supplyCurrentWheel2);
         StatusCode hoodStatus =
                 BaseStatusSignal.refreshAll(
                         positionHood,
@@ -198,7 +221,8 @@ public class ShooterIOHardware implements ShooterIO {
                         currentHood,
                         tempHood,
                         angularVelocityHood,
-                        positionHoodAbs);
+                        positionHoodAbs,
+                        supplyCurrentHood);
 
         if (hasTurret) {
             StatusCode turretStatus =
@@ -207,13 +231,15 @@ public class ShooterIOHardware implements ShooterIO {
                             voltageTurret,
                             currentTurret,
                             tempTurret,
-                            angularVelocityTurret);
+                            angularVelocityTurret,
+                            supplyCurrentTurret);
             inputs.turretConnected = turretConnectedDebounce.calculate(turretStatus.isOK());
             inputs.turretPositionDeg = positionTurret.getValue().in(Degrees);
             inputs.turretVoltage = voltageTurret.getValueAsDouble();
             inputs.turretCurrent = currentTurret.getValueAsDouble();
             inputs.turretTemp = tempTurret.getValueAsDouble();
             inputs.turretVelocity = angularVelocityTurret.getValue().in(DegreesPerSecond);
+            inputs.turretSupplyCurrent = supplyCurrentTurret.getValueAsDouble();
         }
 
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
@@ -230,6 +256,10 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.hoodAbsEncRotations = positionHoodAbs.getValueAsDouble();
         inputs.wheel2Temp = tempWheel2.getValueAsDouble();
         inputs.wheel2Current = currentWheel2.getValueAsDouble();
+
+        inputs.wheelSupplyCurrent = supplyCurrentWheel.getValueAsDouble();
+        inputs.wheel2SupplyCurrent = supplyCurrentWheel2.getValueAsDouble();
+        inputs.hoodSupplyCurrent = supplyCurrentHood.getValueAsDouble();
 
         double rawHoodPosition = positionHood.getValue().in(Rotations);
         inputs.hoodPositionRaw = rawHoodPosition;

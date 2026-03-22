@@ -40,12 +40,14 @@ public class SpindexterIOHardware implements SpindexterIO {
     private final StatusSignal<Current> currentSpin;
     private final StatusSignal<Temperature> tempSpin;
     private final StatusSignal<AngularVelocity> angularVelocitySpin;
+    private final StatusSignal<Current> supplyCurrentSpin;
 
     private final StatusSignal<Angle> positionGate;
     private final StatusSignal<Voltage> voltageGate;
     private final StatusSignal<Current> currentGate;
     private final StatusSignal<Temperature> tempGate;
     private final StatusSignal<AngularVelocity> angularVelocityGate;
+    private final StatusSignal<Current> supplyCurrentGate;
 
     private final Debouncer spinConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer gateConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
@@ -84,32 +86,33 @@ public class SpindexterIOHardware implements SpindexterIO {
         currentSpin = spin.getStatorCurrent();
         tempSpin = spin.getDeviceTemp();
         angularVelocitySpin = spin.getVelocity();
+        supplyCurrentSpin = spin.getSupplyCurrent();
 
         positionGate = gate.getPosition();
         voltageGate = gate.getMotorVoltage();
         currentGate = gate.getStatorCurrent();
         tempGate = gate.getDeviceTemp();
         angularVelocityGate = gate.getVelocity();
+        supplyCurrentGate = gate.getSupplyCurrent();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-                50, positionSpin, voltageSpin, currentSpin, tempSpin, angularVelocitySpin);
+                50, positionSpin, voltageSpin, currentSpin, tempSpin, angularVelocitySpin, supplyCurrentSpin);
         BaseStatusSignal.setUpdateFrequencyForAll(
-                50, positionGate, voltageGate, currentGate, tempGate, angularVelocityGate);
+                50, positionGate, voltageGate, currentGate, tempGate, angularVelocityGate, supplyCurrentGate);
         // TODO: temporary
-        BaseStatusSignal.setUpdateFrequencyForAll(200, currentGate, currentSpin);
+        //BaseStatusSignal.setUpdateFrequencyForAll(200, currentGate, currentSpin);
 
-        ParentDevice.optimizeBusUtilizationForAll(spin);
-        ParentDevice.optimizeBusUtilizationForAll(gate);
+        ParentDevice.optimizeBusUtilizationForAll(spin, gate);
     }
 
     @Override
     public void updateInputs(SpindexterIOInputs inputs) {
         StatusCode spinStatus =
                 BaseStatusSignal.refreshAll(
-                        positionSpin, voltageSpin, currentSpin, tempSpin, angularVelocitySpin);
+                        positionSpin, voltageSpin, currentSpin, tempSpin, angularVelocitySpin, supplyCurrentSpin);
         StatusCode gateStatus =
                 BaseStatusSignal.refreshAll(
-                        positionGate, voltageGate, currentGate, tempGate, angularVelocityGate);
+                        positionGate, voltageGate, currentGate, tempGate, angularVelocityGate, supplyCurrentGate);
 
         inputs.spinConnected = spinConnectedDebounce.calculate(spinStatus.isOK());
         inputs.spinPosition = positionSpin.getValue().in(Rotations);
@@ -117,6 +120,7 @@ public class SpindexterIOHardware implements SpindexterIO {
         inputs.spinCurrent = currentSpin.getValueAsDouble();
         inputs.spinTemp = tempSpin.getValueAsDouble();
         inputs.spinVelocity = angularVelocitySpin.getValue().in(RPM);
+        inputs.spinSupplyCurrent = supplyCurrentSpin.getValueAsDouble();
 
         inputs.gateConnected = gateConnectedDebounce.calculate(gateStatus.isOK());
         inputs.gatePosition = positionGate.getValue().in(Rotations);
@@ -124,6 +128,7 @@ public class SpindexterIOHardware implements SpindexterIO {
         inputs.gateCurrent = currentGate.getValueAsDouble();
         inputs.gateTemp = tempGate.getValueAsDouble();
         inputs.gateVelocity = angularVelocityGate.getValue().in(RPM);
+        inputs.gateSupplyCurrent = supplyCurrentGate.getValueAsDouble();
     }
 
     @Override

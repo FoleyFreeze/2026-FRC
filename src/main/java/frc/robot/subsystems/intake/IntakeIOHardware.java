@@ -50,20 +50,24 @@ public class IntakeIOHardware implements IntakeIO {
     private final MotionMagicTorqueCurrentFOC motionRequestArm =
             new MotionMagicTorqueCurrentFOC(0).withSlot(1);
 
-    private final StatusSignal<Angle> positionWheelL;
     private final StatusSignal<Angle> positionArm;
     private final StatusSignal<Angle> positionArmAbs;
-    private final StatusSignal<Voltage> voltageWheelL;
     private final StatusSignal<Voltage> voltageArm;
-    private final StatusSignal<Current> currentWheelL;
     private final StatusSignal<Current> currentArm;
-    private final StatusSignal<Temperature> tempWheelL;
     private final StatusSignal<Temperature> tempArm;
-    private final StatusSignal<AngularVelocity> angularVelocityWheelL;
     private final StatusSignal<AngularVelocity> angularVelocityArm;
+    private final StatusSignal<Current> supplyCurrentArm;
+
+    private final StatusSignal<Angle> positionWheelL;
+    private final StatusSignal<Voltage> voltageWheelL;
+    private final StatusSignal<Current> currentWheelL;
+    private final StatusSignal<Temperature> tempWheelL;
+    private final StatusSignal<AngularVelocity> angularVelocityWheelL;
+    private final StatusSignal<Current> supplyCurrentWheelL;
 
     private final StatusSignal<Current> currentWheelR;
     private final StatusSignal<Temperature> tempWheelR;
+    private final StatusSignal<Current> supplyCurrentWheelR;
 
     private final Debouncer wheelConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer armConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
@@ -127,20 +131,24 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.CurrentLimits.StatorCurrentLimit = 70;
         intakeBar.getConfigurator().apply(cfg);
 
-        positionWheelL = wheelL.getPosition();
         positionArm = intakeBar.getPosition();
-        voltageWheelL = wheelL.getMotorVoltage();
         voltageArm = intakeBar.getMotorVoltage();
-        currentWheelL = wheelL.getStatorCurrent();
         currentArm = intakeBar.getStatorCurrent();
-        tempWheelL = wheelL.getDeviceTemp();
         tempArm = intakeBar.getDeviceTemp();
-        angularVelocityWheelL = wheelL.getVelocity();
         angularVelocityArm = intakeBar.getVelocity();
+        supplyCurrentArm = intakeBar.getSupplyCurrent();
         positionArmAbs = intakeAbsEnc.getPosition();
+
+        positionWheelL = wheelL.getPosition();
+        voltageWheelL = wheelL.getMotorVoltage();
+        currentWheelL = wheelL.getStatorCurrent();
+        tempWheelL = wheelL.getDeviceTemp();        
+        angularVelocityWheelL = wheelL.getVelocity();
+        supplyCurrentWheelL = wheelL.getSupplyCurrent();
 
         currentWheelR = wheelR.getTorqueCurrent();
         tempWheelR = wheelR.getDeviceTemp();
+        supplyCurrentWheelR = wheelR.getSupplyCurrent();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50,
@@ -156,7 +164,10 @@ public class IntakeIOHardware implements IntakeIO {
                 angularVelocityArm,
                 positionArmAbs,
                 currentWheelR,
-                tempWheelR);
+                tempWheelR,
+                supplyCurrentArm,
+                supplyCurrentWheelL,
+                supplyCurrentWheelR);
         ParentDevice.optimizeBusUtilizationForAll(wheelL, wheelR, intakeBar, intakeAbsEnc);
     }
 
@@ -170,7 +181,9 @@ public class IntakeIOHardware implements IntakeIO {
                         tempWheelL,
                         angularVelocityWheelL,
                         currentWheelR,
-                        tempWheelR);
+                        tempWheelR,
+                        supplyCurrentWheelL,
+                        supplyCurrentWheelR);
         StatusCode armStatus =
                 BaseStatusSignal.refreshAll(
                         positionArm,
@@ -178,6 +191,7 @@ public class IntakeIOHardware implements IntakeIO {
                         currentArm,
                         tempArm,
                         angularVelocityArm,
+                        supplyCurrentArm,
                         positionArmAbs);
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
         inputs.armConnected = armConnectedDebounce.calculate(armStatus.isOK());
@@ -191,10 +205,14 @@ public class IntakeIOHardware implements IntakeIO {
         inputs.armTemp = tempArm.getValueAsDouble();
         inputs.wheelLVelocity = angularVelocityWheelL.getValue().in(RPM);
         inputs.armVelocity = angularVelocityArm.getValue().in(RPM);
+        inputs.armSupplyCurrent = supplyCurrentArm.getValueAsDouble();
         inputs.armPositionAbs = positionArmAbs.getValue().in(Rotations);
+
+        inputs.wheelLSupplyCurrent = supplyCurrentWheelL.getValueAsDouble();
 
         inputs.wheelRCurrent = currentWheelR.getValueAsDouble();
         inputs.wheelRTemp = tempWheelR.getValueAsDouble();
+        inputs.wheelRSupplyCurrent = supplyCurrentWheelR.getValueAsDouble();
     }
 
     @Override

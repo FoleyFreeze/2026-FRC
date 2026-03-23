@@ -134,13 +134,10 @@ public class ShooterIOSim implements ShooterIO {
                 hoodController.reset();
             }
             if (turretClosedLoop) {
-                if (shooter.isTurret) {
                     turretControlVoltage =
                             turretFeedfwdVoltage
                                     + turretController.calculate(
-                                            Units.radiansToDegrees(turret.getAngleRads()));
-                }
-
+                                            Units.radiansToDegrees(turret.getAngleRads()));     
             } else {
                 turretController.reset();
             }
@@ -245,7 +242,7 @@ public class ShooterIOSim implements ShooterIO {
         if (!dontModelPID) {
             hood.update(0.02);
             wheel.update(0.02);
-            if (shooter.isTurret) turret.update(0.02);
+            turret.update(0.02);
         }
 
         inputs.hoodConnected = true;
@@ -275,7 +272,6 @@ public class ShooterIOSim implements ShooterIO {
     }
 
     public void setTurretAngle(double turretAngle, double velocity) {
-        if (!shooter.isTurret) return;
         if (dontModelPID) {
             turret.setState(Math.toRadians(turretAngle), Math.toRadians(velocity));
         } else {

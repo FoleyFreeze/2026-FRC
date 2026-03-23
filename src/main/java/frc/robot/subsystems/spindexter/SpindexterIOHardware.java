@@ -96,11 +96,23 @@ public class SpindexterIOHardware implements SpindexterIO {
         supplyCurrentGate = gate.getSupplyCurrent();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-                50, positionSpin, voltageSpin, currentSpin, tempSpin, angularVelocitySpin, supplyCurrentSpin);
+                50,
+                positionSpin,
+                voltageSpin,
+                currentSpin,
+                tempSpin,
+                angularVelocitySpin,
+                supplyCurrentSpin);
         BaseStatusSignal.setUpdateFrequencyForAll(
-                50, positionGate, voltageGate, currentGate, tempGate, angularVelocityGate, supplyCurrentGate);
+                50,
+                positionGate,
+                voltageGate,
+                currentGate,
+                tempGate,
+                angularVelocityGate,
+                supplyCurrentGate);
         // TODO: temporary
-        //BaseStatusSignal.setUpdateFrequencyForAll(200, currentGate, currentSpin);
+        // BaseStatusSignal.setUpdateFrequencyForAll(200, currentGate, currentSpin);
 
         ParentDevice.optimizeBusUtilizationForAll(spin, gate);
     }
@@ -109,10 +121,20 @@ public class SpindexterIOHardware implements SpindexterIO {
     public void updateInputs(SpindexterIOInputs inputs) {
         StatusCode spinStatus =
                 BaseStatusSignal.refreshAll(
-                        positionSpin, voltageSpin, currentSpin, tempSpin, angularVelocitySpin, supplyCurrentSpin);
+                        positionSpin,
+                        voltageSpin,
+                        currentSpin,
+                        tempSpin,
+                        angularVelocitySpin,
+                        supplyCurrentSpin);
         StatusCode gateStatus =
                 BaseStatusSignal.refreshAll(
-                        positionGate, voltageGate, currentGate, tempGate, angularVelocityGate, supplyCurrentGate);
+                        positionGate,
+                        voltageGate,
+                        currentGate,
+                        tempGate,
+                        angularVelocityGate,
+                        supplyCurrentGate);
 
         inputs.spinConnected = spinConnectedDebounce.calculate(spinStatus.isOK());
         inputs.spinPosition = positionSpin.getValue().in(Rotations);

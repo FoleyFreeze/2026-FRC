@@ -85,9 +85,8 @@ public class ShooterIOHardware implements ShooterIO {
     private StatusSignal<Temperature> tempTurret;
     private StatusSignal<AngularVelocity> angularVelocityTurret;
     private StatusSignal<Current> supplyCurrentTurret;
-    
-    private final StatusSignal<Angle> positionHoodAbs;
 
+    private final StatusSignal<Angle> positionHoodAbs;
 
     private final Debouncer wheelConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer hoodConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
@@ -164,7 +163,7 @@ public class ShooterIOHardware implements ShooterIO {
         tempHood = hood.getDeviceTemp();
         angularVelocityHood = hood.getVelocity();
         supplyCurrentHood = hood.getSupplyCurrent();
-        
+
         positionHoodAbs = hoodAbsEnc.getAbsolutePosition();
 
         if (hasTurret) {

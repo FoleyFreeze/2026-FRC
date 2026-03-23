@@ -28,7 +28,6 @@ public class Shooter extends SubsystemBase {
     RobotContainer r;
 
     public static final boolean isDisabled = false;
-    public boolean isTurret = false; // TODO: cal for turret
 
     private final ShooterIO io;
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
@@ -454,11 +453,11 @@ public class Shooter extends SubsystemBase {
         if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;
             return false;
-        } else if (isTurret && !isWithin(turretTarget, inputs.turretPositionDeg, angleThresh)) {
+        } else if (!isWithin(turretTarget, inputs.turretPositionDeg, angleThresh)) {
             missReason = MissReason.TURRET_ANGLE;
             return false;
-        } else if (!isTurret
-                && shootMode != ShootMode.MANUAL
+        } else if (
+                 shootMode != ShootMode.MANUAL
                 && !isWithin(
                         r.drive
                                 .getRotation()

@@ -606,8 +606,7 @@ public class Drive extends SubsystemBase {
         // allow wider thresholds for passing
         double angleThresh = shooter.shootMode == ShootMode.HUB ? 90 : 180;
 
-        if (!r.shooter.isTurret
-                && Math.abs(robotVelocity.omegaRadiansPerSecond)
+        if (Math.abs(robotVelocity.omegaRadiansPerSecond)
                         > Units.degreesToRadians(angleThresh)) {
             missReason = MissReasonDrive.ANGLE_VEL;
             return false;

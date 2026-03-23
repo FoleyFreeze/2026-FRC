@@ -142,7 +142,7 @@ public class IntakeIOHardware implements IntakeIO {
         positionWheelL = wheelL.getPosition();
         voltageWheelL = wheelL.getMotorVoltage();
         currentWheelL = wheelL.getStatorCurrent();
-        tempWheelL = wheelL.getDeviceTemp();        
+        tempWheelL = wheelL.getDeviceTemp();
         angularVelocityWheelL = wheelL.getVelocity();
         supplyCurrentWheelL = wheelL.getSupplyCurrent();
 

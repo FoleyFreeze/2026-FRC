@@ -35,7 +35,6 @@ import frc.robot.generated.TunerConstants;
 
 public class ShooterIOHardware implements ShooterIO {
 
-    private static final boolean hasTurret = false;
 
     // total angle range of 32.4deg
     public static final double hoodMinAngle = 49.5; // deg
@@ -134,7 +133,7 @@ public class ShooterIOHardware implements ShooterIO {
         cfg.Feedback.SensorToMechanismRatio = 20.0 / 48.0 * 314.0 / 20.0;
         hood.getConfigurator().apply(cfg);
 
-        if (hasTurret) {
+        
             turret = new TalonFX(0);
             // TODO: cfg
 
@@ -144,7 +143,7 @@ public class ShooterIOHardware implements ShooterIO {
             tempTurret = turret.getDeviceTemp();
             angularVelocityTurret = turret.getVelocity();
             supplyCurrentTurret = turret.getSupplyCurrent();
-        }
+        
 
         positionWheel = wheel.getPosition();
         voltageWheel = wheel.getMotorVoltage();
@@ -166,7 +165,7 @@ public class ShooterIOHardware implements ShooterIO {
 
         positionHoodAbs = hoodAbsEnc.getAbsolutePosition();
 
-        if (hasTurret) {
+
             BaseStatusSignal.setUpdateFrequencyForAll(
                     50,
                     positionTurret,
@@ -176,7 +175,7 @@ public class ShooterIOHardware implements ShooterIO {
                     angularVelocityTurret,
                     supplyCurrentTurret);
             ParentDevice.optimizeBusUtilizationForAll(turret);
-        }
+        
 
         BaseStatusSignal.setUpdateFrequencyForAll(200, currentWheel);
 
@@ -223,7 +222,6 @@ public class ShooterIOHardware implements ShooterIO {
                         positionHoodAbs,
                         supplyCurrentHood);
 
-        if (hasTurret) {
             StatusCode turretStatus =
                     BaseStatusSignal.refreshAll(
                             positionTurret,
@@ -239,7 +237,6 @@ public class ShooterIOHardware implements ShooterIO {
             inputs.turretTemp = tempTurret.getValueAsDouble();
             inputs.turretVelocity = angularVelocityTurret.getValue().in(DegreesPerSecond);
             inputs.turretSupplyCurrent = supplyCurrentTurret.getValueAsDouble();
-        }
 
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
         inputs.hoodConnected = hoodConnectedDebounce.calculate(hoodStatus.isOK());
@@ -278,14 +275,14 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void turretPower(double power) {
-        if (!hasTurret) return;
+        
 
         turret.setControl(voltageRequestTurret.withOutput(power * 12));
     }
 
     @Override
     public void setTurretAngle(double turretAngle, double velocity) {
-        if (!hasTurret) return;
+        
 
         turret.setControl(
                 positionRequestTurret

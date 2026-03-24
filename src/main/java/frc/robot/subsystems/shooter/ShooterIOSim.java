@@ -134,10 +134,10 @@ public class ShooterIOSim implements ShooterIO {
                 hoodController.reset();
             }
             if (turretClosedLoop) {
-                    turretControlVoltage =
-                            turretFeedfwdVoltage
-                                    + turretController.calculate(
-                                            Units.radiansToDegrees(turret.getAngleRads()));     
+                turretControlVoltage =
+                        turretFeedfwdVoltage
+                                + turretController.calculate(
+                                        Units.radiansToDegrees(turret.getAngleRads()));
             } else {
                 turretController.reset();
             }

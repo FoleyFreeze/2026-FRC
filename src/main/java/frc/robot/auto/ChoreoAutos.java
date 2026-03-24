@@ -78,7 +78,7 @@ public class ChoreoAutos {
 
         autoChooser.addOption(
                 "TestMode",
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(10)
                         .finallyDo(
                                 () -> {
@@ -109,7 +109,7 @@ public class ChoreoAutos {
         sequence.addCommands(parallelGroup);
         // shoot the balls while driving to the second start point
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
@@ -144,9 +144,7 @@ public class ChoreoAutos {
         sequence.addCommands(r.intake.fastDrop());
         sequence.addCommands(parallelGroup);
         // shoot again for the remaining time
-        sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(
-                        r, () -> 0, () -> 0, FieldConstants.Hub.center));
+        sequence.addCommands(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
         return sequence;
     }
 
@@ -161,7 +159,7 @@ public class ChoreoAutos {
 
         // shoot the balls while stationary
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
@@ -179,8 +177,7 @@ public class ChoreoAutos {
 
         // shoot again for the remaining time
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(5));
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center).withTimeout(5));
         return sequence;
     }
 
@@ -188,8 +185,7 @@ public class ChoreoAutos {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible
         sequence.addCommands(
-                ShooterCommands.smarterShootAndGather(
-                                r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(1.2)
                         .finallyDo(
                                 () -> {
@@ -206,7 +202,7 @@ public class ChoreoAutos {
 
         // shoot the balls while stationary
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
@@ -224,8 +220,7 @@ public class ChoreoAutos {
 
         // shoot again for the remaining time
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
-                        .withTimeout(5));
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center).withTimeout(5));
         return sequence;
     }
 
@@ -240,7 +235,7 @@ public class ChoreoAutos {
 
         // shoot the balls while stationary
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
@@ -257,9 +252,7 @@ public class ChoreoAutos {
         sequence.addCommands(parallelGroup);
 
         // shoot again for the remaining time
-        sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(
-                        r, () -> 0, () -> 0, FieldConstants.Hub.center));
+        sequence.addCommands(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
         return sequence;
     }
 
@@ -267,8 +260,7 @@ public class ChoreoAutos {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible while shooting the preload
         sequence.addCommands(
-                ShooterCommands.smarterShootAndGather(
-                                r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(1.2)
                         .finallyDo(
                                 () -> {
@@ -285,7 +277,7 @@ public class ChoreoAutos {
 
         // shoot the balls while stationary
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
@@ -302,16 +294,14 @@ public class ChoreoAutos {
         sequence.addCommands(parallelGroup);
 
         // shoot again for the remaining time
-        sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(
-                        r, () -> 0, () -> 0, FieldConstants.Hub.center));
+        sequence.addCommands(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
         return sequence;
     }
 
     private Command buildSitStillAndShoot() {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {

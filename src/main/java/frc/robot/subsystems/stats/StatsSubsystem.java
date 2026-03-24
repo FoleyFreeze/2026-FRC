@@ -45,9 +45,9 @@ public class StatsSubsystem extends SubsystemBase {
         stats.totalTravelDist += deltaDist;
 
         stats.totalDistFLwheel += getWheelDistDelta(0);
-        stats.totalDistFLwheel += getWheelDistDelta(1);
-        stats.totalDistFLwheel += getWheelDistDelta(2);
-        stats.totalDistFLwheel += getWheelDistDelta(3);
+        stats.totalDistFRwheel += getWheelDistDelta(1);
+        stats.totalDistRLwheel += getWheelDistDelta(2);
+        stats.totalDistRRwheel += getWheelDistDelta(3);
 
         if (deltaDist > Units.inchesToMeters(2)) {
             stats.totalTravelTime += dt;
@@ -63,8 +63,6 @@ public class StatsSubsystem extends SubsystemBase {
             stats.totalPassShootTime += dt;
         }
 
-        stats.totalButtonsPressed += ConfigButtons.trackButtons();
-
         // stats.totalDistanceClimbed;
         // stats.totalClimbs;
 
@@ -74,6 +72,13 @@ public class StatsSubsystem extends SubsystemBase {
         if (DriverStation.isEnabled()) {
             // stats.totalEnabledBallImages;
             stats.totalEnabledTagImages += r.vision.validImages;
+
+            stats.totalButtonsPressed += ConfigButtons.trackButtons();
+            stats.totalControlBoardButtonsPressed += ConfigButtons.trackControlBoardButtons();
+        } else {
+            // run when disabled so edge detector works
+            ConfigButtons.trackButtons();
+            ConfigButtons.trackControlBoardButtons();
         }
 
         Logger.recordOutput("Stats", stats);

@@ -21,6 +21,7 @@ public class Stats implements StructSerializable {
     double totalPassShootTime;
 
     double totalButtonsPressed;
+    double totalControlBoardButtonsPressed;
 
     double totalDistanceClimbed;
     double totalClimbs;
@@ -41,6 +42,7 @@ public class Stats implements StructSerializable {
             double totalHubShootTime,
             double totalPassShootTime,
             double totalButtonsPressed,
+            double totalControlBoardButtonsPressed,
             double totalDistanceClimbed,
             double totalClimbs,
             double totalEnabledTagImages,
@@ -57,6 +59,7 @@ public class Stats implements StructSerializable {
         this.totalHubShootTime = totalHubShootTime;
         this.totalPassShootTime = totalPassShootTime;
         this.totalButtonsPressed = totalButtonsPressed;
+        this.totalControlBoardButtonsPressed = totalControlBoardButtonsPressed;
         this.totalDistanceClimbed = totalDistanceClimbed;
         this.totalClimbs = totalClimbs;
         this.totalEnabledTagImages = totalEnabledTagImages;

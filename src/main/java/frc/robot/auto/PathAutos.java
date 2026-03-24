@@ -105,8 +105,7 @@ public class PathAutos {
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible
         sequence.addCommands(
-                ShooterCommands.smarterShootAndGather(
-                                r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(initialShootWait)
                         .finallyDo(
                                 () -> {
@@ -123,7 +122,7 @@ public class PathAutos {
 
         // shoot the balls while stationary
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstShootTime)
                         .finallyDo(
                                 () -> {
@@ -141,7 +140,7 @@ public class PathAutos {
 
         // shoot again for the remaining time
         sequence.addCommands(
-                ShooterCommands.smarterShootNoGather(r, () -> 0, () -> 0, FieldConstants.Hub.center)
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(secondShootTime));
         return sequence;
     }

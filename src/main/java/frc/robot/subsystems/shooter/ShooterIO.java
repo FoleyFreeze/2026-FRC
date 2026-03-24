@@ -34,8 +34,8 @@ public interface ShooterIO {
         public double turretTemp = 0;
         public double turretSupplyCurrent = 0;
 
-        public double turretAbsEnc1Deg = 0;
-        public double turretAbsEnc2Deg = 0;
+        public double turretAbsEnc27Deg = 0;
+        public double turretAbsEnc29Deg = 0;
         public double hoodAbsEncRotations = 0;
     }
 

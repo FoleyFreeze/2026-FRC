@@ -67,7 +67,8 @@ public class Drive extends SubsystemBase {
     public static final boolean isDisabled = false;
 
     // TunerConstants doesn't include these constants, so they are declared locally
-    static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
+    public static final double ODOMETRY_FREQUENCY =
+            TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
     public static final double DRIVE_BASE_RADIUS =
             Math.max(
                     Math.max(
@@ -124,7 +125,7 @@ public class Drive extends SubsystemBase {
                                     KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia),
                                     WHEEL_COF));
 
-    static final Lock odometryLock = new ReentrantLock();
+    public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIO gyroIO2;
     public final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -606,8 +607,7 @@ public class Drive extends SubsystemBase {
         // allow wider thresholds for passing
         double angleThresh = shooter.shootMode == ShootMode.HUB ? 90 : 180;
 
-        if (Math.abs(robotVelocity.omegaRadiansPerSecond)
-                        > Units.degreesToRadians(angleThresh)) {
+        if (Math.abs(robotVelocity.omegaRadiansPerSecond) > Units.degreesToRadians(angleThresh)) {
             missReason = MissReasonDrive.ANGLE_VEL;
             return false;
         } else {

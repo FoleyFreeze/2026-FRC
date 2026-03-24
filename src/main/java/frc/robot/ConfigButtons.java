@@ -7,6 +7,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
+import frc.robot.util.EdgeDetector;
+import frc.robot.util.EdgeDetector.EdgeType;
+import java.util.ArrayList;
 
 public class ConfigButtons {
 
@@ -30,11 +33,21 @@ public class ConfigButtons {
         r.spindexter.setDefaultCommand(r.spindexter.stop());
         r.intake.setDefaultCommand(r.intake.stopIntake());
 
+        // drive while shooting
+        final double shootXyReduce = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);
+        final double shootZReduce = Math.pow(0.45, 1.0 / DriveCommands.thetaExpo);
+        controller
+                .rightTrigger()
+                .or(controller.rightBumper())
+                .or(controller.leftBumper())
+                .whileTrue(
+                        DriveCommands.joystickDriveTurnOut(
+                                r.drive,
+                                () -> -controller.getLeftX() * shootXyReduce,
+                                () -> -controller.getLeftY() * shootXyReduce,
+                                () -> -controller.getRightX() * shootZReduce));
+
         // drive over trench
-        // 0.65 ^ 2.5 is 0.35
-        // 0.69 ^ 2.5 is 0.40
-        // 0.76 ^ 2.5 is 0.50
-        // 0.82 ^ 2.5 is 0.60
         final double xyReduceBump = Math.pow(0.5, 1.0 / DriveCommands.xyExpo);
         final double xyReduceTrench = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);
         controller
@@ -60,21 +73,23 @@ public class ConfigButtons {
         controller.start().debounce(0.5).onTrue(new InstantCommand(() -> r.drive.zeroDrive()));
 
         // intake functions
-        // TODO: Victor
-        // intake in M2
-        // intake out M6
-
+        // intake in
+        // intake out
         controller.a().onTrue(new InstantCommand(r.intake::extend));
-
         controller.b().onTrue(new InstantCommand(r.intake::retract));
 
         // intake spin
-        controller
-                .leftTrigger()
-                .and(controller.rightTrigger().negate())
-                .whileTrue(r.intake.smartIntake());
+        controller.leftTrigger().whileTrue(r.intake.smartIntake());
 
-        // camera gather M5
+        // shake while shoot unless gathering
+        controller
+                .rightTrigger()
+                .or(controller.rightBumper())
+                .or(controller.leftBumper())
+                .and(controller.leftTrigger().negate())
+                .whileTrue(r.intake.shakeTheIntake());
+
+        // camera gather (LB maybe)
         // unjam back
         controller
                 .x()
@@ -84,54 +99,20 @@ public class ConfigButtons {
 
         // shoot functions
         // pass left LB
-
         controller
                 .leftBumper()
-                .whileTrue(
-                        ShooterCommands.smartShoot(
-                                r, controller, FieldConstants.Locations.passLeft));
+                .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft));
         // // pass right RB
         controller
                 .rightBumper()
-                .whileTrue(
-                        ShooterCommands.smartShoot(
-                                r, controller, FieldConstants.Locations.passRight));
+                .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passRight));
 
         // shoot hub RT
-        final double shootXyReduce = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);
         controller
                 .rightTrigger()
-                .and(controller.leftTrigger().negate())
-                .whileTrue(
-                        ShooterCommands.smarterShootNoGather(
-                                r,
-                                () -> -controller.getLeftY() * shootXyReduce,
-                                () -> -controller.getLeftX() * shootXyReduce,
-                                FieldConstants.Hub.center));
+                .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
 
-        controller
-                .rightTrigger()
-                .and(controller.leftTrigger())
-                .whileTrue(
-                        ShooterCommands.smarterShootAndGather(
-                                r,
-                                () -> -controller.getLeftY(),
-                                () -> -controller.getLeftX(),
-                                FieldConstants.Hub.center));
-
-        // set manual shot positions (X Y B)
-
-        // controller
-        //         .x()
-        //         .and(controller.leftTrigger())
-        //         .whileTrue(
-        //                 new InstantCommand(() -> r.shooter.setManualGoal(ManualShotLoc.CLIMB))
-        //                         .andThen(
-        //                                 r.shooter
-        //                                         .manualShot()
-        //                                         .alongWith(
-        //                                                 r.spindexter.smartSpinCmd(
-        //                                                         r.shooter, r.drive))));
+        // set manual shot positions (dpad)
         controller
                 .povDown()
                 .whileTrue(
@@ -142,16 +123,7 @@ public class ConfigButtons {
                                                 .alongWith(
                                                         r.spindexter.smartSpinCmd(
                                                                 r.shooter, r.drive))));
-        // controller
-        //         .y()
-        //         .and(controller.leftTrigger())
-        //         .whileTrue(
-        //                 new InstantCommand(() ->
-        // r.shooter.setManualGoal(ManualShotLoc.FRONT_HUB))
-        //                         .andThen(
-        //                                 r.shooter
-        //                                         .manualShot()
-        //                                         .alongWith(r.spindexter.smarterSpinCmd())));
+
         controller
                 .povUp()
                 .whileTrue(
@@ -161,8 +133,8 @@ public class ConfigButtons {
                                                 .manualShot()
                                                 .alongWith(r.spindexter.smarterSpinCmd())));
 
-        // select zero turret (reset to abs enc)
-        // start+select full zero turret (reset to zero and ignore abs)
+        // select zero turret? (reset to abs enc)
+        // start+select full zero turret? (reset to zero and ignore abs)
 
         // climb functions
         // dpad + X drive then climb
@@ -231,6 +203,20 @@ public class ConfigButtons {
                 .onTrue(r.shooter.jogHubAngleUp());
     }
 
+    static ArrayList<EdgeDetector> controllerEdges = new ArrayList<>();
+    static ArrayList<EdgeDetector> dsEdges = new ArrayList<>();
+    static ArrayList<EdgeDetector> ds2Edges = new ArrayList<>();
+
+    static {
+        // initialize all edge detectors
+        for (int i = 0; i < 2; i++) {
+            controllerEdges.add(new EdgeDetector(EdgeType.RISING));
+        }
+        for (int i = 0; i < 4; i++) {
+            dsEdges.add(new EdgeDetector(EdgeType.RISING));
+        }
+    }
+
     public static double trackButtons() {
         double count = 0;
 
@@ -241,6 +227,45 @@ public class ConfigButtons {
             }
         }
 
+        // count axis as buttons (custom edge detector)
+        if (controllerEdges.get(0).calc(controller.getHID().getLeftTriggerAxis() > 0.5)) {
+            count++;
+        }
+        if (controllerEdges.get(0).calc(controller.getHID().getRightTriggerAxis() > 0.5)) {
+            count++;
+        }
+        return count;
+    }
+
+    public static double trackControlBoardButtons() {
+        double count = 0;
+
+        int buttoncount = driveStation.getHID().getButtonCount();
+        for (int i = 1; i < buttoncount + 1; i++) {
+            if (driveStation.getHID().getRawButtonPressed(i)) {
+                count++;
+            }
+        }
+        // count axis as buttons
+        if (dsEdges.get(0).calc(driveStation.getHID().getRawAxis(0) > 0.5)) {
+            count++;
+        }
+        if (dsEdges.get(1).calc(driveStation.getHID().getRawAxis(0) < -0.5)) {
+            count++;
+        }
+        if (dsEdges.get(2).calc(driveStation.getHID().getRawAxis(1) > 0.5)) {
+            count++;
+        }
+        if (dsEdges.get(3).calc(driveStation.getHID().getRawAxis(1) < -0.5)) {
+            count++;
+        }
+
+        buttoncount = driveStation2.getHID().getButtonCount();
+        for (int i = 1; i < buttoncount + 1; i++) {
+            if (driveStation2.getHID().getRawButtonPressed(i)) {
+                count++;
+            }
+        }
         return count;
     }
 }

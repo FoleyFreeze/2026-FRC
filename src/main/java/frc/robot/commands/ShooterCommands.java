@@ -1,16 +1,11 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import java.util.function.Consumer;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class ShooterCommands {
@@ -37,75 +32,9 @@ public class ShooterCommands {
                 .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive));
     }
 
-    public static Command smartShoot(
-            RobotContainer r, CommandXboxController controller, Translation2d target) {
-        Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
-        Thing<Double> velocityThing = new Thing<>(); // thing2
+    public static Command smartShoot(RobotContainer r, Translation2d target) {
 
-        return new RunCommand(
-                        () ->
-                                r.shooter.newPrime(
-                                        target, r.drive.getPose(), rotationThing, velocityThing),
-                        r.shooter)
-                .alongWith(
-                        DriveCommands.driveAtAngleFFw(
-                                r.drive,
-                                () -> -controller.getLeftY(),
-                                () -> -controller.getLeftX(),
-                                rotationThing,
-                                velocityThing))
-                .alongWith(r.spindexter.smartSpinCmd(r.shooter, r.drive));
-    }
-
-    public static Command smarterShootNoGather(
-            RobotContainer r, DoubleSupplier driveX, DoubleSupplier driveY, Translation2d target) {
-        Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
-        Thing<Double> velocityThing = new Thing<>(); // thing2
-
-        // run shoot, drive, and index in parallel
-        ParallelCommandGroup parallelGroup = new ParallelCommandGroup();
-        parallelGroup.addCommands(
-                new RunCommand(
-                        () ->
-                                r.shooter.newPrime(
-                                        target, r.drive.getPose(), rotationThing, velocityThing),
-                        r.shooter));
-        parallelGroup.addCommands(
-                DriveCommands.driveAtAngleFFw(
-                        r.drive, driveX, driveY, rotationThing, velocityThing));
-        parallelGroup.addCommands(r.spindexter.smarterSpinCmd());
-        parallelGroup.addCommands(r.intake.shakeTheIntake());
-
-        return parallelGroup;
-    }
-
-    public static Command smarterShootAndGather(
-            RobotContainer r,
-            DoubleSupplier xSupplier,
-            DoubleSupplier ySupplier,
-            Translation2d target) {
-        Thing<Rotation2d> rotationThing = new Thing<>(); // thing1
-        Thing<Double> velocityThing = new Thing<>(); // thing2
-
-        // run shoot, drive, and index in parallel
-        ParallelCommandGroup parallelGroup = new ParallelCommandGroup();
-        parallelGroup.addCommands(
-                new RunCommand(
-                        () ->
-                                r.shooter.newPrime(
-                                        target, r.drive.getPose(), rotationThing, velocityThing),
-                        r.shooter));
-        parallelGroup.addCommands(
-                DriveCommands.driveAtAngleFFw(
-                        r.drive,
-                        () -> xSupplier.getAsDouble() * 0.87, // 0.87 is 0.7^2.5
-                        () -> ySupplier.getAsDouble() * 0.87,
-                        rotationThing,
-                        velocityThing));
-        parallelGroup.addCommands(r.spindexter.smarterSpinCmd());
-        parallelGroup.addCommands(
-                new InstantCommand(r.intake::extend, r.intake).andThen(r.intake.smartIntake()));
-
-        return parallelGroup;
+        return new RunCommand(() -> r.shooter.newPrime(target, r.drive.getPose()), r.shooter)
+                .alongWith(r.spindexter.smarterSpinCmd());
     }
 }

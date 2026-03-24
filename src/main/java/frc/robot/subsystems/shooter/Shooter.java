@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
-import frc.robot.commands.ShooterCommands.Thing;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
 import frc.robot.util.Util2;
 import java.util.function.DoubleSupplier;
@@ -245,11 +244,8 @@ public class Shooter extends SubsystemBase {
     }
 
     // for the current no-turret
-    public void newPrime(
-            Translation2d localgoal,
-            Pose2d botLoc,
-            Thing<Rotation2d> rotationThing,
-            Thing<Double> velocityThing) {
+    // scratch that, for the current yes-turret
+    public void newPrime(Translation2d localgoal, Pose2d botLoc) {
         // 0 what are we shooting at? (goal vs pass)
         ChassisSpeeds botVel;
 
@@ -268,7 +264,7 @@ public class Shooter extends SubsystemBase {
         lastPredFlightTime = setpoints.time();
 
         // 2 use setpoints from lerp to set motors
-        double angleSetpoint = setpoints.angle() - 90 + r.drive.getRotation().getDegrees();
+        double angleSetpoint = setpoints.angle();
         botAngleTarget = angleSetpoint;
         Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
         Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
@@ -278,46 +274,9 @@ public class Shooter extends SubsystemBase {
 
         // hoodTarget = setpoints.hood();
         // rpmTarget = setpoints.rpm();
-        // manageTurretWrap(angleSetpoint, setpoints.turretVel());
-        rotationThing.accept(Rotation2d.fromDegrees(angleSetpoint));
-        velocityThing.accept(Math.toRadians(setpoints.turretVel()));
+        manageTurretWrap(angleSetpoint, setpoints.turretVel());
         setShotSpeedAngle(
                 setpoints.hood(), setpoints.rpm(), localgoal != FieldConstants.Hub.center);
-        // io.setHoodAngle(setpoints.hood());
-        // io.setSpeed(setpoints.rpm());
-    }
-
-    // for the eventual turret
-    public void newPrime(Translation2d goal, Pose2d botLoc) {
-        // 0 what are we shooting at? (goal vs pass)
-        ChassisSpeeds botVel;
-
-        botVel = r.drive.getChassisSpeeds();
-        this.goal = FieldConstants.flipIfRed(goal);
-
-        // 1 call the lerp
-        DataPoint setpoints;
-        if (goal == FieldConstants.Hub.center) {
-            setpoints = lerp.getHub(this.goal, botLoc, botVel);
-            shootMode = ShootMode.HUB;
-        } else {
-            setpoints = lerp.getPass(this.goal, botLoc, botVel);
-            shootMode = ShootMode.PASS;
-        }
-        lastPredFlightTime = setpoints.time();
-
-        // 2 use setpoints from lerp to set motors
-        double angleSetpoint = setpoints.angle();
-        Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
-        Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
-        Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
-        Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
-        Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
-
-        // hoodTarget = setpoints.hood();
-        // rpmTarget = setpoints.rpm();
-        manageTurretWrap(angleSetpoint, setpoints.turretVel());
-        setShotSpeedAngle(setpoints.hood(), setpoints.rpm(), goal != FieldConstants.Hub.center);
         // io.setHoodAngle(setpoints.hood());
         // io.setSpeed(setpoints.rpm());
     }
@@ -456,8 +415,8 @@ public class Shooter extends SubsystemBase {
         } else if (!isWithin(turretTarget, inputs.turretPositionDeg, angleThresh)) {
             missReason = MissReason.TURRET_ANGLE;
             return false;
-        } else if (
-                 shootMode != ShootMode.MANUAL
+        } else if (false
+                && shootMode != ShootMode.MANUAL
                 && !isWithin(
                         r.drive
                                 .getRotation()

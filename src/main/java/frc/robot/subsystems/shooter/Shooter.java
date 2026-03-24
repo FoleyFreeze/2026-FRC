@@ -162,11 +162,24 @@ public class Shooter extends SubsystemBase {
                 () -> {
                     io.wheelPower(0);
                     io.setHoodAngle(maxHoodAngle);
+                    io.turretPower(0);
                     rpmTarget = 0;
                     hoodTarget = maxHoodAngle;
                     shootMode = ShootMode.MANUAL;
                 },
                 this);
+    }
+
+    public Command pointAtHub(){
+        return new RunCommand(() -> pointAtLoc(FieldConstants.Hub.center), this);
+    }
+
+    public void pointAtLoc(Translation2d loc){
+        loc = FieldConstants.flipIfRed(loc);
+        Pose2d botPose = r.drive.getPose();
+        Translation2d vecToTarget = botPose.getTranslation().minus(loc);
+        Rotation2d rotTarget = vecToTarget.getAngle().minus(botPose.getRotation());
+        manageTurretWrap(rotTarget.getDegrees(), 0);
     }
 
     // deprecated

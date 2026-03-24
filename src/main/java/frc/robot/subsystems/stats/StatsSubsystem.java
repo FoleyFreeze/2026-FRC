@@ -49,7 +49,7 @@ public class StatsSubsystem extends SubsystemBase {
         stats.totalDistRLwheel += getWheelDistDelta(2);
         stats.totalDistRRwheel += getWheelDistDelta(3);
 
-        if (deltaDist > Units.inchesToMeters(2)) {
+        if (deltaDist > Units.inchesToMeters(2) * dt) {
             stats.totalTravelTime += dt;
         }
 

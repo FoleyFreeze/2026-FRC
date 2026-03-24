@@ -90,6 +90,7 @@ public class ConfigButtons {
                 .whileTrue(r.intake.shakeTheIntake());
 
         // camera gather (LB maybe)
+
         // unjam back
         controller
                 .x()
@@ -111,6 +112,11 @@ public class ConfigButtons {
         controller
                 .rightTrigger()
                 .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
+
+        //when not shooting and in autoPoint mode, point at the hub
+        driveStation.button(5)//what button use?
+                    .and(controller.rightTrigger().or(controller.rightBumper().or(controller.leftBumper())).negate())
+                    .whileTrue(r.shooter.pointAtHub());
 
         // set manual shot positions (dpad)
         controller

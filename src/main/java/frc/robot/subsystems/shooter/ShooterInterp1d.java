@@ -176,6 +176,8 @@ public class ShooterInterp1d {
         double tangentVelocity;
         double turretVel;
         DataPoint data;
+        double turretAngle;
+        double futureTurretAngle;
 
         // determine if pass or hub shot by comparison of timeTable reference
         if (timeTable == timeTableRealPassing || timeTable == timeTableSimPassing) {
@@ -220,11 +222,13 @@ public class ShooterInterp1d {
                             timeTable,
                             turretVel);
             */
-            // double rpm, double angle, double hood, double time, double turretVel, double dist
+            turretAngle = vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees();
+            //predict forward
+            futureTurretAngle = turretAngle + turretVel * dt;
             data =
                     new DataPoint(
                             passData[0],
-                            vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(),
+                            futureTurretAngle,
                             passData[1],
                             passData[2],
                             turretVel,
@@ -264,11 +268,13 @@ public class ShooterInterp1d {
                             .getRadians(); // tangent angle (b)
             tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
             turretVel = Math.toDegrees(tangentVelocity / dist);
+            turretAngle = vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees();
+            futureTurretAngle = turretAngle + turretVel * dt;
 
             data =
                     get(
                             dist,
-                            vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees(),
+                            futureTurretAngle,
                             distAxis,
                             rpmTable,
                             hoodAngleTable,

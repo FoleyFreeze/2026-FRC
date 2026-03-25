@@ -11,6 +11,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -61,7 +62,7 @@ public class ShooterIOHardware implements ShooterIO {
     private final MotionMagicVelocityTorqueCurrentFOC velocityRequestWheel =
             new MotionMagicVelocityTorqueCurrentFOC(0);
     private final PositionTorqueCurrentFOC positionRequestHood = new PositionTorqueCurrentFOC(0);
-    private final PositionTorqueCurrentFOC positionRequestTurret = new PositionTorqueCurrentFOC(0);
+    private final MotionMagicTorqueCurrentFOC positionRequestTurret = new MotionMagicTorqueCurrentFOC(0);
 
     private final StatusSignal<Angle> positionWheel;
     private final StatusSignal<Voltage> voltageWheel;
@@ -150,7 +151,9 @@ public class ShooterIOHardware implements ShooterIO {
         cfgT.Slot0.kA = 0;
         cfgT.TorqueCurrent.PeakForwardTorqueCurrent = 25;
         cfgT.TorqueCurrent.PeakReverseTorqueCurrent = -25;
-        cfgT.MotionMagic.MotionMagicAcceleration = 0;
+        cfgT.MotionMagic.MotionMagicAcceleration = 2;
+        cfgT.MotionMagic.MotionMagicCruiseVelocity = 0.25;
+        cfgT.Feedback.SensorToMechanismRatio = turretGearRatio;
         PhoenixUtil.tryUntilOk(5, () -> turret.getConfigurator().apply(cfgT));
 
         turretAbsEnc27 = new CANcoder(27, TunerConstants.kCANBus);
@@ -274,12 +277,12 @@ public class ShooterIOHardware implements ShooterIO {
                         supplyCurrentTurret);
 
         inputs.turretConnected = turretConnectedDebounce.calculate(turretStatus.isOK());
-        inputs.turretPositionDeg = positionTurret.getValue().in(Degrees) / turretGearRatio;
+        inputs.turretPositionDeg = positionTurret.getValue().in(Degrees);
         inputs.turretVoltage = voltageTurret.getValueAsDouble();
         inputs.turretCurrent = currentTurret.getValueAsDouble();
         inputs.turretTemp = tempTurret.getValueAsDouble();
         inputs.turretVelocity =
-                angularVelocityTurret.getValue().in(DegreesPerSecond) / turretGearRatio;
+                angularVelocityTurret.getValue().in(DegreesPerSecond);
         inputs.turretSupplyCurrent = supplyCurrentTurret.getValueAsDouble();
 
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
@@ -327,12 +330,10 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void setTurretAngle(double turretAngle, double velocity) {
-        turretAngle *= turretGearRatio;
-        velocity *= turretGearRatio;
+        //ignoring velocity because motion magic
         turret.setControl(
                 positionRequestTurret
-                        .withPosition(Units.degreesToRotations(turretAngle))
-                        .withVelocity(Units.degreesToRotations(velocity)));
+                        .withPosition(Units.degreesToRotations(turretAngle)));
     }
 
     @Override

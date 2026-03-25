@@ -124,7 +124,8 @@ public class ConfigButtons {
                 .and(
                         controller
                                 .rightTrigger()
-                                .or(controller.rightBumper().or(controller.leftBumper()))
+                                .or(controller.rightBumper())
+                                .or(controller.leftBumper())
                                 .negate())
                 .whileTrue(r.shooter.pointAtHub());
 

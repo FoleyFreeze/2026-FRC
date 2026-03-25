@@ -74,7 +74,7 @@ public class Robot extends LoggedRobot {
         }
 
         // Start AdvantageKit logger
-        pdh = LoggedPowerDistribution.getInstance(1, ModuleType.kRev);
+        LoggedPowerDistribution.getInstance(1, ModuleType.kRev);
         Logger.start();
         WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
@@ -129,15 +129,20 @@ public class Robot extends LoggedRobot {
         }
 
         // rezero to the start point of the auton
-        // autonomousCommand = robotContainer.getAutonomousCommand();
-        // if (prevAuto != autonomousCommand) {
-        //     System.out.println("Updated auto");
-        //     if (robotContainer.pathAutos.pathMap.containsKey(autonomousCommand)) {
-        //         // this should zero to auton initial state
-        //         robotContainer.pathAutos.pathMap.get(autonomousCommand).run();
-        //     }
-        //     prevAuto = autonomousCommand;
-        // }
+        autonomousCommand = robotContainer.getAutonomousCommand();
+        if (prevAuto != autonomousCommand) {
+            System.out.println("Updated auto");
+            Logger.recordOutput(
+                    "Auton/Selected",
+                    DriverStation.getAlliance().toString()
+                            + ", "
+                            + robotContainer.autoChooser.getSendableChooser().getSelected());
+            if (robotContainer.pathAutos.pathMap.containsKey(autonomousCommand)) {
+                // this should zero to auton initial state
+                robotContainer.pathAutos.pathMap.get(autonomousCommand).run();
+            }
+            prevAuto = autonomousCommand;
+        }
     }
 
     /**

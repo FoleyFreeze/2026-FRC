@@ -61,7 +61,7 @@ public class RobotContainer {
     private SwerveDriveSimulation driveSimulation;
 
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser;
+    public final LoggedDashboardChooser<Command> autoChooser;
 
     private static RobotContainer instance;
 

@@ -30,6 +30,10 @@ public class PathAutos {
     public PathPlannerPath leftBumpInside = loadPath("LeftBumpInsideLoop");
     public PathPlannerPath rightBumpInside = leftBumpInside.mirrorPath();
 
+    // map some runnable with each auton. Using these to zero the robot to the auton start as soon
+    // as its selected
+    // so that any position error can be learned from there by vision between when auton is selected
+    // and when auton starts
     public HashMap<Command, Runnable> pathMap = new HashMap<>();
 
     public PathAutos(RobotContainer r) {
@@ -66,7 +70,12 @@ public class PathAutos {
     public Command leftTrenchOutsideLoop() {
         Command auto = twoScoopAuto(leftSideToNeutralZone, leftSideTrenchToInside);
         Runnable run =
-                () -> r.drive.setRotation(leftSideToNeutralZone.getIdealStartingState().rotation());
+                () -> {
+                    Rotation2d rot = leftSideToNeutralZone.getIdealStartingState().rotation();
+                    Translation2d tx = leftSideToNeutralZone.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(pose);
+                };
         pathMap.put(auto, run);
         return auto;
     }
@@ -74,9 +83,12 @@ public class PathAutos {
     public Command rightTrenchOutsideLoop() {
         Command auto = twoScoopAuto(rightSideToNeutralZone, rightSideTrenchToInside);
         Runnable run =
-                () ->
-                        r.drive.setRotation(
-                                rightSideToNeutralZone.getIdealStartingState().rotation());
+                () -> {
+                    Rotation2d rot = rightSideToNeutralZone.getIdealStartingState().rotation();
+                    Translation2d tx = rightSideToNeutralZone.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(pose);
+                };
         pathMap.put(auto, run);
         return auto;
     }
@@ -84,7 +96,12 @@ public class PathAutos {
     public Command leftBumpOutside() {
         Command auto = twoScoopAuto(leftBumpOutside, leftBumpInside);
         Runnable run =
-                () -> r.drive.setRotation(leftBumpOutside.getIdealStartingState().rotation());
+                () -> {
+                    Rotation2d rot = leftBumpOutside.getIdealStartingState().rotation();
+                    Translation2d tx = leftBumpOutside.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(pose);
+                };
         pathMap.put(auto, run);
         return auto;
     }
@@ -92,7 +109,12 @@ public class PathAutos {
     public Command rightBumpOutside() {
         Command auto = twoScoopAuto(rightBumpOutside, rightBumpInside);
         Runnable run =
-                () -> r.drive.setRotation(rightBumpOutside.getIdealStartingState().rotation());
+                () -> {
+                    Rotation2d rot = rightBumpOutside.getIdealStartingState().rotation();
+                    Translation2d tx = rightBumpOutside.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(pose);
+                };
         pathMap.put(auto, run);
         return auto;
     }
@@ -117,7 +139,10 @@ public class PathAutos {
 
         // drive the profile while intaking
         ParallelDeadlineGroup parallelGroup =
-                new ParallelDeadlineGroup(AutoBuilder.followPath(path1), r.intake.smartIntake());
+                new ParallelDeadlineGroup(
+                        AutoBuilder.followPath(path1),
+                        r.intake.smartIntake(),
+                        r.shooter.pointAtHub());
         sequence.addCommands(parallelGroup);
 
         // shoot the balls while stationary
@@ -135,7 +160,10 @@ public class PathAutos {
 
         // drive the second profile while intaking
         parallelGroup =
-                new ParallelDeadlineGroup(AutoBuilder.followPath(path2), r.intake.smartIntake());
+                new ParallelDeadlineGroup(
+                        AutoBuilder.followPath(path2),
+                        r.intake.smartIntake(),
+                        r.shooter.pointAtHub());
         sequence.addCommands(parallelGroup);
 
         // shoot again for the remaining time

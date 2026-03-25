@@ -31,6 +31,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.PhoenixUtil;
@@ -94,6 +95,8 @@ public class ShooterIOHardware implements ShooterIO {
     private final Debouncer wheelConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer hoodConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer turretConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
+
+    public static final double turretGearRatio = 3.0 * 172.0 / 44.0; // rotor to mechanism rotations
 
     public ShooterIOHardware() {
         wheel = new TalonFX(12, TunerConstants.kCANBus);
@@ -234,7 +237,7 @@ public class ShooterIOHardware implements ShooterIO {
         double turretAngleOffset =
                 Shooter.getAngleCRT(
                         enc27Abs.getValue().in(Degrees), enc29Abs.getValue().in(Degrees));
-        turret.setPosition(turretAngleOffset / 360.0);
+        turret.setPosition((turretAngleOffset - Constants.turretAngleOffset) / 360.0);
         Logger.recordOutput("Shooter/TurretZero", turretAngleOffset);
     }
 
@@ -271,11 +274,12 @@ public class ShooterIOHardware implements ShooterIO {
                         supplyCurrentTurret);
 
         inputs.turretConnected = turretConnectedDebounce.calculate(turretStatus.isOK());
-        inputs.turretPositionDeg = positionTurret.getValue().in(Degrees);
+        inputs.turretPositionDeg = positionTurret.getValue().in(Degrees) / turretGearRatio;
         inputs.turretVoltage = voltageTurret.getValueAsDouble();
         inputs.turretCurrent = currentTurret.getValueAsDouble();
         inputs.turretTemp = tempTurret.getValueAsDouble();
-        inputs.turretVelocity = angularVelocityTurret.getValue().in(DegreesPerSecond);
+        inputs.turretVelocity =
+                angularVelocityTurret.getValue().in(DegreesPerSecond) / turretGearRatio;
         inputs.turretSupplyCurrent = supplyCurrentTurret.getValueAsDouble();
 
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
@@ -323,6 +327,8 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void setTurretAngle(double turretAngle, double velocity) {
+        turretAngle *= turretGearRatio;
+        velocity *= turretGearRatio;
         turret.setControl(
                 positionRequestTurret
                         .withPosition(Units.degreesToRotations(turretAngle))

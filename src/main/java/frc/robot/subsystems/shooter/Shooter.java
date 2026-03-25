@@ -303,7 +303,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void manageTurretWrap(double angle, double velocity) {
-        double trueAngle = angle - Constants.turretAngleOffset;
+        double trueAngle = angle;
         double normAngle = Util2.floorMod(trueAngle, 360);
         double delta = normAngle - (inputs.turretPositionDeg % 360);
 
@@ -323,9 +323,9 @@ public class Shooter extends SubsystemBase {
             setPoint += 360;
         }
 
-        Logger.recordOutput("Shooter/TurretSetpoint", setPoint);
-        turretTarget = setPoint;
-        io.setTurretAngle(setPoint, velocity);
+        turretTarget = setPoint - Constants.turretAngleOffset;
+        Logger.recordOutput("Shooter/TurretSetpoint", turretTarget);
+        io.setTurretAngle(turretTarget, velocity);
     }
 
     public void setManualGoal(ManualShotLoc loc) {
@@ -482,7 +482,8 @@ public class Shooter extends SubsystemBase {
         return new InstantCommand(
                         () -> {
                             double turretAngleAbs =
-                                    getAngleCRT(inputs.turretAbsEnc27Deg, inputs.turretAbsEnc29Deg);
+                                    getAngleCRT(inputs.turretAbsEnc27Deg, inputs.turretAbsEnc29Deg)
+                                            - Constants.turretAngleOffset;
                             double turretAngle = inputs.turretPositionDeg;
                             double error = turretAngleAbs - turretAngle;
 
@@ -496,7 +497,8 @@ public class Shooter extends SubsystemBase {
                             }
                         })
                 .andThen(new WaitCommand(10))
-                .repeatedly();
+                .repeatedly()
+                .ignoringDisable(true);
     }
 
     public static double getAngleCRT(double e1Deg, double e2Deg) {

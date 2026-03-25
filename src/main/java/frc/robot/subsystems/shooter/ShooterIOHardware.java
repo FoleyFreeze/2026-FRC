@@ -34,6 +34,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.PhoenixUtil;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOHardware implements ShooterIO {
 
@@ -222,9 +223,19 @@ public class ShooterIOHardware implements ShooterIO {
                 // currentTurret,
                 tempTurret,
                 angularVelocityTurret,
-                supplyCurrentTurret);
+                supplyCurrentTurret,
+                enc27Abs,
+                enc29Abs);
         ParentDevice.optimizeBusUtilizationForAll(
                 wheel, wheel2, hood, hoodAbsEnc, turret, turretAbsEnc27, turretAbsEnc29);
+
+        // do the initial zero for the turret
+        BaseStatusSignal.refreshAll(enc27Abs, enc29Abs);
+        double turretAngleOffset =
+                Shooter.getAngleCRT(
+                        enc27Abs.getValue().in(Degrees), enc29Abs.getValue().in(Degrees));
+        turret.setPosition(turretAngleOffset / 360.0);
+        Logger.recordOutput("Shooter/TurretZero", turretAngleOffset);
     }
 
     @Override

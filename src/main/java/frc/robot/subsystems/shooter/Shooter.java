@@ -7,12 +7,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
@@ -86,14 +89,8 @@ public class Shooter extends SubsystemBase {
     NetworkTableEntry hoodSet =
             NetworkTableInstance.getDefault().getTable("Tuning").getEntry("HoodSet");
 
-    // DoubleSubscriber rpmSet =
-    //         NetworkTableInstance.getDefault()
-    //                 .getDoubleTopic("/Tuning/RpmSet")
-    //                 .subscribe(0);
-    // DoubleSubscriber hoodSet =
-    //         NetworkTableInstance.getDefault()
-    //                 .getDoubleTopic("/Tuning/HoodSet")
-    //                 .subscribe(0);
+    Alert turretBroke = new Alert("Oops, turrets broke", AlertType.kError);
+    Alert turretCRTbroke = new Alert("Oops, CRT algo's broke", AlertType.kError);
 
     public static Shooter create(RobotContainer r, ShooterIOSim shootSim) {
         if (isDisabled) {
@@ -170,11 +167,11 @@ public class Shooter extends SubsystemBase {
                 this);
     }
 
-    public Command pointAtHub(){
+    public Command pointAtHub() {
         return new RunCommand(() -> pointAtLoc(FieldConstants.Hub.center), this);
     }
 
-    public void pointAtLoc(Translation2d loc){
+    public void pointAtLoc(Translation2d loc) {
         loc = FieldConstants.flipIfRed(loc);
         Pose2d botPose = r.drive.getPose();
         Translation2d vecToTarget = botPose.getTranslation().minus(loc);
@@ -481,11 +478,32 @@ public class Shooter extends SubsystemBase {
         io.setSpeed(rpm);
     }
 
-    public double getAngleCRT(double e1Deg, double e2Deg) {
+    public Command zeroTurretToEnc() {
+        return new InstantCommand(
+                        () -> {
+                            double turretAngleAbs =
+                                    getAngleCRT(inputs.turretAbsEnc27Deg, inputs.turretAbsEnc29Deg);
+                            double turretAngle = inputs.turretPositionDeg;
+                            double error = turretAngleAbs - turretAngle;
+
+                            Logger.recordOutput("Shooter/lastCRTerror", error);
+                            if (Math.abs(error) > 1) {
+                                turretBroke.set(true);
+
+                                // TODO: use some other kind of logic to rezero?
+                                // maybe limelight angle vs gyro?
+                                // io.setTurretZero(turretAngleAbs);
+                            }
+                        })
+                .andThen(new WaitCommand(10))
+                .repeatedly();
+    }
+
+    public static double getAngleCRT(double e1Deg, double e2Deg) {
         final double t_teeth = 220;
         final double e1_teeth = 27;
         final double e2_teeth = 29;
-        final double maxTurretDegrees = 400;
+        final double maxTurretDegrees = Constants.maximumTurretAngle;
         // maximum number of e1 & e2 rotations worth considering (dependent on how many degrees of
         // turret angle you can measure)
         final int arraySize =
@@ -520,6 +538,9 @@ public class Shooter extends SubsystemBase {
         }
         Logger.recordOutput("Shooter/CRT_TurretAngle", turretAngle);
         Logger.recordOutput("Shooter/CRT_MinError", minError);
+        if (minError > 0.1) {
+            RobotContainer.getInstance().shooter.turretCRTbroke.set(true);
+        }
 
         return turretAngle;
     }

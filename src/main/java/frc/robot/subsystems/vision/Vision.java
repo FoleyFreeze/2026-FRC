@@ -54,7 +54,8 @@ public class Vision extends SubsystemBase {
                         new VisionIOLimelight(
                                 VisionConstants.camera0Name,
                                 drive::getRotation,
-                                VisionConstants.robotToCamera0),
+                                VisionConstants.robotToCamera0,
+                                r.shooter::getTurretAngle),
                         new VisionIOLimelight(
                                 VisionConstants.camera1Name,
                                 drive::getRotation,

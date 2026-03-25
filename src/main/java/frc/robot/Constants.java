@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -42,8 +43,9 @@ public final class Constants {
 
     public static final Translation2d shooterLocOnBot =
             new Translation2d(
-                    (frameLength / 2) - Units.inchesToMeters(22),
-                    (-frameWidth / 2) + Units.inchesToMeters(13));
+                    (-frameLength / 2) + Units.inchesToMeters(7.252),
+                    (frameWidth / 2) - Units.inchesToMeters(18.77));
+    public static final Translation3d shooterLocOnBot3d = new Translation3d(shooterLocOnBot);
     public static final double turretAngleOffset = 0;
     public static final double maximumTurretAngle = 400;
 }

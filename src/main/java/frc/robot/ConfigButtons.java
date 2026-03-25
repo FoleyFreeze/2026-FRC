@@ -1,9 +1,12 @@
 package frc.robot;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
@@ -113,10 +116,17 @@ public class ConfigButtons {
                 .rightTrigger()
                 .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
 
-        //when not shooting and in autoPoint mode, point at the hub
-        driveStation.button(5)//what button use?
-                    .and(controller.rightTrigger().or(controller.rightBumper().or(controller.leftBumper())).negate())
-                    .whileTrue(r.shooter.pointAtHub());
+        // when not shooting and in autoPoint mode, point at the hub
+        // shooter cam switch is active low
+        driveStation
+                .button(10)
+                .negate()
+                .and(
+                        controller
+                                .rightTrigger()
+                                .or(controller.rightBumper().or(controller.leftBumper()))
+                                .negate())
+                .whileTrue(r.shooter.pointAtHub());
 
         // set manual shot positions (dpad)
         controller
@@ -207,6 +217,10 @@ public class ConfigButtons {
                 .axisGreaterThan(0, 0.5)
                 .and(driveStation2.button(12).negate())
                 .onTrue(r.shooter.jogHubAngleUp());
+
+        // other commands
+        Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
+        botDisabled.debounce(5, DebounceType.kRising).whileTrue(r.shooter.zeroTurretToEnc());
     }
 
     static ArrayList<EdgeDetector> controllerEdges = new ArrayList<>();

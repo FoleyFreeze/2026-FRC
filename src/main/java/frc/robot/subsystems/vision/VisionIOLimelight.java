@@ -11,13 +11,13 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.Constants;
 import frc.robot.util.LimelightHelpers;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -64,7 +64,13 @@ public class VisionIOLimelight implements VisionIO {
         megatag2Subscriber =
                 table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
 
-        initialCameraPose = Pose3d.kZero.transformBy(robotToCamXform);
+        // transform 90 deg camera pose to the true zero degree camera pose
+        Pose3d cam90pose =
+                new Pose3d(robotToCamXform.getTranslation(), robotToCamXform.getRotation());
+        initialCameraPose =
+                cam90pose.rotateAround(
+                        Constants.shooterLocOnBot3d, new Rotation3d(0, 0, Math.toRadians(-90)));
+
         this.cameraRotationSupplier = cameraRotationSupplier;
     }
 
@@ -89,13 +95,10 @@ public class VisionIOLimelight implements VisionIO {
         // Update orientation for MegaTag 2
         if (cameraRotationSupplier != null) {
             Pose3d finalCamPose =
-                    initialCameraPose.transformBy(
-                            new Transform3d(
-                                    Translation3d.kZero,
-                                    new Rotation3d(
-                                            0,
-                                            0,
-                                            Math.toRadians(cameraRotationSupplier.getAsDouble()))));
+                    initialCameraPose.rotateAround(
+                            Constants.shooterLocOnBot3d,
+                            new Rotation3d(
+                                    0, 0, Math.toRadians(cameraRotationSupplier.getAsDouble())));
             LimelightHelpers.setCameraPose_RobotSpace(
                     name,
                     finalCamPose.getX(),

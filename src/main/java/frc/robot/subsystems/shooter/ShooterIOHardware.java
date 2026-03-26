@@ -32,6 +32,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -45,6 +47,11 @@ public class ShooterIOHardware implements ShooterIO {
     public static final double hoodMaxAngle = 81.4;
     public static final double hoodMinRot = 0; // rotations
     public static final double hoodMaxRot = 0.0915;
+
+    public static final double turretMaxTemp = 65;//deg C
+    public static final double turretMaxTempHyst = 60;
+    private boolean pausedDueToTurretTemp = false;
+    private Alert turretTempAlert = new Alert("Turret Temp Too High!", AlertType.kError);
 
     private final TalonFX wheel;
     private final TalonFX wheel2;
@@ -311,6 +318,14 @@ public class ShooterIOHardware implements ShooterIO {
 
         inputs.turretAbsEnc27Deg = enc27Abs.getValue().in(Degrees);
         inputs.turretAbsEnc29Deg = enc29Abs.getValue().in(Degrees);
+
+        //latch off when temp is high until it falls below the lower limit
+        if(pausedDueToTurretTemp){
+            pausedDueToTurretTemp = inputs.turretTemp < turretMaxTempHyst;
+        } else {
+            pausedDueToTurretTemp = inputs.turretTemp > turretMaxTemp;
+        }
+        turretTempAlert.set(pausedDueToTurretTemp);
     }
 
     @Override
@@ -330,9 +345,14 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void setTurretAngle(double turretAngle, double velocity) {
-        // ignoring velocity because motion magic
-        turret.setControl(
+        if(pausedDueToTurretTemp){
+            //stop turret when its hot
+            turret.setControl(voltageRequestTurret.withOutput(0));
+        } else {
+            // ignoring velocity because motion magic
+            turret.setControl(
                 positionRequestTurret.withPosition(Units.degreesToRotations(turretAngle)));
+        }
     }
 
     @Override

@@ -176,12 +176,12 @@ public class PathAutos {
         return new ConditionalCommand(abortCommand(), sequence, this::shouldAbort);
     }
 
-    //abort auton if things like the pigeon or limelight are not connected
-    private boolean shouldAbort(){
+    // abort auton if things like the pigeon or limelight are not connected
+    private boolean shouldAbort() {
         return false;
     }
 
-    private Command abortCommand(){
+    private Command abortCommand() {
         return new InstantCommand();
     }
 }

@@ -44,7 +44,7 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleSupplier cameraRotationSupplier;
     private final Pose3d initialCameraPose;
 
-    //wait 5 secs of disable before throttling limelights. should cover the auto-tele transition
+    // wait 5 secs of disable before throttling limelights. should cover the auto-tele transition
     private Debouncer throttleDebouce = new Debouncer(5, DebounceType.kRising);
 
     /**
@@ -79,7 +79,7 @@ public class VisionIOLimelight implements VisionIO {
 
         this.cameraRotationSupplier = cameraRotationSupplier;
 
-        //seed with off
+        // seed with off
         throttleDebouce.calculate(false);
     }
 
@@ -95,8 +95,8 @@ public class VisionIOLimelight implements VisionIO {
         inputs.connected =
                 ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
 
-        //throttle fps when robot is disabled to reduce limelight temps
-        if(throttleDebouce.calculate(DriverStation.isDisabled())){
+        // throttle fps when robot is disabled to reduce limelight temps
+        if (throttleDebouce.calculate(DriverStation.isDisabled())) {
             LimelightHelpers.SetThrottle(name, 100);
         } else {
             LimelightHelpers.SetThrottle(name, 0);

@@ -90,7 +90,7 @@ public class Intake extends SubsystemBase {
                     if (!armDisabled || overrideToSpinWheels) {
                         if (inputs.armPosition <= armStartWheelPos) {
                             io.wheelSpeed(wheelSpeed);
-                            //io.wheelPower(intakeInPower);
+                            // io.wheelPower(intakeInPower);
                         } else {
                             io.wheelPower(0);
                         }
@@ -107,12 +107,12 @@ public class Intake extends SubsystemBase {
 
     public Command dumbIntake() {
         return new RunCommand(() -> io.wheelSpeed(wheelSpeed), this);
-        //return new RunCommand(() -> io.wheelPower(intakeInPower), this);
+        // return new RunCommand(() -> io.wheelPower(intakeInPower), this);
     }
 
     public Command unjamIntake() {
         return new RunCommand(() -> io.wheelSpeed(unjamWheelSpeed), this);
-        //return new RunCommand(() -> io.wheelPower(intakeOutPower), this);
+        // return new RunCommand(() -> io.wheelPower(intakeOutPower), this);
     }
 
     double velSetpoint = 0;
@@ -131,7 +131,7 @@ public class Intake extends SubsystemBase {
                     velSetpoint = speed - velReduction;
                     Logger.recordOutput("Intake/VelSepoint", velSetpoint);
                     io.wheelSpeed(velSetpoint);
-                    //io.wheelPower(intakeInPower);
+                    // io.wheelPower(intakeInPower);
                 },
                 this);
     }

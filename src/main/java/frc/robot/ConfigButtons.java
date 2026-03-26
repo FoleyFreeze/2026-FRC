@@ -46,8 +46,8 @@ public class ConfigButtons {
                 .whileTrue(
                         DriveCommands.joystickDriveTurnOut(
                                 r.drive,
-                                () -> -controller.getLeftX() * shootXyReduce,
                                 () -> -controller.getLeftY() * shootXyReduce,
+                                () -> -controller.getLeftX() * shootXyReduce,
                                 () -> -controller.getRightX() * shootZReduce));
 
         // drive over trench

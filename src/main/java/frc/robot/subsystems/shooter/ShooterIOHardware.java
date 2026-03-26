@@ -48,7 +48,7 @@ public class ShooterIOHardware implements ShooterIO {
     public static final double hoodMinRot = 0; // rotations
     public static final double hoodMaxRot = 0.0915;
 
-    public static final double turretMaxTemp = 65;//deg C
+    public static final double turretMaxTemp = 65; // deg C
     public static final double turretMaxTempHyst = 60;
     private boolean pausedDueToTurretTemp = false;
     private Alert turretTempAlert = new Alert("Turret Temp Too High!", AlertType.kError);
@@ -319,8 +319,8 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.turretAbsEnc27Deg = enc27Abs.getValue().in(Degrees);
         inputs.turretAbsEnc29Deg = enc29Abs.getValue().in(Degrees);
 
-        //latch off when temp is high until it falls below the lower limit
-        if(pausedDueToTurretTemp){
+        // latch off when temp is high until it falls below the lower limit
+        if (pausedDueToTurretTemp) {
             pausedDueToTurretTemp = inputs.turretTemp < turretMaxTempHyst;
         } else {
             pausedDueToTurretTemp = inputs.turretTemp > turretMaxTemp;
@@ -345,13 +345,13 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void setTurretAngle(double turretAngle, double velocity) {
-        if(pausedDueToTurretTemp){
-            //stop turret when its hot
+        if (pausedDueToTurretTemp) {
+            // stop turret when its hot
             turret.setControl(voltageRequestTurret.withOutput(0));
         } else {
             // ignoring velocity because motion magic
             turret.setControl(
-                positionRequestTurret.withPosition(Units.degreesToRotations(turretAngle)));
+                    positionRequestTurret.withPosition(Units.degreesToRotations(turretAngle)));
         }
     }
 

@@ -48,6 +48,6 @@ public final class Constants {
     public static final Translation3d shooterLocOnBot3d = new Translation3d(shooterLocOnBot);
 
     public static final double turretAngleOffset =
-            0; // true degrees when turret is at robot 0 degrees
+            200; // true degrees when turret is at robot 0 degrees
     public static final double maximumTurretAngle = 400;
 }

@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 public class Util2 {
 
+    // force modulo to always return a positive remainder
     public static double floorMod(double a, double b) {
         // the google ai suggestion
         /*double r = a - b*Math.floor(a / b);

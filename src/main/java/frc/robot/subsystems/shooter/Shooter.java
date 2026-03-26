@@ -32,7 +32,7 @@ public class Shooter extends SubsystemBase {
     public static final boolean isDisabled = false;
 
     private final ShooterIO io;
-    private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+    public final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
     private final ShooterInterp1d lerp = new ShooterInterp1d();
 
@@ -303,9 +303,11 @@ public class Shooter extends SubsystemBase {
     }
 
     public void manageTurretWrap(double angle, double velocity) {
-        double trueAngle = angle;
+        double trueAngle = angle + Constants.turretAngleOffset;
         double normAngle = Util2.floorMod(trueAngle, 360);
-        double delta = normAngle - (inputs.turretPositionDeg % 360);
+        // no need to mod rawTurretAngle as if its not between 0 and maxTurretAngle its broken
+        double rawTurretAngle = inputs.turretPositionDeg + Constants.turretAngleOffset;
+        double delta = normAngle - rawTurretAngle;
 
         double shortDelta;
         if (delta > 180) {
@@ -316,7 +318,7 @@ public class Shooter extends SubsystemBase {
             shortDelta = delta;
         }
 
-        double setPoint = shortDelta + (inputs.turretPositionDeg);
+        double setPoint = shortDelta + rawTurretAngle;
         if (setPoint > Constants.maximumTurretAngle) {
             setPoint -= 360;
         } else if (setPoint < 0) {

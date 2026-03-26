@@ -223,7 +223,7 @@ public class ShooterInterp1d {
                             turretVel);
             */
             turretAngle = vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees();
-            //predict forward
+            // predict forward
             futureTurretAngle = turretAngle + turretVel * dt;
             data =
                     new DataPoint(

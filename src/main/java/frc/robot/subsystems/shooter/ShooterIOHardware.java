@@ -62,7 +62,8 @@ public class ShooterIOHardware implements ShooterIO {
     private final MotionMagicVelocityTorqueCurrentFOC velocityRequestWheel =
             new MotionMagicVelocityTorqueCurrentFOC(0);
     private final PositionTorqueCurrentFOC positionRequestHood = new PositionTorqueCurrentFOC(0);
-    private final MotionMagicTorqueCurrentFOC positionRequestTurret = new MotionMagicTorqueCurrentFOC(0);
+    private final MotionMagicTorqueCurrentFOC positionRequestTurret =
+            new MotionMagicTorqueCurrentFOC(0);
 
     private final StatusSignal<Angle> positionWheel;
     private final StatusSignal<Voltage> voltageWheel;
@@ -281,8 +282,7 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.turretVoltage = voltageTurret.getValueAsDouble();
         inputs.turretCurrent = currentTurret.getValueAsDouble();
         inputs.turretTemp = tempTurret.getValueAsDouble();
-        inputs.turretVelocity =
-                angularVelocityTurret.getValue().in(DegreesPerSecond);
+        inputs.turretVelocity = angularVelocityTurret.getValue().in(DegreesPerSecond);
         inputs.turretSupplyCurrent = supplyCurrentTurret.getValueAsDouble();
 
         inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
@@ -330,10 +330,9 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void setTurretAngle(double turretAngle, double velocity) {
-        //ignoring velocity because motion magic
+        // ignoring velocity because motion magic
         turret.setControl(
-                positionRequestTurret
-                        .withPosition(Units.degreesToRotations(turretAngle)));
+                positionRequestTurret.withPosition(Units.degreesToRotations(turretAngle)));
     }
 
     @Override

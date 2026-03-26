@@ -303,12 +303,14 @@ public class Shooter extends SubsystemBase {
     }
 
     public void manageTurretWrap(double angle, double velocity) {
+        //convert desired and actual turret angles (robot relative) to 0-x turret relative
         double trueAngle = angle + Constants.turretAngleOffset;
         double normAngle = Util2.floorMod(trueAngle, 360);
         // no need to mod rawTurretAngle as if its not between 0 and maxTurretAngle its broken
         double rawTurretAngle = inputs.turretPositionDeg + Constants.turretAngleOffset;
         double delta = normAngle - rawTurretAngle;
 
+        //determine if we can take a faster way around to the target angle
         double shortDelta;
         if (delta > 180) {
             shortDelta = delta - 360;
@@ -318,12 +320,25 @@ public class Shooter extends SubsystemBase {
             shortDelta = delta;
         }
 
+        //do the flippy thing if we reach the limit of turret travel in either direction
         double setPoint = shortDelta + rawTurretAngle;
-        if (setPoint > Constants.maximumTurretAngle) {
+        if (setPoint > Constants.maximumTurretAngle - Constants.turretSoftLimit) {
             setPoint -= 360;
-        } else if (setPoint < 0) {
+        } else if (setPoint < Constants.turretSoftLimit) {
             setPoint += 360;
         }
+
+        //if for some reason the turret is restricted to less than 360 degrees of rotation
+        //prevent it from exceeding the limit by stopping early
+        boolean turretInfeasable = false;
+        if(setPoint > Constants.maximumTurretAngle - Constants.turretSoftLimit){
+            turretInfeasable = true;
+            setPoint = Constants.maximumTurretAngle - Constants.turretSoftLimit;
+        } else if(setPoint < Constants.turretSoftLimit){
+            turretInfeasable = true;
+            setPoint = Constants.turretSoftLimit;
+        }
+        Logger.recordOutput("Shooter/TurretInfeasable", turretInfeasable);
 
         turretTarget = setPoint - Constants.turretAngleOffset;
         Logger.recordOutput("Shooter/TurretSetpoint", turretTarget);

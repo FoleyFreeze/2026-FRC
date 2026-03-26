@@ -149,6 +149,18 @@ public class ShooterIOHardware implements ShooterIO {
         cfgH.Feedback.SensorToMechanismRatio = 20.0 / 48.0 * 314.0 / 20.0;
         PhoenixUtil.tryUntilOk(5, () -> hood.getConfigurator().apply(cfgH));
 
+        turretAbsEnc27 = new CANcoder(27, TunerConstants.kCANBus);
+        var encCfg27 = new CANcoderConfiguration();
+        encCfg27.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
+        encCfg27.MagnetSensor.MagnetOffset = -0.428;
+        PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc27.getConfigurator().apply(encCfg27));
+
+        turretAbsEnc29 = new CANcoder(29, TunerConstants.kCANBus);
+        var encCfg29 = new CANcoderConfiguration();
+        encCfg29.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
+        encCfg29.MagnetSensor.MagnetOffset = -0.662;
+        PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc29.getConfigurator().apply(encCfg29));
+
         turret = new TalonFX(7, TunerConstants.kCANBus);
         var cfgT = new TalonFXConfiguration();
         cfgT.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -163,18 +175,6 @@ public class ShooterIOHardware implements ShooterIO {
         cfgT.MotionMagic.MotionMagicCruiseVelocity = 0.25;
         cfgT.Feedback.SensorToMechanismRatio = turretGearRatio;
         PhoenixUtil.tryUntilOk(5, () -> turret.getConfigurator().apply(cfgT));
-
-        turretAbsEnc27 = new CANcoder(27, TunerConstants.kCANBus);
-        var encCfg27 = new CANcoderConfiguration();
-        encCfg27.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg27.MagnetSensor.MagnetOffset = -0.428;
-        PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc27.getConfigurator().apply(encCfg27));
-
-        turretAbsEnc29 = new CANcoder(29, TunerConstants.kCANBus);
-        var encCfg29 = new CANcoderConfiguration();
-        encCfg29.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg29.MagnetSensor.MagnetOffset = -0.662;
-        PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc29.getConfigurator().apply(encCfg29));
 
         positionTurret = turret.getPosition();
         voltageTurret = turret.getMotorVoltage();

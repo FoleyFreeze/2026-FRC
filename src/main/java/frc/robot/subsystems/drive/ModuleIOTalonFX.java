@@ -58,7 +58,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     protected final VoltageOut voltageRequest = new VoltageOut(0);
     protected final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
     protected final MotionMagicVelocityVoltage velocityVoltageRequest =
-            new MotionMagicVelocityVoltage(0.0).withEnableFOC(false);
+            new MotionMagicVelocityVoltage(0.0);
 
     // Torque-current control requests
     protected final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);

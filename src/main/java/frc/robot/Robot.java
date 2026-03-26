@@ -140,6 +140,8 @@ public class Robot extends LoggedRobot {
             if (robotContainer.pathAutos.pathMap.containsKey(autonomousCommand)) {
                 // this should zero to auton initial state
                 robotContainer.pathAutos.pathMap.get(autonomousCommand).run();
+            } else {
+                System.out.println("No auton zero configured");
             }
             prevAuto = autonomousCommand;
         }

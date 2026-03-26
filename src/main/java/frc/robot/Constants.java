@@ -47,7 +47,8 @@ public final class Constants {
                     (frameWidth / 2) - Units.inchesToMeters(18.77));
     public static final Translation3d shooterLocOnBot3d = new Translation3d(shooterLocOnBot);
 
-    public static final double turretAngleOffset =
-            200; // true degrees when turret is at robot 0 degrees
-    public static final double maximumTurretAngle = 400;
+    // true degrees when turret is at robot 0 degrees
+    public static final double turretAngleOffset = 176;
+    public static final double maximumTurretAngle = 420;
+    public static final double turretSoftLimit = 10;
 }

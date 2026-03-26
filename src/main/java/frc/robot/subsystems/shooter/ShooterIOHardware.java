@@ -160,13 +160,13 @@ public class ShooterIOHardware implements ShooterIO {
         turretAbsEnc27 = new CANcoder(27, TunerConstants.kCANBus);
         var encCfg27 = new CANcoderConfiguration();
         encCfg27.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg27.MagnetSensor.MagnetOffset = 0;
+        encCfg27.MagnetSensor.MagnetOffset = -0.428;
         PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc27.getConfigurator().apply(encCfg27));
 
         turretAbsEnc29 = new CANcoder(29, TunerConstants.kCANBus);
         var encCfg29 = new CANcoderConfiguration();
         encCfg29.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg29.MagnetSensor.MagnetOffset = 0;
+        encCfg29.MagnetSensor.MagnetOffset = -0.662;
         PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc29.getConfigurator().apply(encCfg29));
 
         positionTurret = turret.getPosition();

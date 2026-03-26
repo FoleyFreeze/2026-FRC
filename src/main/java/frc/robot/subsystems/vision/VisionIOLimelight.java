@@ -7,6 +7,8 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -16,6 +18,7 @@ import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
 import frc.robot.util.LimelightHelpers;
@@ -40,6 +43,9 @@ public class VisionIOLimelight implements VisionIO {
 
     private final DoubleSupplier cameraRotationSupplier;
     private final Pose3d initialCameraPose;
+
+    //wait 5 secs of disable before throttling limelights. should cover the auto-tele transition
+    private Debouncer throttleDebouce = new Debouncer(5, DebounceType.kRising);
 
     /**
      * Creates a new VisionIOLimelight.
@@ -72,6 +78,9 @@ public class VisionIOLimelight implements VisionIO {
                         Constants.shooterLocOnBot3d, new Rotation3d(0, 0, Math.toRadians(-90)));
 
         this.cameraRotationSupplier = cameraRotationSupplier;
+
+        //seed with off
+        throttleDebouce.calculate(false);
     }
 
     public VisionIOLimelight(
@@ -85,6 +94,13 @@ public class VisionIOLimelight implements VisionIO {
         // 250ms
         inputs.connected =
                 ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
+
+        //throttle fps when robot is disabled to reduce limelight temps
+        if(throttleDebouce.calculate(DriverStation.isDisabled())){
+            LimelightHelpers.SetThrottle(name, 100);
+        } else {
+            LimelightHelpers.SetThrottle(name, 0);
+        }
 
         // Update target observation
         inputs.latestTargetObservation =

@@ -105,7 +105,7 @@ public class ShooterIOHardware implements ShooterIO {
     private final Debouncer hoodConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer turretConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
-    public static final double turretGearRatio = 3.0 * 172.0 / 44.0; // rotor to mechanism rotations
+    public static final double turretGearRatio = 3.0 * 172.0 / 45.0; // rotor to mechanism rotations
 
     public ShooterIOHardware() {
         wheel = new TalonFX(12, TunerConstants.kCANBus);

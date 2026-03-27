@@ -17,7 +17,7 @@ public class FuelVisionDataStruct implements Struct<FuelVisionData> {
 
     @Override
     public int getSize() {
-        return kSizeFloat * 2 + 1 + kSizeInt16;
+        return kSizeFloat * 2 + 1 + kSizeInt32;
     }
 
     @Override

@@ -6,7 +6,7 @@ public class FuelVisionData implements StructSerializable {
     float distance;
     float angle;
     byte orientation;
-    short amount;
+    int amount;
 
     public static final FuelVisionDataStruct struct = new FuelVisionDataStruct();
 }

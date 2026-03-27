@@ -40,7 +40,7 @@ public class FuelVisionDataStruct implements Struct<FuelVisionData> {
         bb.putFloat(value.distance);
         bb.putFloat(value.angle);
         bb.put(value.orientation);
-        bb.putShort(value.amount);
+        bb.putInt(value.amount);
     }
 
     @Override

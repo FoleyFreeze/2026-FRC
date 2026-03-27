@@ -120,7 +120,7 @@ public class Intake extends SubsystemBase {
     public Command velDependentIntake() {
         return new RunCommand(
                 () -> {
-                    double speed = 6000;
+                    double speed = 3500;
 
                     // reduce speed by 120rpm per meter per second
                     double reductionRatio = 120;

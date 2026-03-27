@@ -21,6 +21,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.util.LimelightHelpers;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,6 +32,7 @@ import java.util.function.Supplier;
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOLimelight implements VisionIO {
+    private RobotContainer r;
     private final String name;
     private final Supplier<Rotation2d> rotationSupplier;
     private final DoubleArrayPublisher orientationPublisher;
@@ -54,10 +56,12 @@ public class VisionIOLimelight implements VisionIO {
      * @param rotationSupplier Supplier for the current estimated rotation, used for MegaTag 2.
      */
     public VisionIOLimelight(
+            RobotContainer r,
             String name,
             Supplier<Rotation2d> rotationSupplier,
             Transform3d robotToCamXform,
             DoubleSupplier cameraRotationSupplier) {
+        this.r = r;
         this.name = name;
         var table = NetworkTableInstance.getDefault().getTable(name);
         this.rotationSupplier = rotationSupplier;
@@ -84,8 +88,11 @@ public class VisionIOLimelight implements VisionIO {
     }
 
     public VisionIOLimelight(
-            String name, Supplier<Rotation2d> rotationSupplier, Transform3d robotToCamXform) {
-        this(name, rotationSupplier, robotToCamXform, null);
+            RobotContainer r,
+            String name,
+            Supplier<Rotation2d> rotationSupplier,
+            Transform3d robotToCamXform) {
+        this(r, name, rotationSupplier, robotToCamXform, null);
     }
 
     @Override
@@ -158,7 +165,9 @@ public class VisionIOLimelight implements VisionIO {
                             rawSample.value[9],
 
                             // Observation type
-                            PoseObservationType.MEGATAG_1));
+                            cameraRotationSupplier != null
+                                    ? PoseObservationType.MEGATAG_1_T
+                                    : PoseObservationType.MEGATAG_1));
         }
         for (var rawSample : megatag2Subscriber.readQueue()) {
             if (rawSample.value.length == 0) continue;
@@ -183,7 +192,9 @@ public class VisionIOLimelight implements VisionIO {
                             rawSample.value[9],
 
                             // Observation type
-                            PoseObservationType.MEGATAG_2));
+                            cameraRotationSupplier != null
+                                    ? PoseObservationType.MEGATAG_2_T
+                                    : PoseObservationType.MEGATAG_2));
         }
 
         // Save pose observations to inputs object

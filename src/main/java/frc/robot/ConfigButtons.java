@@ -221,7 +221,14 @@ public class ConfigButtons {
 
         // other commands
         Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
-        botDisabled.debounce(5, DebounceType.kRising).whileTrue(r.shooter.zeroTurretToEnc());
+        botDisabled.debounce(5, DebounceType.kRising).whileTrue(r.shooter.recalcTurretToEnc());
+
+        driveStation
+                .button(11)
+                .negate()
+                .and(driveStation2.button(12))
+                .debounce(0.5, DebounceType.kRising)
+                .onTrue(new InstantCommand(() -> r.shooter.zeroTurret()).ignoringDisable(true));
     }
 
     static ArrayList<EdgeDetector> controllerEdges = new ArrayList<>();

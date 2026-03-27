@@ -75,12 +75,12 @@ public class IntakeIOHardware implements IntakeIO {
         var cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfg.Slot0.kP = 12;
+        cfg.Slot0.kP = 6;
         cfg.Slot0.kS = 4;
         cfg.Slot0.kV = 0.01;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 60;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -60;
-        cfg.MotionMagic.MotionMagicAcceleration = 600;
+        cfg.MotionMagic.MotionMagicAcceleration = 300;
         cfg.MotionMagic.MotionMagicJerk = 0;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
         cfg.CurrentLimits.StatorCurrentLimit = 60;

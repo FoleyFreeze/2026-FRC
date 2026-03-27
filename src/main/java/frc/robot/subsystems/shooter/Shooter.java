@@ -156,28 +156,30 @@ public class Shooter extends SubsystemBase {
 
     public Command stopAll() {
         return new RunCommand(
-                () -> {
-                    io.wheelPower(0);
-                    io.setHoodAngle(maxHoodAngle);
-                    io.turretPower(0);
-                    rpmTarget = 0;
-                    hoodTarget = maxHoodAngle;
-                    shootMode = ShootMode.MANUAL;
-                },
-                this);
+                        () -> {
+                            io.wheelPower(0);
+                            io.setHoodAngle(maxHoodAngle);
+                            io.turretPower(0);
+                            rpmTarget = 0;
+                            hoodTarget = maxHoodAngle;
+                            shootMode = ShootMode.MANUAL;
+                        },
+                        this)
+                .ignoringDisable(true);
     }
 
     public Command pointAtHub() {
         return new RunCommand(
-                () -> {
-                    pointAtLoc(FieldConstants.Hub.center);
-                    io.wheelPower(0);
-                    io.setHoodAngle(maxHoodAngle);
-                    rpmTarget = 0;
-                    hoodTarget = maxHoodAngle;
-                    shootMode = ShootMode.MANUAL;
-                },
-                this);
+                        () -> {
+                            pointAtLoc(FieldConstants.Hub.center);
+                            io.wheelPower(0);
+                            io.setHoodAngle(maxHoodAngle);
+                            rpmTarget = 0;
+                            hoodTarget = maxHoodAngle;
+                            shootMode = ShootMode.MANUAL;
+                        },
+                        this)
+                .ignoringDisable(true);
     }
 
     public void pointAtLoc(Translation2d loc) {
@@ -510,7 +512,7 @@ public class Shooter extends SubsystemBase {
         io.setSpeed(rpm);
     }
 
-    public Command zeroTurretToEnc() {
+    public Command recalcTurretToEnc() {
         return new InstantCommand(
                         () -> {
                             double turretAngleAbs =

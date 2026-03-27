@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -43,26 +44,30 @@ public class Vision extends SubsystemBase {
     public static Vision create(
             RobotContainer r, Drive drive, Shooter shoot, SwerveDriveSimulation driveSimulation) {
         if (isDisabled) {
-            return new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+            return new Vision(r, drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
         switch (Constants.currentMode) {
             case REAL:
                 // TODO: add shoot::getTurretAngle to turret camera (cam0) when turret is installed
                 return new Vision(
+                        r,
                         drive::addVisionMeasurement,
                         new VisionIOLimelight(
+                                r,
                                 VisionConstants.camera0Name,
                                 drive::getRotation,
                                 VisionConstants.robotToCamera0,
                                 r.shooter::getTurretAngle),
                         new VisionIOLimelight(
+                                r,
                                 VisionConstants.camera1Name,
                                 drive::getRotation,
                                 VisionConstants.robotToCamera1));
 
             case SIM:
                 return new Vision(
+                        r,
                         drive::addVisionMeasurement,
                         new VisionIOPhotonVisionSim(
                                 VisionConstants.camera0Name,
@@ -75,11 +80,12 @@ public class Vision extends SubsystemBase {
 
             default:
                 return new Vision(
-                        drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+                        r, drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
     }
 
-    public Vision(VisionConsumer consumer, VisionIO... io) {
+    public Vision(RobotContainer r, VisionConsumer consumer, VisionIO... io) {
+        this.r = r;
         this.consumer = consumer;
         this.io = io;
 
@@ -174,13 +180,45 @@ public class Vision extends SubsystemBase {
 
                 // Calculate standard deviations
                 double stdDevFactor =
-                        Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+                        observation.averageTagDistance()
+                                * observation.averageTagDistance()
+                                / observation.tagCount();
                 double linearStdDev = linearStdDevBaseline * stdDevFactor;
-                double angularStdDev = angularStdDevBaseline * stdDevFactor;
-                if (observation.type() == PoseObservationType.MEGATAG_2) {
-                    linearStdDev *= linearStdDevMegatag2Factor;
-                    angularStdDev *= angularStdDevMegatag2Factor;
+
+                // only accept angles from multi tag images
+                double angularStdDev;
+                if (observation.tagCount() > 1) {
+                    angularStdDev = angularStdDevBaseline * stdDevFactor;
+                } else {
+                    angularStdDev = Double.POSITIVE_INFINITY;
                 }
+
+                switch (observation.type()) {
+                    case MEGATAG_2:
+                        linearStdDev *= linearStdDevMegatag2Factor;
+                        angularStdDev *= angularStdDevMegatag2Factor;
+                    case MEGATAG_1:
+                        break;
+
+                        // turret tags are weighted
+                    case MEGATAG_2_T:
+                        linearStdDev *= linearStdDevMegatag2Factor;
+                        angularStdDev *= angularStdDevMegatag2Factor;
+                    case MEGATAG_1_T:
+                        double extraForTurretRotate =
+                                1
+                                        + Math.abs(
+                                                        Units.degreesToRotations(
+                                                                r.shooter.inputs.turretVelocity))
+                                                * 2;
+                        linearStdDev *= extraForTurretRotate;
+                        angularStdDev *= extraForTurretRotate;
+                        break;
+
+                    default:
+                }
+                if (observation.type() == PoseObservationType.MEGATAG_2) {}
+
                 if (cameraIndex < cameraStdDevFactors.length) {
                     linearStdDev *= cameraStdDevFactors[cameraIndex];
                     angularStdDev *= cameraStdDevFactors[cameraIndex];

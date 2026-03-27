@@ -167,14 +167,14 @@ public class ShooterIOHardware implements ShooterIO {
         var cfgT = new TalonFXConfiguration();
         cfgT.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfgT.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfgT.Slot0.kP = 6500;
+        cfgT.Slot0.kP = 7500;
         cfgT.Slot0.kD = 35;
         cfgT.Slot0.kS = 0;
         cfgT.Slot0.kV = 0;
         cfgT.Slot0.kA = 0;
         cfgT.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfgT.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-        cfgT.MotionMagic.MotionMagicAcceleration = 4;
+        cfgT.MotionMagic.MotionMagicAcceleration = 1;
         cfgT.MotionMagic.MotionMagicCruiseVelocity = 1.5;
         cfgT.Feedback.SensorToMechanismRatio = turretGearRatio;
         PhoenixUtil.tryUntilOk(5, () -> turret.getConfigurator().apply(cfgT));

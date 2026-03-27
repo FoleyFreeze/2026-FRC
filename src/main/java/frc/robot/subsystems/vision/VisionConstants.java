@@ -30,13 +30,13 @@ public class VisionConstants {
                     -Constants.frameLength / 2.0 + Units.inchesToMeters(7.25),
                     Constants.frameWidth / 2.0 - Units.inchesToMeters(12.25 + 0.340),
                     Units.inchesToMeters(21.3125 - 0.1585),
-                    new Rotation3d(0.0, Math.toRadians(-25), Math.toRadians(90)));
+                    new Rotation3d(0.0, Math.toRadians(25), Math.toRadians(90)));
     public static Transform3d robotToCamera1 =
             new Transform3d(
                     -Constants.frameLength / 2 + Units.inchesToMeters(4.23),
                     Constants.frameWidth / 2 - Units.inchesToMeters(1.57),
                     Units.inchesToMeters(8.779),
-                    new Rotation3d(0.0, -Math.toRadians(30), Math.toRadians(90)));
+                    new Rotation3d(0.0, Math.toRadians(30), Math.toRadians(90)));
 
     // Basic filtering thresholds
     public static double maxAmbiguity = 0.3;
@@ -52,7 +52,7 @@ public class VisionConstants {
     public static double[] cameraStdDevFactors =
             new double[] {
                 1.0, // Camera 0
-                1.0 // Camera 1
+                3.0 // Camera 1
             };
 
     // Multipliers to apply for MegaTag 2 observations

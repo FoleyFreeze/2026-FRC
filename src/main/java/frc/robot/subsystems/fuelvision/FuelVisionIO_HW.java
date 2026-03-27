@@ -59,7 +59,7 @@ public class FuelVisionIO_HW implements FuelVisionIO {
                                 fvd.distance = poseDataFuel.getFloat();
                                 fvd.angle = poseDataFuel.getFloat();
                                 fvd.orientation = poseDataFuel.get();
-                                fvd.amount = poseDataFuel.getShort();
+                                fvd.amount = poseDataFuel.getInt();
                                 fuelArray[i] = fvd;
                             }
 

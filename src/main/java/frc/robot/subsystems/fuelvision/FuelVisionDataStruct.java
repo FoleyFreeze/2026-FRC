@@ -22,7 +22,7 @@ public class FuelVisionDataStruct implements Struct<FuelVisionData> {
 
     @Override
     public String getSchema() {
-        return "float distance;float angle;byte orientation;short amount";
+        return "float distance;float angle;byte orientation;int amount";
     }
 
     @Override
@@ -31,7 +31,7 @@ public class FuelVisionDataStruct implements Struct<FuelVisionData> {
         v.distance = bb.getFloat();
         v.angle = bb.getFloat();
         v.orientation = bb.get();
-        v.amount = bb.getShort();
+        v.amount = bb.getInt();
         return v;
     }
 

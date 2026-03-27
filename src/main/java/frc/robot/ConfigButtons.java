@@ -32,7 +32,7 @@ public class ConfigButtons {
                         () -> -controller.getLeftY(),
                         () -> -controller.getLeftX(),
                         () -> -controller.getRightX() * thetaReduction));
-        r.shooter.setDefaultCommand(r.shooter.stop());
+        r.shooter.setDefaultCommand(r.shooter.stopAll());
         r.spindexter.setDefaultCommand(r.spindexter.stop());
         r.intake.setDefaultCommand(r.intake.stopIntake());
 

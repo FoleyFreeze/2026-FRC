@@ -133,7 +133,7 @@ public class PathAutos {
                         .withTimeout(initialShootWait)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -153,7 +153,7 @@ public class PathAutos {
                         .withTimeout(firstShootTime)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();

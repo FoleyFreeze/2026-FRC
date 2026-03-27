@@ -92,6 +92,7 @@ public class RobotContainer {
         // fuelVision = FuelVision.create(this);
         spindexter = Spindexter.create(this, spinSim);
         shooter = Shooter.create(this, shootSim);
+        shooter.zeroTurret();
         vision = Vision.create(this, drive, shooter, driveSimulation);
         intake = Intake.create(this, iis);
         climber = Climber.create(this);

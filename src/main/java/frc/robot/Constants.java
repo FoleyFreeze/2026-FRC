@@ -48,7 +48,7 @@ public final class Constants {
     public static final Translation3d shooterLocOnBot3d = new Translation3d(shooterLocOnBot);
 
     // true degrees when turret is at robot 0 degrees
-    public static final double turretAngleOffset = 176;
-    public static final double maximumTurretAngle = 420;
-    public static final double turretSoftLimit = 10;
+    public static final double turretAngleOffset = 210;
+    public static final double maximumTurretAngle = 470.3;
+    public static final double turretSoftLimit = 40;
 }

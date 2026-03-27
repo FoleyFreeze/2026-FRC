@@ -82,7 +82,7 @@ public class ChoreoAutos {
                         .withTimeout(10)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -113,7 +113,7 @@ public class ChoreoAutos {
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -163,7 +163,7 @@ public class ChoreoAutos {
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -189,7 +189,7 @@ public class ChoreoAutos {
                         .withTimeout(1.2)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -206,7 +206,7 @@ public class ChoreoAutos {
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -239,7 +239,7 @@ public class ChoreoAutos {
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -264,7 +264,7 @@ public class ChoreoAutos {
                         .withTimeout(1.2)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -281,7 +281,7 @@ public class ChoreoAutos {
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
@@ -305,7 +305,7 @@ public class ChoreoAutos {
                         .withTimeout(firstStepShootTime)
                         .finallyDo(
                                 () -> {
-                                    r.shooter.stop().execute();
+                                    r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();

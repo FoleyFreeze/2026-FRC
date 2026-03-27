@@ -52,4 +52,6 @@ public interface ShooterIO {
     public default void turretPower(double power) {}
 
     public default void hoodPower(double power) {}
+
+    public default void zeroTurretToEnc() {}
 }

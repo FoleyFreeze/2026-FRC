@@ -120,12 +120,13 @@ public class VisionIOLimelight implements VisionIO {
                     finalCamPose.getX(),
                     finalCamPose.getY(),
                     finalCamPose.getZ(),
-                    finalCamPose.getRotation().getX(),
-                    finalCamPose.getRotation().getY(),
-                    finalCamPose.getRotation().getZ());
+                    Math.toDegrees(finalCamPose.getRotation().getX()),
+                    Math.toDegrees(finalCamPose.getRotation().getY()),
+                    Math.toDegrees(finalCamPose.getRotation().getZ()));
         }
         orientationPublisher.accept(
                 new double[] {rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0});
+
         NetworkTableInstance.getDefault()
                 .flush(); // Increases network traffic but recommended by Limelight
 
@@ -143,7 +144,7 @@ public class VisionIOLimelight implements VisionIO {
                             rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
                             // 3D pose estimate
-                            parsePose(rawSample.value),
+                            parsePoseMt1(rawSample.value),
 
                             // Ambiguity, using only the first tag because ambiguity isn't
                             // applicable for
@@ -170,7 +171,7 @@ public class VisionIOLimelight implements VisionIO {
                             rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
                             // 3D pose estimate
-                            parsePose(rawSample.value),
+                            parsePoseMt2(rawSample.value),
 
                             // Ambiguity, zeroed because the pose is already disambiguated
                             0.0,
@@ -200,7 +201,22 @@ public class VisionIOLimelight implements VisionIO {
     }
 
     /** Parses the 3D pose from a Limelight botpose array. */
-    private static Pose3d parsePose(double[] rawLLArray) {
+    private Pose3d parsePoseMt1(double[] rawLLArray) {
+        double rawYaw = rawLLArray[5];
+        if (cameraRotationSupplier != null) {
+            // rawYaw -= cameraRotationSupplier.getAsDouble();
+        }
+        return new Pose3d(
+                rawLLArray[0],
+                rawLLArray[1],
+                rawLLArray[2],
+                new Rotation3d(
+                        Units.degreesToRadians(rawLLArray[3]),
+                        Units.degreesToRadians(rawLLArray[4]),
+                        Units.degreesToRadians(rawYaw)));
+    }
+
+    private Pose3d parsePoseMt2(double[] rawLLArray) {
         return new Pose3d(
                 rawLLArray[0],
                 rawLLArray[1],

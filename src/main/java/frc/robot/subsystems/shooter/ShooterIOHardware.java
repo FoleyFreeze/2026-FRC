@@ -151,28 +151,31 @@ public class ShooterIOHardware implements ShooterIO {
 
         turretAbsEnc27 = new CANcoder(27, TunerConstants.kCANBus);
         var encCfg27 = new CANcoderConfiguration();
+        encCfg27.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         encCfg27.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg27.MagnetSensor.MagnetOffset = -0.428;
+        encCfg27.MagnetSensor.MagnetOffset = -0.8322;
         PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc27.getConfigurator().apply(encCfg27));
 
         turretAbsEnc29 = new CANcoder(29, TunerConstants.kCANBus);
         var encCfg29 = new CANcoderConfiguration();
+        encCfg29.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         encCfg29.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg29.MagnetSensor.MagnetOffset = -0.662;
+        encCfg29.MagnetSensor.MagnetOffset = -0.6472;
         PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc29.getConfigurator().apply(encCfg29));
 
         turret = new TalonFX(7, TunerConstants.kCANBus);
         var cfgT = new TalonFXConfiguration();
         cfgT.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfgT.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfgT.Slot0.kP = 0;
+        cfgT.Slot0.kP = 6500;
+        cfgT.Slot0.kD = 35;
         cfgT.Slot0.kS = 0;
         cfgT.Slot0.kV = 0;
         cfgT.Slot0.kA = 0;
-        cfgT.TorqueCurrent.PeakForwardTorqueCurrent = 25;
-        cfgT.TorqueCurrent.PeakReverseTorqueCurrent = -25;
-        cfgT.MotionMagic.MotionMagicAcceleration = 2;
-        cfgT.MotionMagic.MotionMagicCruiseVelocity = 0.25;
+        cfgT.TorqueCurrent.PeakForwardTorqueCurrent = 100;
+        cfgT.TorqueCurrent.PeakReverseTorqueCurrent = -100;
+        cfgT.MotionMagic.MotionMagicAcceleration = 4;
+        cfgT.MotionMagic.MotionMagicCruiseVelocity = 1.5;
         cfgT.Feedback.SensorToMechanismRatio = turretGearRatio;
         PhoenixUtil.tryUntilOk(5, () -> turret.getConfigurator().apply(cfgT));
 
@@ -242,14 +245,6 @@ public class ShooterIOHardware implements ShooterIO {
                 enc29Abs);
         ParentDevice.optimizeBusUtilizationForAll(
                 wheel, wheel2, hood, hoodAbsEnc, turret, turretAbsEnc27, turretAbsEnc29);
-
-        // do the initial zero for the turret
-        BaseStatusSignal.refreshAll(enc27Abs, enc29Abs);
-        double turretAngleOffset =
-                Shooter.getAngleCRT(
-                        enc27Abs.getValue().in(Degrees), enc29Abs.getValue().in(Degrees));
-        turret.setPosition((turretAngleOffset - Constants.turretAngleOffset) / 360.0);
-        Logger.recordOutput("Shooter/TurretZero", turretAngleOffset);
     }
 
     @Override
@@ -282,7 +277,9 @@ public class ShooterIOHardware implements ShooterIO {
                         currentTurret,
                         tempTurret,
                         angularVelocityTurret,
-                        supplyCurrentTurret);
+                        supplyCurrentTurret,
+                        enc27Abs,
+                        enc29Abs);
 
         inputs.turretConnected = turretConnectedDebounce.calculate(turretStatus.isOK());
         inputs.turretPositionDeg = positionTurret.getValue().in(Degrees);
@@ -368,5 +365,19 @@ public class ShooterIOHardware implements ShooterIO {
     @Override
     public void setSpeed(double speed) {
         wheel.setControl(velocityRequestWheel.withVelocity(speed / 60));
+    }
+
+    @Override
+    public void zeroTurretToEnc() {
+        var status = BaseStatusSignal.refreshAll(enc27Abs, enc29Abs);
+        if (status.isOK()) {
+            double turretAngleOffset =
+                    Shooter.getAngleCRT(
+                            enc27Abs.getValue().in(Degrees), enc29Abs.getValue().in(Degrees));
+            turret.setPosition((turretAngleOffset - Constants.turretAngleOffset) / 360.0);
+            Logger.recordOutput("Shooter/TurretZero", turretAngleOffset);
+        } else {
+            Logger.recordOutput("Shooter/ZeroFailureReason", status.toString());
+        }
     }
 }

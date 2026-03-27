@@ -154,7 +154,7 @@ public class Shooter extends SubsystemBase {
                 this);
     }
 
-    public Command stop() {
+    public Command stopAll() {
         return new RunCommand(
                 () -> {
                     io.wheelPower(0);
@@ -168,7 +168,16 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command pointAtHub() {
-        return new RunCommand(() -> pointAtLoc(FieldConstants.Hub.center), this);
+        return new RunCommand(
+                () -> {
+                    pointAtLoc(FieldConstants.Hub.center);
+                    io.wheelPower(0);
+                    io.setHoodAngle(maxHoodAngle);
+                    rpmTarget = 0;
+                    hoodTarget = maxHoodAngle;
+                    shootMode = ShootMode.MANUAL;
+                },
+                this);
     }
 
     public void pointAtLoc(Translation2d loc) {
@@ -519,7 +528,7 @@ public class Shooter extends SubsystemBase {
                                 // io.setTurretZero(turretAngleAbs);
                             }
                         })
-                .andThen(new WaitCommand(10))
+                .andThen(new WaitCommand(2))
                 .repeatedly()
                 .ignoringDisable(true);
     }
@@ -568,6 +577,10 @@ public class Shooter extends SubsystemBase {
         }
 
         return turretAngle;
+    }
+
+    public void zeroTurret() {
+        io.zeroTurretToEnc();
     }
 
     public boolean ballShotEdge = false;

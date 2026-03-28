@@ -137,6 +137,9 @@ public class Shooter extends SubsystemBase {
                         .getTranslation()
                         .plus(Constants.shooterLocOnBot.rotateBy(r.drive.getRotation()))
                         .getDistance(FieldConstants.flipIfRed(FieldConstants.Hub.center)));
+
+        boolean isOffsetJog = ConfigButtons.driveStation.getHID().getRawButton(6) == false;
+            Logger.recordOutput("Shooter/isOffsetJog", isOffsetJog);
     }
 
     public double getTurretAngle() {
@@ -507,11 +510,12 @@ public class Shooter extends SubsystemBase {
             rpm += jogHubRpm;
 
             boolean isOffsetJog = ConfigButtons.driveStation.getHID().getRawButton(6) == false;
-            if(isOffsetJog){
+            Logger.recordOutput("Shooter/isOffsetJog", isOffsetJog);
+            if (isOffsetJog) {
                 hoodAngle += 8;
                 rpm += 175;
             }
-            Logger.recordOutput("Shooter/isOffsetJog", isOffsetJog);
+            
         }
 
         hoodTarget = hoodAngle;

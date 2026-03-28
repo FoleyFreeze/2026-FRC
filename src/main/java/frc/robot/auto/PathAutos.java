@@ -166,7 +166,7 @@ public class PathAutos {
     }
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
-        double initialShootWait = 1.2;
+        double initialShootWait = 5;//1.2;
         double firstShootTime = 3.8;
         double secondShootTime = 5;
 

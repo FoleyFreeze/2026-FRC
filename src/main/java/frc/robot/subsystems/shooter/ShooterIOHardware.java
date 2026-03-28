@@ -115,7 +115,7 @@ public class ShooterIOHardware implements ShooterIO {
         var cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfg.Slot0.kP = 11;
+        cfg.Slot0.kP = 10;
         cfg.Slot0.kS = 5;
         cfg.Slot0.kV = 0.17;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 100;

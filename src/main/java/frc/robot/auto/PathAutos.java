@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ShooterCommands;
+
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -33,6 +35,10 @@ public class PathAutos {
     public PathPlannerPath rightBumpInside = leftBumpInside.mirrorPath();
     public PathPlannerPath middleLeftMiddle = loadPath("MiddleLeftMiddle");
     public PathPlannerPath middleRightMiddle = middleLeftMiddle.mirrorPath();
+    public PathPlannerPath forwardLeftBump1 = loadPath("ForwardLeftBump1");
+    public PathPlannerPath forwardLeftBump2 = loadPath("ForwardLeftBump2");
+    public PathPlannerPath forwardRightBump1 = forwardLeftBump1.mirrorPath();
+    public PathPlannerPath forwardRightBump2 = forwardLeftBump2.mirrorPath();
 
     // map some runnable with each auton. Using these to zero the robot to the auton start as soon
     // as its selected
@@ -63,9 +69,37 @@ public class PathAutos {
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
         autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
         autoChooser.addOption("RightTrenchTwoScoop", rightTrenchOutsideLoop());
+        autoChooser.addOption("ForwardLeftBump", buildFwdLeftBump());
+        autoChooser.addOption("ForwardRightBump", buildFwdRightBump());
         autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
         autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
         autoChooser.addOption("SitStillAndShoot", buildSitStillAndShoot());
+    }
+
+    private Command buildFwdLeftBump(){
+        Command auto = twoScoopAuto(forwardLeftBump1, forwardLeftBump2);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = forwardLeftBump1.getIdealStartingState().rotation();
+                    Translation2d tx = forwardLeftBump1.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
+    private Command buildFwdRightBump(){
+        Command auto = twoScoopAuto(forwardRightBump1, forwardRightBump2);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = forwardRightBump1.getIdealStartingState().rotation();
+                    Translation2d tx = forwardRightBump1.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
     }
 
     private Command buildSitStillAndShoot() {

@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
-import frc.robot.commands.AutoPathCommand;
 import frc.robot.commands.ShooterCommands;
 import java.util.HashMap;
 import java.util.function.Supplier;

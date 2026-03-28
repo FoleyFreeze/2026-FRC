@@ -16,7 +16,7 @@ public class ShooterInterp1d {
 
     // based on quick testing
     private static final double[] rpmTableReal = {2500, 2700, 3050, 3200, 3400, 3600, 3800, 4000};
-    private static final double[] hoodAngleTableReal = {70, 55, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5};
+    private static final double[] hoodAngleTableReal = {70, 55, 50.5, 50.5, 50.5, 50.5, 50.5, 50.5};
     private static final double[] timeTableReal = {0.58, 0.78, 0.91, 1.04, 1.30, 1.37, 1.44, 1.50};
     private static final double[] distAxisReal = {1.317, 2.75, 3.54, 3.91, 4.42, 5.03, 5.18, 5.79};
     //                                                         139in 154in 180in 204in 17ft  19ft

@@ -60,7 +60,7 @@ public class PathAutos {
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
         autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
-        autoChooser.addOption("RightTrenchOutside", rightTrenchOutsideLoop());
+        autoChooser.addOption("RightTrenchTwoScoop", rightTrenchOutsideLoop());
         autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
         autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
     }
@@ -76,7 +76,7 @@ public class PathAutos {
                     Rotation2d rot = leftSideToNeutralZone.getIdealStartingState().rotation();
                     Translation2d tx = leftSideToNeutralZone.getPoint(0).position;
                     Pose2d pose = new Pose2d(tx, rot);
-                    r.drive.setPose(pose);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
                 };
         pathMap.put(auto, run);
         return auto;
@@ -89,7 +89,7 @@ public class PathAutos {
                     Rotation2d rot = rightSideToNeutralZone.getIdealStartingState().rotation();
                     Translation2d tx = rightSideToNeutralZone.getPoint(0).position;
                     Pose2d pose = new Pose2d(tx, rot);
-                    r.drive.setPose(pose);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
                 };
         pathMap.put(auto, run);
         return auto;
@@ -102,7 +102,7 @@ public class PathAutos {
                     Rotation2d rot = leftBumpOutside.getIdealStartingState().rotation();
                     Translation2d tx = leftBumpOutside.getPoint(0).position;
                     Pose2d pose = new Pose2d(tx, rot);
-                    r.drive.setPose(pose);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
                 };
         pathMap.put(auto, run);
         return auto;
@@ -115,7 +115,7 @@ public class PathAutos {
                     Rotation2d rot = rightBumpOutside.getIdealStartingState().rotation();
                     Translation2d tx = rightBumpOutside.getPoint(0).position;
                     Pose2d pose = new Pose2d(tx, rot);
-                    r.drive.setPose(pose);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
                 };
         pathMap.put(auto, run);
         return auto;

@@ -23,6 +23,7 @@ public class ConfigButtons {
     // note that xbox controller takes the first 3 spots
 
     public static void config(RobotContainer r) {
+        Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
 
         // drive functions
         final double thetaReduction = Math.pow(0.65, 1.0 / DriveCommands.thetaExpo);
@@ -127,6 +128,7 @@ public class ConfigButtons {
                                 .or(controller.rightBumper())
                                 .or(controller.leftBumper())
                                 .negate())
+                .and(botDisabled.negate())
                 .whileTrue(r.shooter.pointAtHub());
 
         // set manual shot positions (dpad)
@@ -220,7 +222,6 @@ public class ConfigButtons {
                 .onTrue(r.shooter.jogHubAngleUp());
 
         // other commands
-        Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
         botDisabled.debounce(5, DebounceType.kRising).whileTrue(r.shooter.recalcTurretToEnc());
 
         driveStation
@@ -259,7 +260,7 @@ public class ConfigButtons {
         if (controllerEdges.get(0).calc(controller.getHID().getLeftTriggerAxis() > 0.5)) {
             count++;
         }
-        if (controllerEdges.get(0).calc(controller.getHID().getRightTriggerAxis() > 0.5)) {
+        if (controllerEdges.get(1).calc(controller.getHID().getRightTriggerAxis() > 0.5)) {
             count++;
         }
         return count;

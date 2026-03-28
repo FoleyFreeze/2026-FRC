@@ -21,6 +21,7 @@ public class StatsSubsystem extends SubsystemBase {
     double botRadius = Drive.getModuleTranslations()[0].getNorm();
 
     double prevtime;
+    double prevTurretAngle = 0;
 
     double[] prevWheelDist = new double[4];
 
@@ -68,6 +69,10 @@ public class StatsSubsystem extends SubsystemBase {
 
         // stats.totalTurretFlips;
         // stats.totalTurretRotations;
+        if(prevTurretAngle != 0){
+            stats.totalTurretRotations += Math.abs(r.shooter.inputs.turretPositionDeg - prevTurretAngle);
+        }
+        prevTurretAngle = r.shooter.inputs.turretPositionDeg;
 
         if (DriverStation.isEnabled()) {
             // stats.totalEnabledBallImages;
@@ -91,5 +96,10 @@ public class StatsSubsystem extends SubsystemBase {
         double deltaDist = Math.abs(dist - prevWheelDist[idx]);
         prevWheelDist[idx] = dist;
         return deltaDist;
+    }
+
+    //dont forget to count your flippy things
+    public void flippyThing(){
+        stats.totalTurretFlips++;
     }
 }

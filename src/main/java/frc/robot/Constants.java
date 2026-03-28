@@ -50,5 +50,5 @@ public final class Constants {
     // true degrees when turret is at robot 0 degrees
     public static final double turretAngleOffset = 210;
     public static final double maximumTurretAngle = 470.3;
-    public static final double turretSoftLimit = 40;
+    public static final double turretSoftLimit = 30;
 }

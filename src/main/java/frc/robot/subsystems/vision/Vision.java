@@ -19,6 +19,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -115,6 +116,7 @@ public class Vision extends SubsystemBase {
     }
 
     public int validImages = 0;
+    int turretCamAcceptedPose = 0;
 
     @Override
     public void periodic() {
@@ -128,6 +130,8 @@ public class Vision extends SubsystemBase {
         List<Pose3d> allRobotPoses = new LinkedList<>();
         List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
         List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+
+        turretCamAcceptedPose--; //decrement every loop
 
         // Loop over cameras
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
@@ -158,7 +162,11 @@ public class Vision extends SubsystemBase {
                                                 > maxAmbiguity) // Cannot be high ambiguity
                                 || Math.abs(observation.pose().getZ())
                                         > maxZError // Must have realistic Z coordinate
-
+                                //reject all megatag1 poses when enabled
+                                || DriverStation.isEnabled() && (observation.type() == PoseObservationType.MEGATAG_1 || 
+                                                                observation.type() == PoseObservationType.MEGATAG_1_T)
+                                //if we have both cameras reporting a pose, only take the turret cam
+                                || cameraIndex == 1 && turretCamAcceptedPose > 0
                                 // Must be within the field boundaries
                                 || observation.pose().getX() < 0.0
                                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
@@ -171,6 +179,11 @@ public class Vision extends SubsystemBase {
                     robotPosesRejected.add(observation.pose());
                 } else {
                     robotPosesAccepted.add(observation.pose());
+                    
+                    //record if turret cam accepted a pose this loop
+                    if(cameraIndex == 0){
+                        turretCamAcceptedPose = 3;
+                    }
                 }
 
                 // Skip if rejected

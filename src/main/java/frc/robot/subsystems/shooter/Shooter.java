@@ -340,8 +340,10 @@ public class Shooter extends SubsystemBase {
         double setPoint = shortDelta + rawTurretAngle;
         if (setPoint > Constants.maximumTurretAngle - Constants.turretSoftLimit) {
             setPoint -= 360;
+            r.stats.flippyThing();
         } else if (setPoint < Constants.turretSoftLimit) {
             setPoint += 360;
+            r.stats.flippyThing();
         }
 
         // if for some reason the turret is restricted to less than 360 degrees of rotation

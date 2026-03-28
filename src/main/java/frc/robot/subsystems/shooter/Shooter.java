@@ -241,9 +241,9 @@ public class Shooter extends SubsystemBase {
 
     public Translation2d getClosestPass(Pose2d botLoc) {
         if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
-            goal = FieldConstants.flipIfRed(FieldConstants.Locations.passRight);
-        } else {
             goal = FieldConstants.flipIfRed(FieldConstants.Locations.passLeft);
+        } else {
+            goal = FieldConstants.flipIfRed(FieldConstants.Locations.passRight);
         }
         return goal;
     }
@@ -329,7 +329,7 @@ public class Shooter extends SubsystemBase {
             Translation2d localgoal,
             Pose2d botLoc,
             Thing<Rotation2d> rotationThing,
-            Thing<Double> velocityThing) {
+            Thing<Double> velocityThing) {``
         // 0 what are we shooting at? (goal vs pass)
         ChassisSpeeds botVel;
 

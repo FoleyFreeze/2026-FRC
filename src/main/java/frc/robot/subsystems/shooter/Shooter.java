@@ -239,14 +239,14 @@ public class Shooter extends SubsystemBase {
         return goal;
     }
 
-    // public Translation2d getClosestPass(Pose2d botLoc) {
-    //                     if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
-    //                 goal = FieldConstants.flip(FieldConstants.Locations.passRight);
-    //             }else{
-    //             goal = FieldConstants.flip(FieldConstants.Locations.passLeft);
-    //         }
-    //     return goal;
-    // }
+    public Translation2d getClosestPass(Pose2d botLoc) {
+        if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
+            goal = FieldConstants.flipIfRed(FieldConstants.Locations.passRight);
+        } else {
+            goal = FieldConstants.flipIfRed(FieldConstants.Locations.passLeft);
+        }
+        return goal;
+    }
 
     double lastPredFlightTime = 0;
 
@@ -296,10 +296,13 @@ public class Shooter extends SubsystemBase {
         // 1 call the lerp
         DataPoint setpoints;
         if (localgoal == FieldConstants.Hub.center) {
+            // we are shooting at the hub
             setpoints = lerp.getHub(this.goal, botLoc, botVel);
             shootMode = ShootMode.HUB;
         } else {
-            setpoints = lerp.getPass(this.goal, botLoc, botVel);
+            // we are passing, pick the best side
+            Translation2d newPassTarget = getClosestPass(botLoc);
+            setpoints = lerp.getPass(newPassTarget, botLoc, botVel);
             shootMode = ShootMode.PASS;
         }
         lastPredFlightTime = setpoints.time();

@@ -329,7 +329,7 @@ public class Shooter extends SubsystemBase {
             Translation2d localgoal,
             Pose2d botLoc,
             Thing<Rotation2d> rotationThing,
-            Thing<Double> velocityThing) {``
+            Thing<Double> velocityThing) {
         // 0 what are we shooting at? (goal vs pass)
         ChassisSpeeds botVel;
 

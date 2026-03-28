@@ -31,6 +31,8 @@ public class PathAutos {
     public PathPlannerPath rightBumpOutside = leftBumpOutside.mirrorPath();
     public PathPlannerPath leftBumpInside = loadPath("LeftBumpInsideLoop");
     public PathPlannerPath rightBumpInside = leftBumpInside.mirrorPath();
+    public PathPlannerPath middleLeftMiddle = loadPath("MiddleLeftMiddle");
+    public PathPlannerPath middleRightMiddle = middleLeftMiddle.mirrorPath();
 
     // map some runnable with each auton. Using these to zero the robot to the auton start as soon
     // as its selected
@@ -130,6 +132,32 @@ public class PathAutos {
                 () -> {
                     Rotation2d rot = rightBumpOutside.getIdealStartingState().rotation();
                     Translation2d tx = rightBumpOutside.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
+    public Command middleLeftMiddle() {
+        Command auto = twoScoopAuto(middleLeftMiddle, middleLeftMiddle);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = middleLeftMiddle.getIdealStartingState().rotation();
+                    Translation2d tx = middleLeftMiddle.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
+    public Command middleRightMiddle() {
+        Command auto = twoScoopAuto(middleRightMiddle, middleRightMiddle);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = middleRightMiddle.getIdealStartingState().rotation();
+                    Translation2d tx = middleRightMiddle.getPoint(0).position;
                     Pose2d pose = new Pose2d(tx, rot);
                     r.drive.setPose(FieldConstants.flipIfRed(pose));
                 };

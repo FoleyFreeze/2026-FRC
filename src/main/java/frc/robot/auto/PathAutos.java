@@ -15,8 +15,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ShooterCommands;
-
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -76,7 +74,7 @@ public class PathAutos {
         autoChooser.addOption("SitStillAndShoot", buildSitStillAndShoot());
     }
 
-    private Command buildFwdLeftBump(){
+    private Command buildFwdLeftBump() {
         Command auto = twoScoopAuto(forwardLeftBump1, forwardLeftBump2);
         Runnable run =
                 () -> {
@@ -89,7 +87,7 @@ public class PathAutos {
         return auto;
     }
 
-    private Command buildFwdRightBump(){
+    private Command buildFwdRightBump() {
         Command auto = twoScoopAuto(forwardRightBump1, forwardRightBump2);
         Runnable run =
                 () -> {
@@ -228,7 +226,7 @@ public class PathAutos {
         // shoot the balls while potentially moving
         Pose2d nextPathStart =
                 new Pose2d(path2.getPoint(0).position, path2.getIdealStartingState().rotation());
-        PathConstraints moveAndShootLimits = new PathConstraints(1, 1, 1, 1);
+        PathConstraints moveAndShootLimits = new PathConstraints(0.75, 0.75, 1, 1);
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstShootTime)

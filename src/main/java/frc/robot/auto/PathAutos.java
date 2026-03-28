@@ -65,7 +65,6 @@ public class PathAutos {
         autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
         autoChooser.addOption("SitStillAndShoot", buildSitStillAndShoot());
     }
-    }
 
     private Command buildSitStillAndShoot() {
         SequentialCommandGroup sequence = new SequentialCommandGroup();

@@ -87,6 +87,19 @@
         "nominalVoltage": 12.0,
         "unlimited": false
       }
+    },
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.6448345712356693,
+      "maxWaypointRelativePos": 2.04996623902769,
+      "constraints": {
+        "maxVelocity": 0.5,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
     }
   ],
   "pointTowardsZones": [],

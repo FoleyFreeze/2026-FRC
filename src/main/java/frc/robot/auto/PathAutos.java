@@ -63,6 +63,23 @@ public class PathAutos {
         autoChooser.addOption("RightTrenchTwoScoop", rightTrenchOutsideLoop());
         autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
         autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
+        autoChooser.addOption("SitStillAndShoot", buildSitStillAndShoot());
+    }
+    }
+
+    private Command buildSitStillAndShoot() {
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        sequence.addCommands(
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .withTimeout(5)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stopAll().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
+        return sequence;
     }
 
     public Supplier<Pose2d> poseMaker(double x, double y, double theta) {

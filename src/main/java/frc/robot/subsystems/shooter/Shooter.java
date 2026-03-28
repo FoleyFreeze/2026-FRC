@@ -170,16 +170,15 @@ public class Shooter extends SubsystemBase {
 
     public Command pointAtHub() {
         return new RunCommand(
-                        () -> {
-                            pointAtLoc(FieldConstants.Hub.center);
-                            io.wheelPower(0);
-                            io.setHoodAngle(maxHoodAngle);
-                            rpmTarget = 0;
-                            hoodTarget = maxHoodAngle;
-                            shootMode = ShootMode.MANUAL;
-                        },
-                        this)
-                .ignoringDisable(true);
+                () -> {
+                    pointAtLoc(FieldConstants.Hub.center);
+                    io.wheelPower(0);
+                    io.setHoodAngle(maxHoodAngle);
+                    rpmTarget = 0;
+                    hoodTarget = maxHoodAngle;
+                    shootMode = ShootMode.MANUAL;
+                },
+                this);
     }
 
     public void pointAtLoc(Translation2d loc) {

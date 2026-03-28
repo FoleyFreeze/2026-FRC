@@ -129,6 +129,7 @@ public class ConfigButtons {
                                 .or(controller.leftBumper())
                                 .negate())
                 .and(botDisabled.negate())
+                .and(new Trigger(() -> !DriverStation.isAutonomous()))
                 .whileTrue(r.shooter.pointAtHub());
 
         // set manual shot positions (dpad)

@@ -72,7 +72,7 @@ public class ConfigButtons {
                                 velocityThing));
 
         // drive over trench
-        final double xyReduceBump = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);
+        final double xyReduceBump = Math.pow(0.6, 1.0 / DriveCommands.xyExpo);
         final double xyReduceTrench = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);
         controller
                 .leftStick()

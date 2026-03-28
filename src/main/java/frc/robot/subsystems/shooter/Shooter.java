@@ -239,6 +239,15 @@ public class Shooter extends SubsystemBase {
         return goal;
     }
 
+    // public Translation2d getClosestPass(Pose2d botLoc) {
+    //                     if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
+    //                 goal = FieldConstants.flip(FieldConstants.Locations.passRight);
+    //             }else{
+    //             goal = FieldConstants.flip(FieldConstants.Locations.passLeft);
+    //         }
+    //     return goal;
+    // }
+
     double lastPredFlightTime = 0;
 
     public double getLastFlightTime() {

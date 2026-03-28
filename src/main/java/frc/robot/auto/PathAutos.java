@@ -191,7 +191,10 @@ public class PathAutos {
                         r.shooter.pointAtHub());
         sequence.addCommands(parallelGroup);
 
-        // shoot the balls while stationary
+        // shoot the balls while potentially moving
+        Pose2d nextPathStart =
+                new Pose2d(path2.getPoint(0).position, path2.getIdealStartingState().rotation());
+        PathConstraints moveAndShootLimits = new PathConstraints(1, 1, 1, 1);
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .withTimeout(firstShootTime)
@@ -201,7 +204,10 @@ public class PathAutos {
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
                                     r.intake.stopIntake().execute();
-                                }));
+                                })
+                        .alongWith(
+                                AutoBuilder.pathfindToPoseFlipped(
+                                        nextPathStart, moveAndShootLimits)));
         sequence.addCommands(r.intake.fastDrop());
 
         // drive the second profile while intaking

@@ -360,7 +360,7 @@ public class Shooter extends SubsystemBase {
         // manageTurretWrap(angleSetpoint, setpoints.turretVel());
 
         // provide the angle the robot should point at
-        botAngleTarget = Rotation2d.fromDegrees(angleSetpoint - inputs.turretPositionDeg);
+        botAngleTarget = Rotation2d.fromDegrees(inputs.turretPositionDeg - angleSetpoint);
         rotationThing.accept(botAngleTarget);
         velocityThing.accept(setpoints.turretVel());
 

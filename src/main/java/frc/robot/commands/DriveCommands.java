@@ -203,7 +203,8 @@ public class DriveCommands {
                                             drive.getRotation().getRadians(),
                                             new TrapezoidProfile.State(
                                                     targetRotation.getRadians(),
-                                                    rotationFFw.get())); // in radians
+                                                    Math.toRadians(
+                                                            rotationFFw.get()))); // in radians
                             // (radians/second)
 
                             // Convert to field relative speeds & send command

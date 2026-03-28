@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -33,8 +34,20 @@ public class ShooterCommands {
     }
 
     public static Command smartShoot(RobotContainer r, Translation2d target) {
-
         return new RunCommand(() -> r.shooter.newPrime(target, r.drive.getPose()), r.shooter)
+                .alongWith(r.spindexter.smarterSpinCmd());
+    }
+
+    public static Command smartShootNoTurret(
+            RobotContainer r,
+            Translation2d target,
+            Thing<Rotation2d> rotationThing,
+            Thing<Double> velocityThing) {
+        return new RunCommand(
+                        () ->
+                                r.shooter.newPrimeNoTurret(
+                                        target, r.drive.getPose(), rotationThing, velocityThing),
+                        r.shooter)
                 .alongWith(r.spindexter.smarterSpinCmd());
     }
 }

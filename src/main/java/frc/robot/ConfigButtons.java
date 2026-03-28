@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -9,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
+import frc.robot.commands.ShooterCommands.Thing;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
 import frc.robot.util.EdgeDetector;
 import frc.robot.util.EdgeDetector.EdgeType;
@@ -44,12 +46,30 @@ public class ConfigButtons {
                 .rightTrigger()
                 .or(controller.rightBumper())
                 .or(controller.leftBumper())
+                // dont run if turret disabled
+                .and(driveStation.button(10).negate())
                 .whileTrue(
                         DriveCommands.joystickDriveTurnOut(
                                 r.drive,
                                 () -> -controller.getLeftY() * shootXyReduce,
                                 () -> -controller.getLeftX() * shootXyReduce,
                                 () -> -controller.getRightX() * shootZReduce));
+
+        Thing<Rotation2d> rotationThing = new Thing<>();
+        Thing<Double> velocityThing = new Thing<>();
+        controller
+                .rightTrigger()
+                .or(controller.rightBumper())
+                .or(controller.leftBumper())
+                // dont run if turret disabled
+                .and(driveStation.button(10))
+                .whileTrue(
+                        DriveCommands.driveAtAngleFFw(
+                                r.drive,
+                                () -> -controller.getLeftY() * shootXyReduce,
+                                () -> -controller.getLeftX() * shootXyReduce,
+                                rotationThing,
+                                velocityThing));
 
         // drive over trench
         final double xyReduceBump = Math.pow(0.5, 1.0 / DriveCommands.xyExpo);
@@ -106,16 +126,43 @@ public class ConfigButtons {
         // pass left LB
         controller
                 .leftBumper()
+                .and(driveStation.button(10).negate()) // with turret
                 .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft));
-        // // pass right RB
+        controller
+                .leftBumper()
+                .and(driveStation.button(10)) // without turret
+                .whileTrue(
+                        ShooterCommands.smartShootNoTurret(
+                                r,
+                                FieldConstants.Locations.passLeft,
+                                rotationThing,
+                                velocityThing));
+        // pass right RB
         controller
                 .rightBumper()
+                .and(driveStation.button(10).negate()) // with turret
                 .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passRight));
+        controller
+                .rightBumper()
+                .and(driveStation.button(10)) // without turret
+                .whileTrue(
+                        ShooterCommands.smartShootNoTurret(
+                                r,
+                                FieldConstants.Locations.passRight,
+                                rotationThing,
+                                velocityThing));
 
         // shoot hub RT
         controller
                 .rightTrigger()
+                .and(driveStation.button(10).negate())
                 .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
+        controller
+                .rightTrigger()
+                .and(driveStation.button(10))
+                .whileTrue(
+                        ShooterCommands.smartShootNoTurret(
+                                r, FieldConstants.Hub.center, rotationThing, velocityThing));
 
         // when not shooting and in autoPoint mode, point at the hub
         // shooter cam switch is active low

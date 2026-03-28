@@ -20,6 +20,7 @@ import frc.robot.ConfigButtons;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
+import frc.robot.commands.ShooterCommands.Thing;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
 import frc.robot.util.Util2;
 import java.util.function.DoubleSupplier;
@@ -37,7 +38,8 @@ public class Shooter extends SubsystemBase {
 
     private final ShooterInterp1d lerp = new ShooterInterp1d();
 
-    public double rpmTarget, hoodTarget, turretTarget, botAngleTarget;
+    public double rpmTarget, hoodTarget, turretTarget;
+    public Rotation2d botAngleTarget = Rotation2d.kZero;
 
     public static final double minHoodAngle = 48;
     public static final double maxHoodAngle = 87;
@@ -295,7 +297,7 @@ public class Shooter extends SubsystemBase {
 
         // 2 use setpoints from lerp to set motors
         double angleSetpoint = setpoints.angle();
-        botAngleTarget = angleSetpoint;
+        // botAngleTarget = angleSetpoint;
         Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
         Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
@@ -305,6 +307,51 @@ public class Shooter extends SubsystemBase {
         // hoodTarget = setpoints.hood();
         // rpmTarget = setpoints.rpm();
         manageTurretWrap(angleSetpoint, setpoints.turretVel());
+        setShotSpeedAngle(
+                setpoints.hood(), setpoints.rpm(), localgoal != FieldConstants.Hub.center);
+        // io.setHoodAngle(setpoints.hood());
+        // io.setSpeed(setpoints.rpm());
+    }
+
+    public void newPrimeNoTurret(
+            Translation2d localgoal,
+            Pose2d botLoc,
+            Thing<Rotation2d> rotationThing,
+            Thing<Double> velocityThing) {
+        // 0 what are we shooting at? (goal vs pass)
+        ChassisSpeeds botVel;
+
+        botVel = r.drive.getFieldVelocity();
+        this.goal = FieldConstants.flipIfRed(localgoal);
+
+        // 1 call the lerp
+        DataPoint setpoints;
+        if (localgoal == FieldConstants.Hub.center) {
+            setpoints = lerp.getHub(this.goal, botLoc, botVel);
+            shootMode = ShootMode.HUB;
+        } else {
+            setpoints = lerp.getPass(this.goal, botLoc, botVel);
+            shootMode = ShootMode.PASS;
+        }
+        lastPredFlightTime = setpoints.time();
+
+        // 2 use setpoints from lerp to set motors
+        double angleSetpoint = setpoints.angle();
+        Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
+        Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
+        Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
+        Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
+        Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
+
+        // hoodTarget = setpoints.hood();
+        // rpmTarget = setpoints.rpm();
+        // manageTurretWrap(angleSetpoint, setpoints.turretVel());
+
+        // provide the angle the robot should point at
+        botAngleTarget = Rotation2d.fromDegrees(angleSetpoint - inputs.turretPositionDeg);
+        rotationThing.accept(botAngleTarget);
+        velocityThing.accept(setpoints.turretVel());
+
         setShotSpeedAngle(
                 setpoints.hood(), setpoints.rpm(), localgoal != FieldConstants.Hub.center);
         // io.setHoodAngle(setpoints.hood());
@@ -461,18 +508,16 @@ public class Shooter extends SubsystemBase {
         if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;
             return false;
-        } else if (!isWithin(turretTarget, inputs.turretPositionDeg, angleThresh)) {
+        } else if (!ConfigButtons.driveStation.getHID().getRawButton(10)
+                && !isWithin(turretTarget, inputs.turretPositionDeg, angleThresh)) {
+            // if using turret and turret not in range
             missReason = MissReason.TURRET_ANGLE;
             return false;
-        } else if (false
+        } else if (ConfigButtons.driveStation.getHID().getRawButton(10)
                 && shootMode != ShootMode.MANUAL
                 && !isWithin(
-                        r.drive
-                                .getRotation()
-                                .minus(Rotation2d.fromDegrees(botAngleTarget))
-                                .getDegrees(),
-                        0,
-                        angleThresh)) {
+                        r.drive.getRotation().minus(botAngleTarget).getDegrees(), 0, angleThresh)) {
+            // if not using turret and robot not in range
             missReason = MissReason.ROBOT_ANGLE;
             return false;
         } else if (!isWithin(hoodTarget, inputs.hoodPositionDeg, angleThresh)) {

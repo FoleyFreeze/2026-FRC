@@ -69,8 +69,10 @@ public class ShooterIOHardware implements ShooterIO {
     private final MotionMagicVelocityTorqueCurrentFOC velocityRequestWheel =
             new MotionMagicVelocityTorqueCurrentFOC(0);
     private final PositionTorqueCurrentFOC positionRequestHood = new PositionTorqueCurrentFOC(0);
-    private final MotionMagicTorqueCurrentFOC positionRequestTurret =
+    private final MotionMagicTorqueCurrentFOC positionMagicRequestTurret =
             new MotionMagicTorqueCurrentFOC(0);
+    private final PositionTorqueCurrentFOC positionRequestTurret =
+            new PositionTorqueCurrentFOC(0).withSlot(1);
 
     private final StatusSignal<Angle> positionWheel;
     private final StatusSignal<Voltage> voltageWheel;
@@ -105,7 +107,8 @@ public class ShooterIOHardware implements ShooterIO {
     private final Debouncer hoodConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer turretConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
 
-    public static final double turretGearRatio = 3.0 * 172.0 / 45.0; // rotor to mechanism rotations
+    public static final double turretGearRatio = 5.0 * 172.0 / 45.0; // rotor to mechanism rotations
+    private double lastTurretAngle = 0;
 
     public ShooterIOHardware() {
         wheel = new TalonFX(12, TunerConstants.kCANBus);
@@ -172,9 +175,14 @@ public class ShooterIOHardware implements ShooterIO {
         cfgT.Slot0.kS = 0;
         cfgT.Slot0.kV = 0;
         cfgT.Slot0.kA = 0;
+        cfgT.Slot1.kP = 5000;
+        cfgT.Slot1.kD = 35;
+        cfgT.Slot1.kS = 0;
+        cfgT.Slot1.kV = 0;
+        cfgT.Slot1.kA = 0;
         cfgT.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfgT.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-        cfgT.MotionMagic.MotionMagicAcceleration = 1;
+        cfgT.MotionMagic.MotionMagicAcceleration = 2;
         cfgT.MotionMagic.MotionMagicCruiseVelocity = 1.5;
         cfgT.Feedback.SensorToMechanismRatio = turretGearRatio;
         PhoenixUtil.tryUntilOk(5, () -> turret.getConfigurator().apply(cfgT));
@@ -323,6 +331,8 @@ public class ShooterIOHardware implements ShooterIO {
             pausedDueToTurretTemp = inputs.turretTemp > turretMaxTemp;
         }
         turretTempAlert.set(pausedDueToTurretTemp);
+
+        lastTurretAngle = inputs.turretPositionDeg;
     }
 
     @Override
@@ -346,9 +356,17 @@ public class ShooterIOHardware implements ShooterIO {
             // stop turret when its hot
             turret.setControl(voltageRequestTurret.withOutput(0));
         } else {
-            // ignoring velocity because motion magic
-            turret.setControl(
-                    positionRequestTurret.withPosition(Units.degreesToRotations(turretAngle)));
+            if (Math.abs(turretAngle - lastTurretAngle) > 15) {
+                // ignoring velocity because motion magic
+                turret.setControl(
+                        positionMagicRequestTurret.withPosition(
+                                Units.degreesToRotations(turretAngle)));
+            } else {
+                turret.setControl(
+                        positionRequestTurret
+                                .withPosition(Units.degreesToRotations(turretAngle))
+                                .withVelocity(Units.degreesToRotations(velocity)));
+            }
         }
     }
 

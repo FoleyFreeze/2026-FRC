@@ -10,8 +10,8 @@ package frc.robot;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.LimelightHelpers;
@@ -86,6 +86,7 @@ public class Robot extends LoggedRobot {
 
     /** This function is called periodically during all modes. */
     double prevTime = 0;
+
     @Override
     public void robotPeriodic() {
         double time = Timer.getFPGATimestamp();

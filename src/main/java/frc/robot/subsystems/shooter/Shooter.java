@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.ConfigButtons;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
@@ -504,6 +505,13 @@ public class Shooter extends SubsystemBase {
         } else {
             hoodAngle += jogHubAngle;
             rpm += jogHubRpm;
+
+            boolean isOffsetJog = ConfigButtons.driveStation.getHID().getRawButton(6) == false;
+            if(isOffsetJog){
+                hoodAngle += 8;
+                rpm += 175;
+            }
+            Logger.recordOutput("Shooter/isOffsetJog", isOffsetJog);
         }
 
         hoodTarget = hoodAngle;

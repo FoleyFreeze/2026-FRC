@@ -69,8 +69,9 @@ public class StatsSubsystem extends SubsystemBase {
 
         // stats.totalTurretFlips;
         // stats.totalTurretRotations;
-        if(prevTurretAngle != 0){
-            stats.totalTurretRotations += Math.abs(r.shooter.inputs.turretPositionDeg - prevTurretAngle);
+        if (prevTurretAngle != 0) {
+            stats.totalTurretRotations +=
+                    Math.abs(r.shooter.inputs.turretPositionDeg - prevTurretAngle);
         }
         prevTurretAngle = r.shooter.inputs.turretPositionDeg;
 
@@ -98,8 +99,8 @@ public class StatsSubsystem extends SubsystemBase {
         return deltaDist;
     }
 
-    //dont forget to count your flippy things
-    public void flippyThing(){
+    // dont forget to count your flippy things
+    public void flippyThing() {
         stats.totalTurretFlips++;
     }
 }

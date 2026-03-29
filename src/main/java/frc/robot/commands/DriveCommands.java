@@ -328,7 +328,7 @@ public class DriveCommands {
         PIDController pidX = new PIDController(8, 0, 0);
         PIDController pidY = new PIDController(8, 0, 0);
         final double POS_TOL = Units.inchesToMeters(0.5);
-        final double POS_MAX_VEL = 1; // may change
+        final double POS_MAX_VEL = 0.75; // may change
         final double POS_MAX_TIME = 2;
         double[] error = new double[1];
         Timer timer = new Timer();

@@ -140,7 +140,7 @@ public class Module {
         return Units.radiansToRotations(inputs.driveVelocityRadPerSec);
     }
 
-    public void setBrakeMode(boolean on){
+    public void setBrakeMode(boolean on) {
         io.setDriveBrake(on);
     }
 }

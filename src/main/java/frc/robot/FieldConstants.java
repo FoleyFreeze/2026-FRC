@@ -71,7 +71,14 @@ public class FieldConstants {
                 new Translation2d(depth, center.getY() - halfWidth);
     }
 
-    public static class Depot {}
+    public static class Depot {
+        public static double yOffset = Units.inchesToMeters(26.22 + 121.25 + 87.38);
+        public static Translation2d inFrontOfDepot =
+                new Translation2d(
+                        Constants.robotLength / 2 + Units.inchesToMeters(27 + 14), yOffset);
+        public static Translation2d depotWall =
+                new Translation2d(Constants.robotLength / 2 + Units.inchesToMeters(12), yOffset);
+    }
 
     public static class Outpost {}
 

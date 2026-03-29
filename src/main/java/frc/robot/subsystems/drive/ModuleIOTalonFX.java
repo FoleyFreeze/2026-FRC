@@ -284,7 +284,9 @@ public class ModuleIOTalonFX implements ModuleIO {
         double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
         driveTalon.setControl(
                 switch (constants.DriveMotorClosedLoopOutput) {
-                    case Voltage -> velocityVoltageRequest.withVelocity(velocityRotPerSec).withOverrideBrakeDurNeutral(brakeMode);
+                    case Voltage -> velocityVoltageRequest
+                            .withVelocity(velocityRotPerSec)
+                            .withOverrideBrakeDurNeutral(brakeMode);
                     case TorqueCurrentFOC -> velocityTorqueCurrentRequest.withVelocity(
                             velocityRotPerSec);
                 });
@@ -301,8 +303,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     private boolean brakeMode = false;
+
     @Override
-    public void setDriveBrake(boolean on){
-        brakeMode = on;        
+    public void setDriveBrake(boolean on) {
+        brakeMode = on;
     }
 }

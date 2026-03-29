@@ -561,7 +561,7 @@ public class Shooter extends SubsystemBase {
     public void setShotSpeedAngle(double hoodAngle, double rpm, boolean isPass) {
         if (isPass) {
             hoodAngle += jogPassAngle;
-            rpm += jogHubRpm;
+            rpm += jogPassRpm;
         } else {
             hoodAngle += jogHubAngle;
             rpm += jogHubRpm;

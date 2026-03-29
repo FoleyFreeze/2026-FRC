@@ -229,7 +229,7 @@ public class PathAutos {
         PathConstraints moveAndShootLimits = new PathConstraints(0.75, 0.75, 1, 1);
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
-                .alongWith(r.intake.shakeTheIntake())
+                        .alongWith(r.intake.shakeTheIntake())
                         .withTimeout(firstShootTime)
                         .finallyDo(
                                 () -> {

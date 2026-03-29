@@ -121,8 +121,8 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.Slot1.kD = 50;
         cfg.Slot1.kV = 0;
         cfg.Slot1.kA = 30;
-        cfg.MotionMagic.MotionMagicCruiseVelocity = 0.5;
-        cfg.MotionMagic.MotionMagicAcceleration = 1;
+        cfg.MotionMagic.MotionMagicCruiseVelocity = 1;
+        cfg.MotionMagic.MotionMagicAcceleration = 1.5;
         cfg.Slot0.kP = 500;
         cfg.Slot0.kD = 120;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;

@@ -294,7 +294,7 @@ public class PathAutos {
     }
 
     public Command twoMiddleScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
-        double initialShootWait = 0.7;
+        double initialShootWait = 1.2;
         double firstShootTime = 3.8;
         double secondShootTime = 5;
 
@@ -359,7 +359,7 @@ public class PathAutos {
     }
 
     public Command singleScoopDepot(PathPlannerPath path) {
-        double initialShootWait = 0.7;
+        double initialShootWait = 1.1;
         double firstShootTime = 5;
         double secondShootTime = 5;
 

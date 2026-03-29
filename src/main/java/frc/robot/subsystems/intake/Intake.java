@@ -23,9 +23,10 @@ public class Intake extends SubsystemBase {
 
     // positions in rotations
     private static final double armInPos = 0.18;
+    private static final double armInShotPos = 0.15;
     public static final double armStartWheelPos = 0.07;
     private static final double armOutPos =
-            -0.02; // -0.042; // intentionally below zero, actual is -0.013
+            -0.03; // -0.042; // intentionally below zero, actual is -0.013
     private static final double armWontHitTrenchPos = 0.05;
     private static final double armTol = 0.04;
 
@@ -73,6 +74,12 @@ public class Intake extends SubsystemBase {
 
     public void retract() {
         io.armMotion(armInPos);
+        overrideToSpinWheels = false;
+        Logger.recordOutput("Intake/ArmSetpoint", armInPos);
+    }
+
+    public void retractForShot(){
+        io.armMotion(armInShotPos);
         overrideToSpinWheels = false;
         Logger.recordOutput("Intake/ArmSetpoint", armInPos);
     }
@@ -168,7 +175,7 @@ public class Intake extends SubsystemBase {
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.extend()));
         shakeTheIntake.addCommands(r.intake.stopIntake());
         shakeTheIntake.addCommands(new WaitCommand(0.35));
-        shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.retract()));
+        shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.retractForShot()));
         shakeTheIntake.addCommands(r.intake.smartIntake().withTimeout(1.5));
         return shakeTheIntake.repeatedly().finallyDo(() -> r.intake.extend());
     }

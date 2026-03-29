@@ -180,7 +180,7 @@ public class ShooterInterp1d {
         double futureTurretAngle;
 
         // determine if pass or hub shot by comparison of timeTable reference
-        if (timeTable == timeTableRealPassing || timeTable == timeTableSimPassing) {
+        if (false && (timeTable == timeTableRealPassing || timeTable == timeTableSimPassing)) {
             // select far or close pass based on control board switch
             // using the "field orient" switch (7)
             double[] passData; // contains rpm, angle, airtime

@@ -632,4 +632,10 @@ public class Drive extends SubsystemBase {
         double targetAngle = Util2.wrapAngle(botAngle.getDegrees(), 180);
         return Rotation2d.fromDegrees(targetAngle);
     }
+
+    public void setBrakeMode(boolean on) {
+        for(var m : modules){
+            m.setBrakeMode(on);
+        }
+    }
 }

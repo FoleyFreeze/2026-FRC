@@ -162,6 +162,8 @@ public class Robot extends LoggedRobot {
         // pdh.setSwitchableChannel(true);
         lastPdhStatus = true;
 
+        robotContainer.drive.setBrakeMode(true);
+
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
@@ -179,6 +181,8 @@ public class Robot extends LoggedRobot {
     public void teleopInit() {
         // pdh.setSwitchableChannel(true);
         lastPdhStatus = true;
+
+        robotContainer.drive.setBrakeMode(false);
 
         // This makes sure that the autonomous stops running when
         // teleop starts running. If you want the autonomous to

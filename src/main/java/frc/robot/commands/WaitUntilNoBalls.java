@@ -31,7 +31,7 @@ public class WaitUntilNoBalls extends Command{
 
     @Override
     public boolean isFinished(){
-        if()
+        return true;
     }
 
     @Override

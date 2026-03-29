@@ -23,7 +23,7 @@ public class Intake extends SubsystemBase {
 
     // positions in rotations
     private static final double armInPos = 0.18;
-    private static final double armInShotPos = 0.15;
+    private static final double armInShotPos = 0.135;
     public static final double armStartWheelPos = 0.07;
     private static final double armOutPos =
             -0.03; // -0.042; // intentionally below zero, actual is -0.013
@@ -78,7 +78,7 @@ public class Intake extends SubsystemBase {
         Logger.recordOutput("Intake/ArmSetpoint", armInPos);
     }
 
-    public void retractForShot(){
+    public void retractForShot() {
         io.armMotion(armInShotPos);
         overrideToSpinWheels = false;
         Logger.recordOutput("Intake/ArmSetpoint", armInPos);

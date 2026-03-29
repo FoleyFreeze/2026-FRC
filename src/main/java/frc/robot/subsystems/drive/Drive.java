@@ -45,6 +45,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.intake.Intake;
@@ -349,8 +350,34 @@ public class Drive extends SubsystemBase {
         robotVelocity = kinematics.toChassisSpeeds(getModuleStates());
 
         Pose2d botPose = getPose();
+        double x = botPose.getX();
+        double y = botPose.getY();
+        boolean resetPose = false;
+        if (x < -2) {
+            x = 0;
+            resetPose = true;
+        } else if (x > FieldConstants.fieldLength + 2) {
+            x = FieldConstants.fieldLength;
+            resetPose = true;
+        }
+        if (y < -2) {
+            y = 0;
+            resetPose = true;
+        } else if (y > FieldConstants.fieldWidth + 2) {
+            y = FieldConstants.fieldWidth;
+            resetPose = true;
+        }
+        if (resetPose) {
+            Pose2d newPose = new Pose2d(x, y, botPose.getRotation());
+            setPose(newPose);
+            botPose = newPose;
+        }
+
         Logger.recordOutput(
-                "Drive/WorldCoords", String.format("%.2f, %.2f", botPose.getX(), botPose.getY()));
+                "Drive/WorldCoords",
+                String.format(
+                        "%.2f, %.2f, %.0f",
+                        botPose.getX(), botPose.getY(), botPose.getRotation().getDegrees()));
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
@@ -581,6 +608,18 @@ public class Drive extends SubsystemBase {
             Pose2d visionRobotPoseMeters,
             double timestampSeconds,
             Matrix<N3, N1> visionMeasurementStdDevs) {
+        // force all vision updates to be within a meter if the robot is enabled
+        // final double maxDist = 1;
+        // Translation2d diff =
+        //         getPose().getTranslation().minus(visionRobotPoseMeters.getTranslation());
+        // if (Constants.isEnabled && diff.getNorm() > maxDist) {
+        //     // replace the pose with one only 1 meter away in the same direction
+        //     visionRobotPoseMeters =
+        //             new Pose2d(
+        //                     new Translation2d(-maxDist, diff.getAngle()),
+        //                     visionRobotPoseMeters.getRotation());
+        // }
+
         poseEstimator.addVisionMeasurement(
                 visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }

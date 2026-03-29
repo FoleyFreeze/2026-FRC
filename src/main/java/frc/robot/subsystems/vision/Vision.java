@@ -173,6 +173,8 @@ public class Vision extends SubsystemBase {
                                 // if we have both cameras reporting a pose, only take the turret
                                 // cam
                                 || cameraIndex == 1 && turretCamAcceptedPose > 0
+                                //ignore side cam in auto
+                                || cameraIndex == 1 && Constants.isAuto
                                 // Must be within the field boundaries
                                 || observation.pose().getX() < 0.0
                                 || observation.pose().getX() > aprilTagLayout.getFieldLength()

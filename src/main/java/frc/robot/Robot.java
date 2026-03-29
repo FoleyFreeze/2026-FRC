@@ -115,6 +115,7 @@ public class Robot extends LoggedRobot {
     public void disabledInit() {
         robotContainer.resetSimulationField();
         Constants.isEnabled = false;
+        Constants.isAuto = false;
     }
 
     /** This function is called periodically when disabled. */
@@ -163,6 +164,7 @@ public class Robot extends LoggedRobot {
         // pdh.setSwitchableChannel(true);
         lastPdhStatus = true;
         Constants.isEnabled = true;
+        Constants.isAuto = true;
 
         robotContainer.drive.setBrakeMode(true);
 
@@ -184,6 +186,7 @@ public class Robot extends LoggedRobot {
         // pdh.setSwitchableChannel(true);
         lastPdhStatus = true;
         Constants.isEnabled = true;
+        Constants.isAuto = false;
 
         robotContainer.drive.setBrakeMode(false);
 

@@ -10,6 +10,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -315,7 +316,7 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
         Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
-
+        Timer.getTimestamp();
         // hoodTarget = setpoints.hood();
         // rpmTarget = setpoints.rpm();
         manageTurretWrap(angleSetpoint, setpoints.turretVel());

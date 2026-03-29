@@ -7,7 +7,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.ConfigButtons;
 import frc.robot.Constants;
-import frc.robot.Robot;
+import frc.robot.Constants.Mode;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterInterp1d {
@@ -80,7 +80,7 @@ public class ShooterInterp1d {
     private static double[] distAxisPassing;
 
     public ShooterInterp1d() {
-        if (Robot.isReal()) {
+        if (Constants.currentMode == Mode.REAL || Constants.currentMode == Mode.REPLAY) {
             rpmTable = rpmTableReal;
             hoodAngleTable = hoodAngleTableReal;
             timeTable = timeTableReal;

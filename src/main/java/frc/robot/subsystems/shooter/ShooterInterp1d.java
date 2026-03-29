@@ -28,14 +28,14 @@ public class ShooterInterp1d {
     private static final double[] distAxisSim = {0, 1.524, 3.048, 4.572, 6.096};
 
     // real passes with drag
-    private static final double[] rpmTableRealPassing = {2600, 3000, 3500, 4000, 5000, 5000, 5000};
+    private static final double[] rpmTableRealPassing = {2600, 3000, 3500, 4000, 5000, 5000, 5000, 5000};
     private static final double[] hoodAngleTableRealPassing = {
-        49.5, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5
+        49.5, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5
     };
     private static final double[] timeTableRealPassing = {
-        0.214, 0.367, 0.527, 0.686, 0.854, 1.059, 1.19
+        0.214, 0.3, 0.367, 0.527, 0.686, 0.854, 1.059, 1.19
     };
-    private static final double[] distAxisPassingReal = {3, 6, 9, 12, 15, 18, 21};
+    private static final double[] distAxisPassingReal = {1, 3, 6, 9, 12, 15, 18, 21};
     // 49.5 for all
     // pairs
     /*3750rpm, 247in landed, 141in roll

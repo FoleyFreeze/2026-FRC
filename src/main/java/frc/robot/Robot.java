@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.LimelightHelpers;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedPowerDistribution;
@@ -118,10 +119,17 @@ public class Robot extends LoggedRobot {
         Constants.isAuto = false;
     }
 
+    boolean wasTeleop = false;
     /** This function is called periodically when disabled. */
     @Override
     public void disabledPeriodic() {
         if (DriverStation.isFMSAttached()) {
+            if(wasTeleop){
+                wasTeleop = false;
+                LimelightHelpers.triggerRewindCapture(VisionConstants.camera0Name, 165);
+                LimelightHelpers.triggerRewindCapture(VisionConstants.camera1Name, 165);
+            }
+
             if (lastPdhStatus) {
 
             } else {
@@ -136,6 +144,7 @@ public class Robot extends LoggedRobot {
 
             }
         }
+        wasTeleop = false;
 
         // rezero to the start point of the auton
         autonomousCommand = robotContainer.getAutonomousCommand();
@@ -187,6 +196,7 @@ public class Robot extends LoggedRobot {
         lastPdhStatus = true;
         Constants.isEnabled = true;
         Constants.isAuto = false;
+        wasTeleop = true;
 
         robotContainer.drive.setBrakeMode(false);
 

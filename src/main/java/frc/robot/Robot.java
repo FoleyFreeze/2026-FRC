@@ -124,7 +124,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledPeriodic() {
         if (DriverStation.isFMSAttached()) {
-            if(wasTeleop){
+            if (wasTeleop) {
                 wasTeleop = false;
                 LimelightHelpers.triggerRewindCapture(VisionConstants.camera0Name, 165);
                 LimelightHelpers.triggerRewindCapture(VisionConstants.camera1Name, 165);

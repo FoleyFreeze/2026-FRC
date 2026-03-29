@@ -14,7 +14,7 @@ public class Stats implements StructSerializable {
     double totalDistRRwheel;
     double totalTravelTime;
 
-    double totalBallShots;
+    public double totalBallShots;
     double totalTurretRotations;
     double totalTurretFlips;
     double totalHubShootTime;

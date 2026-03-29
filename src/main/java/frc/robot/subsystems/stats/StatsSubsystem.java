@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class StatsSubsystem extends SubsystemBase {
     RobotContainer r;
-    Stats stats = new Stats();
+    public Stats stats = new Stats();
 
     double botRadius = Drive.getModuleTranslations()[0].getNorm();
 

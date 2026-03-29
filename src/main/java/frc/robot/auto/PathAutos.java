@@ -233,7 +233,7 @@ public class PathAutos {
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
         double initialShootWait = 1.6;
-        double firstShootTime = 3.8;
+        double firstShootTime = 5;
         double secondShootTime = 5;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();

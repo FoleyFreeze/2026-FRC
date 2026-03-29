@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -117,6 +118,8 @@ public class Vision extends SubsystemBase {
 
     public int validImages = 0;
     int turretCamAcceptedPose = 0;
+    Translation2d lastTagPose = new Translation2d();
+    Translation2d last2TagPose = new Translation2d();
 
     @Override
     public void periodic() {
@@ -245,6 +248,11 @@ public class Vision extends SubsystemBase {
                         observation.pose().toPose2d(),
                         observation.timestamp(),
                         VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+
+                lastTagPose = r.drive.getPose().getTranslation();
+                if(observation.tagCount() > 1){
+                    last2TagPose = r.drive.getPose().getTranslation();
+                }
             }
 
             // Log camera metadata
@@ -266,6 +274,18 @@ public class Vision extends SubsystemBase {
             allRobotPosesRejected.addAll(robotPosesRejected);
 
             validImages = allRobotPoses.size();
+
+            if(r.drive.getPose().getTranslation().getDistance(lastTagPose) > 1){
+                Logger.recordOutput("Vision/hasRecentTag", true);
+            } else {
+                Logger.recordOutput("Vision/hasRecentTag", false);
+            }
+
+            if(r.drive.getPose().getTranslation().getDistance(last2TagPose) > 1){
+                Logger.recordOutput("Vision/hasRecent2Tag", true);
+            } else {
+                Logger.recordOutput("Vision/hasRecent2Tag", false);
+            }
         }
 
         // Log summary data

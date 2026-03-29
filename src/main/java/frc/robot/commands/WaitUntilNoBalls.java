@@ -4,13 +4,13 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 
-public class WaitUntilNoBalls extends Command{
-    double initTime,emptyTime;
+public class WaitUntilNoBalls extends Command {
+    double initTime, emptyTime;
     double lastBallCount;
     private Timer initTimer;
     private Timer emptyTimer;
 
-    public WaitUntilNoBalls(double initTime, double emptyTime){
+    public WaitUntilNoBalls(double initTime, double emptyTime) {
         this.initTime = initTime;
         this.emptyTime = emptyTime;
         initTimer = new Timer();
@@ -18,24 +18,20 @@ public class WaitUntilNoBalls extends Command{
     }
 
     @Override
-    public void initialize(){
+    public void initialize() {
         initTimer.restart();
         emptyTimer.restart();
         lastBallCount = RobotContainer.getInstance().stats.stats.totalBallShots;
     }
 
     @Override
-    public void execute(){
-
-    }
+    public void execute() {}
 
     @Override
-    public boolean isFinished(){
+    public boolean isFinished() {
         return true;
     }
 
     @Override
-    public void end(boolean interrupted){
-
-    }
+    public void end(boolean interrupted) {}
 }

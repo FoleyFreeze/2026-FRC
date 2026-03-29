@@ -250,7 +250,7 @@ public class Vision extends SubsystemBase {
                         VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
 
                 lastTagPose = r.drive.getPose().getTranslation();
-                if(observation.tagCount() > 1){
+                if (observation.tagCount() > 1) {
                     last2TagPose = r.drive.getPose().getTranslation();
                 }
             }
@@ -275,13 +275,13 @@ public class Vision extends SubsystemBase {
 
             validImages = allRobotPoses.size();
 
-            if(r.drive.getPose().getTranslation().getDistance(lastTagPose) > 1){
+            if (r.drive.getPose().getTranslation().getDistance(lastTagPose) < 1) {
                 Logger.recordOutput("Vision/hasRecentTag", true);
             } else {
                 Logger.recordOutput("Vision/hasRecentTag", false);
             }
 
-            if(r.drive.getPose().getTranslation().getDistance(last2TagPose) > 1){
+            if (r.drive.getPose().getTranslation().getDistance(last2TagPose) < 1) {
                 Logger.recordOutput("Vision/hasRecent2Tag", true);
             } else {
                 Logger.recordOutput("Vision/hasRecent2Tag", false);

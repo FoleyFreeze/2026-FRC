@@ -64,6 +64,7 @@ public class FuelVisionIO_HW implements FuelVisionIO {
                             }
 
                             // save data to capture on next inputs loop
+                            fuelHeader = fvh;
                             fuelData = fuelArray;
                         });
     }

@@ -22,7 +22,8 @@ public class FuelVision extends SubsystemBase {
 
     public static final boolean isDisabled = false;
 
-    public static int bufferSize = 8;
+    public static double oldestAllowedImage = 0.5;
+    public static int bufferSize = (int) Math.ceil(oldestAllowedImage / 0.02);
     public static boolean disable = false;
 
     Translation2d lastNoteLocation;
@@ -93,7 +94,7 @@ public class FuelVision extends SubsystemBase {
                     Constants.frameWidth / 2 - Units.inchesToMeters(3));
     public static final Translation2d ctrFrtBumper =
             new Translation2d(
-                    Constants.frameLength / 2 + (Constants.robotLength - Constants.frameLength) / 2,
+                    Constants.robotLength/2,
                     0);
 
     // line (RFLB), x1y1x2y2, apply X offset for region
@@ -143,7 +144,8 @@ public class FuelVision extends SubsystemBase {
         // gathering them
 
         // abort if data is too old
-        if (Timer.getTimestamp() - inputs.realTime > 0.5) return;
+        //TODO: just follow the edge paths
+        if (Timer.getTimestamp() - inputs.realTime > oldestAllowedImage) return;
 
         // step1
         Pose2d botPose = getPoseAtCamTime(inputs.realTime);
@@ -188,7 +190,7 @@ public class FuelVision extends SubsystemBase {
             // 3) adding the robot field position
             Translation2d pos =
                     baseOffset
-                            .plus(ctrFrtBumper)
+                            .plus(camLocation)
                             .rotateBy(botPose.getRotation())
                             .plus(botPose.getTranslation());
 
@@ -280,7 +282,7 @@ public class FuelVision extends SubsystemBase {
 
         // if data is too old, dont use any image data
         if (past.time > time) {
-            return r.drive.getPose();
+            return past.pose;
         }
 
         for (int i = 1; i < robotPoseBuffer.size(); i++) {

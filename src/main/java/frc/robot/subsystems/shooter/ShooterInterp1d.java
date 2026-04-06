@@ -79,6 +79,11 @@ public class ShooterInterp1d {
     private static double[] timeTablePass;
     private static double[] distAxisPassing;
 
+    // turret position lookahead
+    private static final double turretPositionLookaheadDt = 0.02;
+    // robot velocity lookahead
+    private static final double dt = 0.02;
+
     public ShooterInterp1d() {
         if (Constants.currentMode == Mode.REAL || Constants.currentMode == Mode.REPLAY) {
             rpmTable = rpmTableReal;
@@ -228,7 +233,7 @@ public class ShooterInterp1d {
             */
             turretAngle = vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees();
             // predict forward
-            futureTurretAngle = turretAngle + turretVel * dt;
+            futureTurretAngle = turretAngle + turretVel * turretPositionLookaheadDt;
             data =
                     new DataPoint(
                             passData[0],
@@ -273,7 +278,7 @@ public class ShooterInterp1d {
             tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
             turretVel = Math.toDegrees(tangentVelocity / dist);
             turretAngle = vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees();
-            futureTurretAngle = turretAngle + turretVel * dt;
+            futureTurretAngle = turretAngle + turretVel * turretPositionLookaheadDt;
 
             data =
                     get(
@@ -290,9 +295,6 @@ public class ShooterInterp1d {
 
         return data;
     }
-
-    // how much velocity lookahead to do
-    static final double dt = 0.02;
 
     // do move&shoot via lookups of horizontal velocity
     public DataPoint getHV(

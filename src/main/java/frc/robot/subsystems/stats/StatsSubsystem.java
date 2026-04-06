@@ -32,50 +32,46 @@ public class StatsSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double time = Timer.getFPGATimestamp();
+        boolean isEnabled = DriverStation.isEnabled();
+
+        double time = Timer.getTimestamp();
         double dt = time - prevtime;
         prevtime = time;
+        Logger.recordOutput("dt", dt);
 
-        ChassisSpeeds speed = r.drive.getChassisSpeeds();
-        double deltaDist =
-                Math.sqrt(
-                                        speed.vxMetersPerSecond * speed.vxMetersPerSecond
-                                                + speed.vyMetersPerSecond * speed.vyMetersPerSecond)
-                                * dt
-                        + Math.abs(speed.omegaRadiansPerSecond) * botRadius * dt;
-        stats.totalTravelDist += deltaDist;
+        if (isEnabled) {
+            ChassisSpeeds speed = r.drive.getChassisSpeeds();
+            double deltaDist =
+                    Math.sqrt(
+                                            speed.vxMetersPerSecond * speed.vxMetersPerSecond
+                                                    + speed.vyMetersPerSecond
+                                                            * speed.vyMetersPerSecond)
+                                    * dt
+                            + Math.abs(speed.omegaRadiansPerSecond) * botRadius * dt;
+            stats.totalTravelDist += deltaDist;
 
-        stats.totalDistFLwheel += getWheelDistDelta(0);
-        stats.totalDistFRwheel += getWheelDistDelta(1);
-        stats.totalDistRLwheel += getWheelDistDelta(2);
-        stats.totalDistRRwheel += getWheelDistDelta(3);
+            stats.totalDistFLwheel += getWheelDistDelta(0);
+            stats.totalDistFRwheel += getWheelDistDelta(1);
+            stats.totalDistRLwheel += getWheelDistDelta(2);
+            stats.totalDistRRwheel += getWheelDistDelta(3);
 
-        if (deltaDist > Units.inchesToMeters(2) * dt) {
-            stats.totalTravelTime += dt;
-        }
+            if (deltaDist > Units.inchesToMeters(2) * dt) {
+                stats.totalTravelTime += dt;
+            }
 
-        if (r.shooter.ballShotEdge) {
-            stats.totalBallShots++;
-        }
+            if (r.shooter.ballShotEdge) {
+                stats.totalBallShots++;
+            }
 
-        if (r.shooter.shootMode == ShootMode.HUB) {
-            stats.totalHubShootTime += dt;
-        } else if (r.shooter.shootMode == ShootMode.PASS) {
-            stats.totalPassShootTime += dt;
-        }
+            if (r.shooter.shootMode == ShootMode.HUB) {
+                stats.totalHubShootTime += dt;
+            } else if (r.shooter.shootMode == ShootMode.PASS) {
+                stats.totalPassShootTime += dt;
+            }
 
-        // stats.totalDistanceClimbed;
-        // stats.totalClimbs;
-
-        // stats.totalTurretFlips;
-        // stats.totalTurretRotations;
-        if (prevTurretAngle != 0) {
             stats.totalTurretRotations +=
                     Math.abs(r.shooter.inputs.turretPositionDeg - prevTurretAngle);
-        }
-        prevTurretAngle = r.shooter.inputs.turretPositionDeg;
 
-        if (DriverStation.isEnabled()) {
             // stats.totalEnabledBallImages;
             stats.totalEnabledTagImages += r.vision.validImages;
 
@@ -86,6 +82,7 @@ public class StatsSubsystem extends SubsystemBase {
             ConfigButtons.trackButtons();
             ConfigButtons.trackControlBoardButtons();
         }
+        prevTurretAngle = r.shooter.inputs.turretPositionDeg;
 
         Logger.recordOutput("Stats", stats);
     }

@@ -145,31 +145,31 @@ public class FuelVision extends SubsystemBase {
         // abort if data is too old
         if (Timer.getTimestamp() - inputs.realTime > 0.5) return;
 
-        //step1
+        // step1
         Pose2d botPose = getPoseAtCamTime(inputs.realTime);
         Zone zone = findFieldZone(botPose);
 
-        //set region bounds and ignore balls outside of them
-        double xmax,ymax,xmin,ymin;
+        // set region bounds and ignore balls outside of them
+        double xmax, ymax, xmin, ymin;
         ymin = 0;
         ymax = FieldConstants.fieldWidth;
-        switch(zone){
+        switch (zone) {
             case BLUE:
             default:
-            xmin = 0;
-            xmax = FieldConstants.HorizontalLines.starting;
-            break;
+                xmin = 0;
+                xmax = FieldConstants.HorizontalLines.starting;
+                break;
             case NEUTRAL:
-            xmin = FieldConstants.HorizontalLines.neutralStart;
-            xmax = FieldConstants.HorizontalLines.neutralEnd;
-            break;
+                xmin = FieldConstants.HorizontalLines.neutralStart;
+                xmax = FieldConstants.HorizontalLines.neutralEnd;
+                break;
             case RED:
-            xmin = mirrorX(FieldConstants.HorizontalLines.starting);
-            xmax = FieldConstants.fieldLength;
-            break;
+                xmin = mirrorX(FieldConstants.HorizontalLines.starting);
+                xmax = FieldConstants.fieldLength;
+                break;
         }
 
-        //step zero, convert cam data to useful representations
+        // step zero, convert cam data to useful representations
         int ballPosLen = 0;
         Translation2d[] ballPos = new Translation2d[inputs.fuelData.length];
         int[] ballCounts = new int[inputs.fuelData.length];
@@ -186,58 +186,58 @@ public class FuelVision extends SubsystemBase {
             // 1) adding the camera relative location
             // 2) rotating by the robot angle
             // 3) adding the robot field position
-            Translation2d pos = 
+            Translation2d pos =
                     baseOffset
                             .plus(ctrFrtBumper)
                             .rotateBy(botPose.getRotation())
                             .plus(botPose.getTranslation());
-            
-            //if this ball is on the field add it to the list
-            if(pos.getX() < xmax && 
-               pos.getX() > xmin && 
-               pos.getY() < ymax && 
-               pos.getY() > ymin){
+
+            // if this ball is on the field add it to the list
+            if (pos.getX() < xmax && pos.getX() > xmin && pos.getY() < ymax && pos.getY() > ymin) {
                 ballPos[ballPosLen] = pos;
                 ballCounts[ballPosLen] = inputs.fuelData[ball].amount;
                 ballPosLen++;
             }
         }
 
-        //step 3 pick the best ray
+        // step 3 pick the best ray
         int bestLineIdx = 0;
         double mostBalls = 0;
 
-        Translation2d camFieldLoc = camLocation.rotateBy(botPose.getRotation()).plus(botPose.getTranslation());
+        Translation2d camFieldLoc =
+                camLocation.rotateBy(botPose.getRotation()).plus(botPose.getTranslation());
         double lineWidth = camFOV / numLines;
-        double startAngle = -camFOV/2 + lineWidth/2;
+        double startAngle = -camFOV / 2 + lineWidth / 2;
         for (int line = 0; line < numLines; line++) {
-            //construct the line
-            //the line is made of 2 points, one starting at the camera, and another at the first fixed line it intersects
-            double lineAngle = line*lineWidth + startAngle + botPose.getRotation().getRadians();
+            // construct the line
+            // the line is made of 2 points, one starting at the camera, and another at the first
+            // fixed line it intersects
+            double lineAngle = line * lineWidth + startAngle + botPose.getRotation().getRadians();
             ballCount[line] = 0;
 
             for (int ball = 0; ball < ballPosLen; ball++) {
                 Translation2d pos = ballPos[ball];
-                //the distance between a point and a line in 2d can be calculated via:
+                // the distance between a point and a line in 2d can be calculated via:
                 // where the line is defined by a point and an angle (P, A)
                 // where the point is (x, y)
                 // then distance = cos(A)*(Py-y)-sin(A)*(Px-x)
-                //see: https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
-                double dist = Math.cos(lineAngle)*(camFieldLoc.getY()-pos.getY()) - 
-                              Math.sin(lineAngle)*(camFieldLoc.getX()-pos.getX());
-                if(Math.abs(dist) < maxDeviation){
+                // see: https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+                double dist =
+                        Math.cos(lineAngle) * (camFieldLoc.getY() - pos.getY())
+                                - Math.sin(lineAngle) * (camFieldLoc.getX() - pos.getX());
+                if (Math.abs(dist) < maxDeviation) {
                     ballCount[line] += ballCounts[ball];
                 }
             }
 
-            if(ballCount[line] > mostBalls){
+            if (ballCount[line] > mostBalls) {
                 bestLineIdx = line;
                 mostBalls = ballCount[line];
             }
         }
 
-        //step4 construct the path
-        
+        // step4 construct the path
+
     }
 
     private Zone findFieldZone(Pose2d botPose) {

@@ -11,7 +11,6 @@ import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.vision.VisionConstants;
@@ -90,9 +89,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        double time = Timer.getFPGATimestamp();
-        Logger.recordOutput("Vision/dt", time - prevTime);
-        prevTime = time;
 
         // Optionally switch the thread to high priority to improve loop
         // timing (see the template project documentation for details)
@@ -105,7 +101,10 @@ public class Robot extends LoggedRobot {
         // the Command-based framework to work.
         CommandScheduler.getInstance().run();
 
-        Logger.recordOutput("Vision/TurretHB", LimelightHelpers.getHeartbeat("limelight-turret"));
+        Logger.recordOutput(
+                "Vision/TurretHB", LimelightHelpers.getHeartbeat(VisionConstants.camera0Name));
+        Logger.recordOutput(
+                "Vision/LeftHB", LimelightHelpers.getHeartbeat(VisionConstants.camera1Name));
 
         // Return to non-RT thread priority (do not modify the first argument)
         // Threads.setCurrentThreadPriority(false, 10);

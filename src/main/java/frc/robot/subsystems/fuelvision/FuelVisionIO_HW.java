@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.RawSubscriber;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 
@@ -18,6 +19,7 @@ public class FuelVisionIO_HW implements FuelVisionIO {
         int seqNum;
         float rioTime;
         float imageTime;
+        float realTime;
     }
 
     FuelVisionHeader fuelHeader = new FuelVisionHeader();
@@ -47,10 +49,23 @@ public class FuelVisionIO_HW implements FuelVisionIO {
                             FuelVisionHeader fvh = new FuelVisionHeader();
 
                             // parse header
+                            float currentTime = (float) Timer.getFPGATimestamp();
                             fvh.seqNum = poseDataFuel.getInt();
                             fvh.rioTime = poseDataFuel.getFloat();
                             fvh.imageTime = poseDataFuel.getFloat();
                             int length = Byte.toUnsignedInt(poseDataFuel.get());
+
+                            // convert into robot timestamp (time since rio boot)
+                            // time image was taken is currentTime - latency/2 - imageProcTime
+                            // where latency is currentTime - rioTime
+                            // (the last recieved rio timestamp by the pi at the time the pi sent
+                            // this message)
+                            // where imageProcTime is imageTime and is the time between when the
+                            // frame was captured to when data was sent
+                            fvh.realTime =
+                                    currentTime
+                                            - (currentTime - fvh.rioTime) / 2.0f
+                                            - fvh.imageTime;
 
                             // parse fuel groups
                             FuelVisionData[] fuelArray = new FuelVisionData[length];
@@ -75,6 +90,7 @@ public class FuelVisionIO_HW implements FuelVisionIO {
         inputs.seqNum = fvh.seqNum;
         inputs.rioTime = fvh.rioTime;
         inputs.imageTime = fvh.imageTime;
+        inputs.realTime = fvh.realTime;
 
         inputs.fuelData = fuelData;
 

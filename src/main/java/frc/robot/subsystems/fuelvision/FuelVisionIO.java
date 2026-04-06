@@ -9,6 +9,7 @@ public interface FuelVisionIO {
         int seqNum = 0;
         float rioTime = 0;
         float imageTime = 0;
+        float realTime = 0;
         FuelVisionData[] fuelData = new FuelVisionData[0];
         double now = 0;
     }

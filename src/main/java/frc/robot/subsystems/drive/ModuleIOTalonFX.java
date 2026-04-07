@@ -296,7 +296,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     public void setTurnPosition(Rotation2d rotation) {
         turnTalon.setControl(
                 switch (constants.SteerMotorClosedLoopOutput) {
-                    case Voltage -> positionVoltageRequest.withPosition(rotation.getRotations());
+                    case Voltage -> positionVoltageRequest.withPosition(rotation.getRotations()).withOverrideBrakeDurNeutral(true);
                     case TorqueCurrentFOC -> positionTorqueCurrentRequest.withPosition(
                             rotation.getRotations());
                 });
@@ -307,5 +307,10 @@ public class ModuleIOTalonFX implements ModuleIO {
     @Override
     public void setDriveBrake(boolean on) {
         brakeMode = on;
+    }
+
+    @Override
+    public void setTurnBrake(boolean on){
+        turnTalon.setControl(voltageRequest.withOutput(0).withOverrideBrakeDurNeutral(on));
     }
 }

@@ -116,6 +116,8 @@ public class Robot extends LoggedRobot {
         robotContainer.resetSimulationField();
         Constants.isEnabled = false;
         Constants.isAuto = false;
+
+        robotContainer.drive.setTurnBrakeMode(false);
     }
 
     boolean wasTeleop = false;

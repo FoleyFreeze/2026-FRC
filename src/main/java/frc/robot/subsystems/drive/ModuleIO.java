@@ -52,4 +52,6 @@ public interface ModuleIO {
     public default void setTurnPosition(Rotation2d rotation) {}
 
     public default void setDriveBrake(boolean on) {}
+
+    public default void setTurnBrake(boolean on){}
 }

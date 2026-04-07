@@ -178,6 +178,7 @@ public class Robot extends LoggedRobot {
         Constants.isEnabled = true;
         Constants.isAuto = true;
         MatchPhaseUtil.matchPhaseState = MatchPhaseUtil.MatchPhase.AUTO;
+        MatchPhaseUtil.elapsedAuto.start();
 
         robotContainer.drive.setBrakeMode(true);
 

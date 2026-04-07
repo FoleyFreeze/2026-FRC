@@ -2,6 +2,8 @@ package frc.robot.util;
 
 import java.util.Optional;
 
+import javax.management.timer.Timer;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -15,7 +17,12 @@ public class MatchPhaseUtil {
         PHASE_4,
         ENDGAME
     }
-
+public static Timer elapsedAuto = new Timer();
+public static Timer elapsedP_1 = new Timer();
+public static Timer elapsedP_2 = new Timer();
+public static Timer elapsedP_3 = new Timer();
+public static Timer elapsedP_4 = new Timer();
+public static Timer elapsedEndgame = new Timer();
 public static MatchPhase matchPhaseState = MatchPhase.NONE;
 
 //thank you wpilib for just having this <33
@@ -63,22 +70,32 @@ public boolean isHubActive() {
   } else if (matchTime > 105) {
     // phase 1
     MatchPhaseUtil.matchPhaseState = MatchPhase.PHASE_1;
+    MatchPhaseUtil.elapsedAuto.stop();
+    MatchPhaseUtil.elapsedP_1.start();
     return phase1Active;
   } else if (matchTime > 80) {
     // phase 2
     MatchPhaseUtil.matchPhaseState = MatchPhase.PHASE_2;
+    MatchPhaseUtil.elapsedP_1.stop();
+    MatchPhaseUtil.elapsedP_2.start();
     return !phase1Active;
   } else if (matchTime > 55) {
     // phase 3
     MatchPhaseUtil.matchPhaseState = MatchPhase.PHASE_3;
+    MatchPhaseUtil.elapsedP_2.stop();
+    MatchPhaseUtil.elapsedP_3.start();
     return phase1Active;
   } else if (matchTime > 30) {
     // phase 4
     MatchPhaseUtil.matchPhaseState = MatchPhase.PHASE_4;
+    MatchPhaseUtil.elapsedP_3.stop();
+    MatchPhaseUtil.elapsedP_4.start();
     return !phase1Active;
   } else {
     // End game, hub always active.
     MatchPhaseUtil.matchPhaseState = MatchPhase.ENDGAME;
+    MatchPhaseUtil.elapsedP_4.stop();
+    MatchPhaseUtil.elapsedEndgame.start();
     return true;
         }
     }

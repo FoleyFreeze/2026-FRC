@@ -35,8 +35,7 @@ public final class Constants {
     }
 
     // with bumpers
-    public static final double robotLength =
-            Units.inchesToMeters(32 + (1.0 / 16.0)); // front and back X
+    public static final double robotLength = Units.inchesToMeters(32.0625); // front and back X
     public static final double robotWidth = Units.inchesToMeters(34.5625); // left and right Y
 
     // without bumpers

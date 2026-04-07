@@ -53,5 +53,5 @@ public interface ModuleIO {
 
     public default void setDriveBrake(boolean on) {}
 
-    public default void setTurnBrake(boolean on){}
+    public default void setTurnBrake(boolean on) {}
 }

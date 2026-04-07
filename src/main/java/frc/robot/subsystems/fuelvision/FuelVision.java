@@ -33,7 +33,9 @@ public class FuelVision extends SubsystemBase {
     int badXErr = 0;
 
     DoubleEntry rioTime =
-            NetworkTableInstance.getDefault().getDoubleTopic("/Vision/RIO Time").getEntry(0);
+            NetworkTableInstance.getDefault()
+                    .getDoubleTopic("/Vision/RIO Time")
+                    .getEntry(Timer.getFPGATimestamp());
 
     public static class TimestampedPose2d {
         Pose2d pose;
@@ -75,6 +77,7 @@ public class FuelVision extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("FuelVision", inputs);
+        rioTime.set(inputs.now);
 
         TimestampedPose2d now = new TimestampedPose2d();
         now.pose = r.drive.getPose();
@@ -93,9 +96,7 @@ public class FuelVision extends SubsystemBase {
                     Constants.frameLength / 2 + Units.inchesToMeters(12),
                     Constants.frameWidth / 2 - Units.inchesToMeters(3));
     public static final Translation2d ctrFrtBumper =
-            new Translation2d(
-                    Constants.robotLength/2,
-                    0);
+            new Translation2d(Constants.robotLength / 2, 0);
 
     // line (RFLB), x1y1x2y2, apply X offset for region
     public double[][] fixedLines = new double[4 * 2][4];
@@ -144,7 +145,7 @@ public class FuelVision extends SubsystemBase {
         // gathering them
 
         // abort if data is too old
-        //TODO: just follow the edge paths
+        // TODO: just follow the edge paths
         if (Timer.getTimestamp() - inputs.realTime > oldestAllowedImage) return;
 
         // step1

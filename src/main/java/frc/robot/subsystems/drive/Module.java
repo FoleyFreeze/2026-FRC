@@ -144,7 +144,7 @@ public class Module {
         io.setDriveBrake(on);
     }
 
-    public void setTurnBrakeMode(boolean on){
+    public void setTurnBrakeMode(boolean on) {
         io.setTurnBrake(on);
     }
 }

@@ -1,7 +1,10 @@
 package frc.robot.subsystems.fuelvision;
 
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleEntry;
@@ -13,6 +16,8 @@ import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
+import java.util.ArrayList;
+import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class FuelVision extends SubsystemBase {
@@ -85,6 +90,11 @@ public class FuelVision extends SubsystemBase {
         robotPoseBuffer.addFirst(now);
     }
 
+    // angle to follow the wall at (dont be square, have some angle so the intake scrapes the wall)
+    // this is calculated via tan-1(bumperwidth / (intakelength-bumperwidth))
+    // i.e. what angle lets the corner of the bumper and the corner of the intake touch the wall
+    public static final double wallAngle = Math.toRadians(18.5);
+
     public static final double camFOV = Math.toRadians(90);
     public static final int numLines = 5;
     public static final double maxDeviation = Units.inchesToMeters(24);
@@ -98,8 +108,8 @@ public class FuelVision extends SubsystemBase {
     public static final Translation2d ctrFrtBumper =
             new Translation2d(Constants.robotLength / 2, 0);
 
-    // line (RFLB), x1y1x2y2, apply X offset for region
-    public double[][] fixedLines = new double[4 * 2][4];
+    // rectangle bounding box (top left, top right, bot left, bot right)
+    public double[][] fixedRects = new double[3][4];
     // line , x1y1x2y2
     public double[][] rays = new double[numLines][4];
 
@@ -207,6 +217,10 @@ public class FuelVision extends SubsystemBase {
         int bestLineIdx = 0;
         double mostBalls = 0;
 
+        // keep track of which balls are available to each line
+        int[] lineBallCount = new int[numLines];
+        int[][] lineBallIdxs = new int[numLines][ballPosLen];
+
         Translation2d camFieldLoc =
                 camLocation.rotateBy(botPose.getRotation()).plus(botPose.getTranslation());
         double lineWidth = camFOV / numLines;
@@ -215,6 +229,8 @@ public class FuelVision extends SubsystemBase {
             // construct the line
             // the line is made of 2 points, one starting at the camera, and another at the first
             // fixed line it intersects
+            // however, we can also represent the infinite line as the starting point (cam location)
+            // and an angle (lineAngle) which will make some math easier
             double lineAngle = line * lineWidth + startAngle + botPose.getRotation().getRadians();
             ballCount[line] = 0;
 
@@ -229,7 +245,12 @@ public class FuelVision extends SubsystemBase {
                         Math.cos(lineAngle) * (camFieldLoc.getY() - pos.getY())
                                 - Math.sin(lineAngle) * (camFieldLoc.getX() - pos.getX());
                 if (Math.abs(dist) < maxDeviation) {
+                    // track that this line will gather this many balls
                     ballCount[line] += ballCounts[ball];
+
+                    // track that this line will need to remember to gather this ball
+                    lineBallIdxs[line][lineBallCount[line]] = ball;
+                    lineBallCount[line]++;
                 }
             }
 
@@ -240,7 +261,45 @@ public class FuelVision extends SubsystemBase {
         }
 
         // step4 construct the path
+        // the path starts at the bot pose,
+        // travels to each ball group close to the line
+        // then to the intersection of the ray with the fixed boundary line
+        // then follows the boundary to the corner
+        // TODO: how to handle corners
+        List<Pose2d> pathPoses = new ArrayList<>();
+        pathPoses.add(botPose);
+        double rayAngle = bestLineIdx * lineWidth + startAngle + botPose.getRotation().getRadians();
+        for (int ball = 0; ball < lineBallCount[bestLineIdx]; ball++) {
+            // we want the robot path to be pointed in the direction of the line for each ball
+            // gather
+            // consider adding a little nudge towards the next ball if there is one though
+            Pose2d targetPose =
+                    new Pose2d(ballPos[lineBallIdxs[bestLineIdx][ball]], new Rotation2d(rayAngle));
+            pathPoses.add(targetPose);
+        }
 
+        // find the intersection with the first fixed line
+        Pose2d intersection =
+                getIntersection(fixedRects[zone.ordinal()], botPose.getTranslation(), rayAngle);
+        pathPoses.add(intersection);
+
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(pathPoses);
+    }
+
+    // uses a modified version of the Liang Barsky clipping algo
+    private Pose2d getIntersection(double[] rect, Translation2d startPoint, double lineAngle) {
+        double startX = startPoint.getX();
+        double startY = startPoint.getY();
+
+        // create a second point for our line. make it long enough that it will definitely hit one
+        // of the lines of the bounding rectangle
+        double offset = FieldConstants.fieldWidth * 2;
+        double endX = startX + Math.cos(lineAngle) * offset;
+        double endY = startY + Math.sin(lineAngle) * offset;
+
+        // TODO: core algo
+
+        return new Pose2d();
     }
 
     private Zone findFieldZone(Pose2d botPose) {
@@ -303,48 +362,33 @@ public class FuelVision extends SubsystemBase {
     private void makeFixedLines() {
         // RFLB (right,far,left,back) rotate around ccw
         // x1y1x2y2
-        setLine(fixedLines[0], 0, 0, FieldConstants.HorizontalLines.starting, 0);
-        setLine(
-                fixedLines[1],
+        // BLUE
+        setRect(
+                fixedRects[0],
                 FieldConstants.HorizontalLines.starting,
-                0,
-                FieldConstants.HorizontalLines.starting,
-                FieldConstants.fieldWidth);
-        setLine(
-                fixedLines[2],
-                0,
                 FieldConstants.fieldWidth,
-                FieldConstants.HorizontalLines.starting,
-                FieldConstants.fieldWidth);
-        setLine(fixedLines[3], 0, 0, 0, FieldConstants.fieldWidth);
-
-        setLine(
-                fixedLines[4],
-                FieldConstants.HorizontalLines.neutralStart,
                 0,
-                FieldConstants.HorizontalLines.neutralEnd,
                 0);
-        setLine(
-                fixedLines[5],
+
+        // NEUTRAL
+        setRect(
+                fixedRects[1],
                 FieldConstants.HorizontalLines.neutralEnd,
-                0,
-                FieldConstants.HorizontalLines.neutralEnd,
-                FieldConstants.fieldWidth);
-        setLine(
-                fixedLines[6],
-                FieldConstants.HorizontalLines.neutralStart,
                 FieldConstants.fieldWidth,
-                FieldConstants.HorizontalLines.neutralEnd,
-                FieldConstants.fieldWidth);
-        setLine(
-                fixedLines[7],
                 FieldConstants.HorizontalLines.neutralStart,
-                0,
-                FieldConstants.HorizontalLines.neutralStart,
-                FieldConstants.fieldWidth);
+                0);
+
+        // RED
+        setRect(
+                fixedRects[2],
+                FieldConstants.fieldLength,
+                FieldConstants.fieldWidth,
+                mirrorX(FieldConstants.HorizontalLines.starting),
+                0);
     }
 
-    private void setLine(double[] line, double x1, double y1, double x2, double y2) {
+    // top left corner, bot right corner
+    private void setRect(double[] line, double x1, double y1, double x2, double y2) {
         line[0] = x1;
         line[1] = y1;
         line[2] = x2;

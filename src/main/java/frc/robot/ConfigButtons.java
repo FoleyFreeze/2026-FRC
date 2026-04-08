@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.CameraBallGatherCmd;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.ShooterCommands.Thing;
@@ -45,7 +46,6 @@ public class ConfigButtons {
         controller
                 .rightTrigger()
                 .or(controller.rightBumper())
-                .or(controller.leftBumper())
                 // dont run if turret disabled
                 .and(driveStation.button(10).negate())
                 .whileTrue(
@@ -60,7 +60,6 @@ public class ConfigButtons {
         controller
                 .rightTrigger()
                 .or(controller.rightBumper())
-                .or(controller.leftBumper())
                 // dont run if turret disabled
                 .and(driveStation.button(10))
                 .whileTrue(
@@ -103,17 +102,17 @@ public class ConfigButtons {
         controller.b().onTrue(new InstantCommand(r.intake::retract));
 
         // intake spin
-        controller.leftTrigger().whileTrue(r.intake.smartIntake());
+        controller.leftTrigger().or(controller.leftBumper()).whileTrue(r.intake.smartIntake());
 
         // shake while shoot unless gathering
         controller
                 .rightTrigger()
                 .or(controller.rightBumper())
-                .or(controller.leftBumper())
-                .and(controller.leftTrigger().negate())
+                .and(controller.leftTrigger().negate().and(controller.leftBumper().negate()))
                 .whileTrue(r.intake.shakeTheIntake());
 
         // camera gather (LB maybe)
+        controller.leftBumper().whileTrue(new CameraBallGatherCmd(r));
 
         // unjam back
         controller
@@ -123,20 +122,20 @@ public class ConfigButtons {
                                 .alongWith(r.intake.unjamIntake()));
 
         // shoot functions
-        // pass left LB
-        controller
-                .leftBumper()
-                .and(driveStation.button(10).negate()) // with turret
-                .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft));
-        controller
-                .leftBumper()
-                .and(driveStation.button(10)) // without turret
-                .whileTrue(
-                        ShooterCommands.smartShootNoTurret(
-                                r,
-                                FieldConstants.Locations.passLeft,
-                                rotationThing,
-                                velocityThing));
+        // pass left LB (has been stolen for auto gather)
+        // controller
+        //         .leftBumper()
+        //         .and(driveStation.button(10).negate()) // with turret
+        //         .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft));
+        // controller
+        //         .leftBumper()
+        //         .and(driveStation.button(10)) // without turret
+        //         .whileTrue(
+        //                 ShooterCommands.smartShootNoTurret(
+        //                         r,
+        //                         FieldConstants.Locations.passLeft,
+        //                         rotationThing,
+        //                         velocityThing));
         // pass right RB
         controller
                 .rightBumper()
@@ -169,12 +168,7 @@ public class ConfigButtons {
         driveStation
                 .button(10)
                 .negate()
-                .and(
-                        controller
-                                .rightTrigger()
-                                .or(controller.rightBumper())
-                                .or(controller.leftBumper())
-                                .negate())
+                .and(controller.rightTrigger().or(controller.rightBumper()).negate())
                 .and(botDisabled.negate())
                 .and(new Trigger(() -> !DriverStation.isAutonomous()))
                 .whileTrue(r.shooter.pointAtHub());
@@ -199,37 +193,6 @@ public class ConfigButtons {
                                         r.shooter
                                                 .manualShot()
                                                 .alongWith(r.spindexter.smarterSpinCmd())));
-
-        // select zero turret? (reset to abs enc)
-        // start+select full zero turret? (reset to zero and ignore abs)
-
-        // climb functions
-        // dpad + X drive then climb
-        // controller
-        //         .x()
-        //         .and(controller.povLeft())
-        //         .whileTrue(
-        //                 ClimbCommands.autoClimb(
-        //                         r,
-        //                         () ->
-        //                                 FieldConstants.flipIfRed(
-        //                                         FieldConstants.Locations.towerLeftFrontPose2d),
-        //                         Units.inchesToMeters(12)));
-        // controller
-        //         .x()
-        //         .and(controller.povRight())
-        //         .whileTrue(
-        //                 ClimbCommands.autoClimb(
-        //                         r,
-        //                         () ->
-        //                                 FieldConstants.flipIfRed(
-        //                                         FieldConstants.Locations.towerRightFrontPose2d),
-        //                         Units.inchesToMeters(12)));
-        // dpad just climb
-        // controller.povUp().whileTrue(r.climber.autoExtendCmd());
-
-        // dpad down to declimb
-        // controller.povDown().onTrue(ClimbCommands.autoDown(r));
 
         // operator board
         // mode sw (idk what we want this to do yet)
@@ -272,6 +235,7 @@ public class ConfigButtons {
         // other commands
         botDisabled.debounce(5, DebounceType.kRising).whileTrue(r.shooter.recalcTurretToEnc());
 
+        // zero turret to abs enc
         driveStation
                 .button(11)
                 .negate()

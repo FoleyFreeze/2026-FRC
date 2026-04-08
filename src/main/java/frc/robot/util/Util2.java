@@ -3,6 +3,7 @@ package frc.robot.util;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.function.Supplier;
@@ -48,5 +49,11 @@ public class Util2 {
 
     public Supplier<Pose2d> poseMaker(double x, double y, double theta) {
         return () -> new Pose2d(new Translation2d(x, y), new Rotation2d(theta));
+    }
+
+    public static double getScalarVel(ChassisSpeeds speeds) {
+        return Math.sqrt(
+                speeds.vxMetersPerSecond * speeds.vxMetersPerSecond
+                        + speeds.vyMetersPerSecond * speeds.vyMetersPerSecond);
     }
 }

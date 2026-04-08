@@ -41,6 +41,8 @@ public class PathAutos {
     public PathPlannerPath forwardLeftBump2 = loadPath("ForwardLeftBump2");
     public PathPlannerPath forwardRightBump1 = forwardLeftBump1.mirrorPath();
     public PathPlannerPath forwardRightBump2 = forwardLeftBump2.mirrorPath();
+    public PathPlannerPath neutralPassLeft = loadPath("NeutralPass");
+    public PathPlannerPath neutralPassRight = neutralPassLeft.mirrorPath();
 
     // map some runnable with each auton. Using these to zero the robot to the auton start as soon
     // as its selected
@@ -80,6 +82,8 @@ public class PathAutos {
         autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
         autoChooser.addOption("RightBumpTwoScop", rightBumpOutside());
         autoChooser.addOption("SitStillAndShoot", buildSitStillAndShoot());
+        autoChooser.addOption("LeftPassNeutral", buildPassNeutralLeft());
+        autoChooser.addOption("RightPassNeutral", buildPassNeutralRight());
     }
 
     private Command buildMiddleLeftDepot() {
@@ -101,6 +105,32 @@ public class PathAutos {
                 () -> {
                     Rotation2d rot = middleRightMiddle1.getIdealStartingState().rotation();
                     Translation2d tx = middleRightMiddle1.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
+    private Command buildPassNeutralLeft() {
+        Command auto = singlePathPass(neutralPassLeft);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = neutralPassLeft.getIdealStartingState().rotation();
+                    Translation2d tx = neutralPassLeft.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
+    private Command buildPassNeutralRight() {
+        Command auto = singlePathPass(neutralPassRight);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = neutralPassRight.getIdealStartingState().rotation();
+                    Translation2d tx = neutralPassRight.getPoint(0).position;
                     Pose2d pose = new Pose2d(tx, rot);
                     r.drive.setPose(FieldConstants.flipIfRed(pose));
                 };
@@ -356,6 +386,27 @@ public class PathAutos {
                         .withTimeout(secondShootTime));
 
         return new ConditionalCommand(abortCommand(), sequence, this::shouldAbort);
+    }
+
+    public Command singlePathPass(PathPlannerPath path) {
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        sequence.addCommands(
+                r.intake
+                        .fastDrop()
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stopAll().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().execute();
+                                }));
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(
+                        AutoBuilder.followPath(path),
+                        r.intake.smartIntake(),
+                        ShooterCommands.smartShoot(r, r.shooter.getClosestPass(r.drive.getPose())));
+        sequence.addCommands(parallelGroup);
+        return sequence;
     }
 
     public Command singleScoopDepot(PathPlannerPath path) {

@@ -205,26 +205,24 @@ public class ModuleIOTalonFX implements ModuleIO {
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         // Refresh all signals
-        var driveStatus =
+        var status =
                 BaseStatusSignal.refreshAll(
                         drivePosition,
                         driveVelocity,
                         driveAppliedVolts,
                         driveCurrent,
                         driveTemp,
-                        driveSupplyCurrent);
-        var turnStatus =
-                BaseStatusSignal.refreshAll(
+                        driveSupplyCurrent,
                         turnPosition,
                         turnVelocity,
                         turnAppliedVolts,
                         turnCurrent,
                         turnTemp,
-                        turnSupplyCurrent);
-        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
+                        turnSupplyCurrent,
+                        turnAbsolutePosition);
 
         // Update drive inputs
-        inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());
+        inputs.driveConnected = driveConnectedDebounce.calculate(drivePosition.getStatus().isOK());
         inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
         inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
         inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
@@ -233,9 +231,9 @@ public class ModuleIOTalonFX implements ModuleIO {
         inputs.driveSupplyCurrent = driveSupplyCurrent.getValueAsDouble();
 
         // Update turn inputs
-        inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK());
+        inputs.turnConnected = turnConnectedDebounce.calculate(turnPosition.getStatus().isOK());
         inputs.turnEncoderConnected =
-                turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
+                turnEncoderConnectedDebounce.calculate(turnAbsolutePosition.getStatus().isOK());
         inputs.turnAbsolutePosition =
                 Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble());
         inputs.turnPosition = Rotation2d.fromRotations(turnPosition.getValueAsDouble());

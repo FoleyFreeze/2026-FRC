@@ -5,6 +5,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.ConfigButtons;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -15,10 +17,18 @@ public class ShooterInterp1d {
             double rpm, double angle, double hood, double time, double turretVel, double dist) {}
 
     // based on quick testing
-    private static final double[] rpmTableReal = {2500, 2700, 3050, 3200, 3300, 3500, 3700, 4000};
-    private static final double[] hoodAngleTableReal = {70, 55, 50.5, 50.5, 50.5, 50.5, 50.5, 50.5};
-    private static final double[] timeTableReal = {0.58, 0.78, 0.91, 1.04, 1.30, 1.37, 1.44, 1.50};
-    private static final double[] distAxisReal = {1.317, 2.75, 3.54, 3.91, 4.42, 5.03, 5.18, 5.79};
+    private static final double[] rpmTableReal = {
+        2550, 2500, 2650, 2700, 3050, 3200, 3300, 3500, 3700, 4000
+    };
+    private static final double[] hoodAngleTableReal = {
+        76, 70, 66.6, 55, 54.5, 50.5, 50.5, 50.5, 50.5, 50.5
+    };
+    private static final double[] timeTableReal = {
+        0.58, 0.58, 0.68, 0.78, 0.91, 1.04, 1.30, 1.37, 1.44, 1.50
+    };
+    private static final double[] distAxisReal = {
+        0.98, 1.317, 2.2, 2.75, 3.54, 3.91, 4.42, 5.03, 5.18, 5.79
+    };
     //                                                         139in 154in 180in 204in 17ft  19ft
 
     // for sim without drag
@@ -84,6 +94,11 @@ public class ShooterInterp1d {
     // robot velocity lookahead
     private static final double dt = 0.02;
 
+    NetworkTableEntry turretLookahead =
+            NetworkTableInstance.getDefault().getTable("Tuning").getEntry("TurretLookahead");
+    NetworkTableEntry robotLookahead =
+            NetworkTableInstance.getDefault().getTable("Tuning").getEntry("RobotLookahead");
+
     public ShooterInterp1d() {
         if (Constants.currentMode == Mode.REAL || Constants.currentMode == Mode.REPLAY) {
             rpmTable = rpmTableReal;
@@ -104,6 +119,9 @@ public class ShooterInterp1d {
             timeTablePass = timeTableSimPassing;
             distAxisPassing = distAxisPassingSim;
         }
+
+        turretLookahead.setDouble(turretPositionLookaheadDt);
+        robotLookahead.setDouble(dt);
     }
 
     public DataPoint get(
@@ -157,7 +175,7 @@ public class ShooterInterp1d {
             double[] timeTable) {
 
         // step1 project robot movement into the future
-        Pose2d futureBotPose = pos.exp(vel.toTwist2d(dt));
+        Pose2d futureBotPose = pos.exp(vel.toTwist2d(robotLookahead.getDouble(dt)));
         Translation2d turretPos =
                 futureBotPose
                         .getTranslation()
@@ -172,7 +190,9 @@ public class ShooterInterp1d {
                 Constants.shooterLocOnBot
                         .rotateBy(
                                 Rotation2d.fromRadians(
-                                        Math.PI / 2.0 + vel.omegaRadiansPerSecond * dt))
+                                        Math.PI / 2.0
+                                                + vel.omegaRadiansPerSecond
+                                                        * robotLookahead.getDouble(dt)))
                         .rotateBy(futureBotPose.getRotation())
                         .times(vel.omegaRadiansPerSecond);
         Translation2d turretVelocity = botVelXY.plus(turretXYfromRot);
@@ -278,7 +298,8 @@ public class ShooterInterp1d {
             tangentVelocity = Math.cos(tangentAngle) * turretVelocity.getNorm();
             turretVel = Math.toDegrees(tangentVelocity / dist);
             turretAngle = vecToTarget.getAngle().minus(futureBotPose.getRotation()).getDegrees();
-            futureTurretAngle = turretAngle + turretVel * turretPositionLookaheadDt;
+            futureTurretAngle =
+                    turretAngle + turretVel * turretLookahead.getDouble(turretPositionLookaheadDt);
 
             data =
                     get(

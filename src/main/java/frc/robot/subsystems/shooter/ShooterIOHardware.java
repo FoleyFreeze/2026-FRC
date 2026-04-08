@@ -257,7 +257,7 @@ public class ShooterIOHardware implements ShooterIO {
 
     @Override
     public void updateInputs(ShooterIOInputs inputs) {
-        StatusCode wheelStatus =
+        StatusCode status =
                 BaseStatusSignal.refreshAll(
                         positionWheel,
                         voltageWheel,
@@ -267,19 +267,14 @@ public class ShooterIOHardware implements ShooterIO {
                         tempWheel2,
                         currentWheel2,
                         supplyCurrentWheel,
-                        supplyCurrentWheel2);
-        StatusCode hoodStatus =
-                BaseStatusSignal.refreshAll(
+                        supplyCurrentWheel2,
                         positionHood,
                         voltageHood,
                         currentHood,
                         tempHood,
                         angularVelocityHood,
                         positionHoodAbs,
-                        supplyCurrentHood);
-
-        StatusCode turretStatus =
-                BaseStatusSignal.refreshAll(
+                        supplyCurrentHood,
                         positionTurret,
                         voltageTurret,
                         currentTurret,
@@ -289,7 +284,8 @@ public class ShooterIOHardware implements ShooterIO {
                         enc27Abs,
                         enc29Abs);
 
-        inputs.turretConnected = turretConnectedDebounce.calculate(turretStatus.isOK());
+        inputs.turretConnected =
+                turretConnectedDebounce.calculate(positionTurret.getStatus().isOK());
         inputs.turretPositionDeg = positionTurret.getValue().in(Degrees);
         inputs.turretVoltage = voltageTurret.getValueAsDouble();
         inputs.turretCurrent = currentTurret.getValueAsDouble();
@@ -297,8 +293,10 @@ public class ShooterIOHardware implements ShooterIO {
         inputs.turretVelocity = angularVelocityTurret.getValue().in(DegreesPerSecond);
         inputs.turretSupplyCurrent = supplyCurrentTurret.getValueAsDouble();
 
-        inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
-        inputs.hoodConnected = hoodConnectedDebounce.calculate(hoodStatus.isOK());
+        inputs.wheelConnected =
+                wheelConnectedDebounce.calculate(
+                        positionWheel.getStatus().isOK() && supplyCurrentWheel2.getStatus().isOK());
+        inputs.hoodConnected = hoodConnectedDebounce.calculate(positionHood.getStatus().isOK());
         inputs.wheelPosition = positionWheel.getValue().in(Rotations);
         inputs.wheelVoltage = voltageWheel.getValueAsDouble();
         inputs.hoodVoltage = voltageHood.getValueAsDouble();

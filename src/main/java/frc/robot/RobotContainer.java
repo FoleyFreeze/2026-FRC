@@ -115,6 +115,7 @@ public class RobotContainer {
         ConfigButtons.config(this);
         DriveCommands.initDriveCommands();
 
+        CommandScheduler.getInstance().setPeriod(0.2);
         CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     }
 

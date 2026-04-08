@@ -171,7 +171,7 @@ public class IntakeIOHardware implements IntakeIO {
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
-        StatusCode wheelStatus =
+        StatusCode status =
                 BaseStatusSignal.refreshAll(
                         positionWheelL,
                         voltageWheelL,
@@ -181,9 +181,7 @@ public class IntakeIOHardware implements IntakeIO {
                         currentWheelR,
                         tempWheelR,
                         supplyCurrentWheelL,
-                        supplyCurrentWheelR);
-        StatusCode armStatus =
-                BaseStatusSignal.refreshAll(
+                        supplyCurrentWheelR,
                         positionArm,
                         voltageArm,
                         currentArm,
@@ -191,8 +189,10 @@ public class IntakeIOHardware implements IntakeIO {
                         angularVelocityArm,
                         supplyCurrentArm,
                         positionArmAbs);
-        inputs.wheelConnected = wheelConnectedDebounce.calculate(wheelStatus.isOK());
-        inputs.armConnected = armConnectedDebounce.calculate(armStatus.isOK());
+        inputs.wheelConnected =
+                wheelConnectedDebounce.calculate(
+                        positionWheelL.getStatus().isOK() && currentWheelR.getStatus().isOK());
+        inputs.armConnected = armConnectedDebounce.calculate(positionArm.getStatus().isOK());
         inputs.wheelLPosition = positionWheelL.getValue().in(Rotations);
         inputs.armPosition = positionArm.getValue().in(Rotations);
         inputs.wheelLVoltage = voltageWheelL.getValueAsDouble();

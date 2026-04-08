@@ -119,16 +119,14 @@ public class SpindexterIOHardware implements SpindexterIO {
 
     @Override
     public void updateInputs(SpindexterIOInputs inputs) {
-        StatusCode spinStatus =
+        StatusCode status =
                 BaseStatusSignal.refreshAll(
                         positionSpin,
                         voltageSpin,
                         currentSpin,
                         tempSpin,
                         angularVelocitySpin,
-                        supplyCurrentSpin);
-        StatusCode gateStatus =
-                BaseStatusSignal.refreshAll(
+                        supplyCurrentSpin,
                         positionGate,
                         voltageGate,
                         currentGate,
@@ -136,7 +134,7 @@ public class SpindexterIOHardware implements SpindexterIO {
                         angularVelocityGate,
                         supplyCurrentGate);
 
-        inputs.spinConnected = spinConnectedDebounce.calculate(spinStatus.isOK());
+        inputs.spinConnected = spinConnectedDebounce.calculate(positionSpin.getStatus().isOK());
         inputs.spinPosition = positionSpin.getValue().in(Rotations);
         inputs.spinVoltage = voltageSpin.getValueAsDouble();
         inputs.spinCurrent = currentSpin.getValueAsDouble();
@@ -144,7 +142,7 @@ public class SpindexterIOHardware implements SpindexterIO {
         inputs.spinVelocity = angularVelocitySpin.getValue().in(RPM);
         inputs.spinSupplyCurrent = supplyCurrentSpin.getValueAsDouble();
 
-        inputs.gateConnected = gateConnectedDebounce.calculate(gateStatus.isOK());
+        inputs.gateConnected = gateConnectedDebounce.calculate(positionGate.getStatus().isOK());
         inputs.gatePosition = positionGate.getValue().in(Rotations);
         inputs.gateVoltage = voltageGate.getValueAsDouble();
         inputs.gateCurrent = currentGate.getValueAsDouble();

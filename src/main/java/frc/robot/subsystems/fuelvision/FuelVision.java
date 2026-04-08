@@ -287,7 +287,7 @@ public class FuelVision extends SubsystemBase {
     }
 
     // uses a modified version of the Liang Barsky clipping algo
-    private Pose2d getIntersection(double[] rect, Translation2d startPoint, double lineAngle) {
+    private Pose2d getIntersection(double[] rect, Translation2d startPoint, double lineAngle, Pose2d botPose) {
         double startX = startPoint.getX();
         double startY = startPoint.getY();
 
@@ -297,7 +297,57 @@ public class FuelVision extends SubsystemBase {
         double endX = startX + Math.cos(lineAngle) * offset;
         double endY = startY + Math.sin(lineAngle) * offset;
 
-        // TODO: core algo
+        double p1 = -(endX - startX);
+        double p2 = -p1;
+        double p3 = -(endY - startY);
+        double p4 = -p3;
+
+        double q1 = startX - rect[2];
+        double q2 = rect[0] - startX;
+        double q3 = startY - rect[3];
+        double q4 = rect[1] - startY;
+
+        if((p1 == 0 && q1<0) || (p2 == 0 && q1 < 0) || (p3 == 0 && q3 < 0) || (p4 == 0 && q4 < 0)){
+            //line does not intersect
+            if(lineAngle == 0 || lineAngle == Math.PI){
+                //we tried twice and it still doesnt intersect
+                return new Pose2d(startPoint, Rotation2d.fromRadians(lineAngle));
+            }
+            return getIntersection(rect, startPoint, botPose.getRotation().getCos() > 0 ? 0 : Math.PI, botPose);
+        }
+
+        //only looking for exit points
+        double exitT = 1;
+        double angle = 0;
+        if(p1 != 0){
+            if(p1 < 0){
+                exitT = q2 / p2;
+                angle = Math.PI/2;
+            } else {
+                exitT = q1 / p1;
+                angle = Math.PI/2;
+            }
+        }
+        if(p3 != 0){
+            if(p3 < 0){
+                double r = q3 / p3;
+                if(r < exitT){
+                    exitT = r;
+                    angle = 0;
+                }
+            } else {
+                double r = q4 / p4;
+                if(r < exitT){
+                    exitT = r;
+                    angle = 0;
+                }
+            }
+        }
+
+        double x = startX + (endX - startX)*exitT;
+        double y = startY + (endY - startY)*exitT;
+
+        //TODO: finish
 
         return new Pose2d();
     }

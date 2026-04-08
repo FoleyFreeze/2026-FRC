@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.LimelightHelpers;
-import frc.robot.util.MatchPhaseUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedPowerDistribution;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -176,8 +175,6 @@ public class Robot extends LoggedRobot {
         lastPdhStatus = true;
         Constants.isEnabled = true;
         Constants.isAuto = true;
-        MatchPhaseUtil.matchPhaseState = MatchPhaseUtil.MatchPhase.AUTO;
-        MatchPhaseUtil.elapsedAuto.start();
 
         robotContainer.drive.setBrakeMode(true);
 

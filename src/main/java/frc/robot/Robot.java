@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.IterativeRobotBase;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -41,6 +42,7 @@ public class Robot extends LoggedRobot {
     private RobotContainer robotContainer;
     private boolean lastPdhStatus = true;
     public LoggedPowerDistribution pdh;
+    private Timer canivoreUpdateTimer = new Timer();
 
     public Robot() {
         // Record metadata
@@ -100,6 +102,7 @@ public class Robot extends LoggedRobot {
         // Instantiate our RobotContainer. This will perform all our button bindings,
         // and put our autonomous chooser on the dashboard.
         robotContainer = new RobotContainer();
+        canivoreUpdateTimer.start();
     }
 
     /** This function is called periodically during all modes. */
@@ -124,7 +127,7 @@ public class Robot extends LoggedRobot {
         Logger.recordOutput(
                 "Vision/LeftHB", LimelightHelpers.getHeartbeat(VisionConstants.camera1Name));
 
-        if (Constants.currentMode == Mode.REAL) {
+        if (Constants.currentMode == Mode.REAL && canivoreUpdateTimer.advanceIfElapsed(0.2)) {
             var canStatus = TunerConstants.kCANBus.getStatus();
             Logger.recordOutput("CANivore/Status", canStatus.Status.getName());
             Logger.recordOutput("CANivore/Utilization", canStatus.BusUtilization);

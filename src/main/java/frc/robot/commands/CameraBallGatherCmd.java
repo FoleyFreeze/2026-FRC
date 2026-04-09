@@ -18,6 +18,7 @@ import frc.robot.subsystems.fuelvision.FuelVision.Zone;
 import frc.robot.util.Util2;
 import java.util.ArrayList;
 import java.util.List;
+import org.littletonrobotics.junction.Logger;
 
 public class CameraBallGatherCmd extends Command {
     RobotContainer r;
@@ -36,6 +37,12 @@ public class CameraBallGatherCmd extends Command {
         c = null;
         try {
             List<Pose2d> pathPoses = r.fuelVision.getFuelPath();
+            Logger.recordOutput("FuelVision/FailReason", r.fuelVision.failReason);
+            if (pathPoses.isEmpty()) {
+                // exit early if path failed
+                c = null;
+                return;
+            }
             List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(pathPoses);
 
             List<RotationTarget> rotationTargets = new ArrayList<>(pathPoses.size());

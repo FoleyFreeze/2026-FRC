@@ -28,7 +28,7 @@ public class FuelVision extends SubsystemBase {
 
     public static final boolean isDisabled = false;
 
-    public static double oldestAllowedImage = 0.5;
+    public static double oldestAllowedImage = 0.75;
     public static int bufferSize = (int) Math.ceil(oldestAllowedImage / 0.02);
     public static boolean disable = false;
 
@@ -47,6 +47,17 @@ public class FuelVision extends SubsystemBase {
         Pose2d pose;
         double time;
     }
+
+    public enum FuelVisionFailReason {
+        NONE,
+        IMAGE_TOO_OLD,
+        NO_BALLS,
+        INCORRECT_END_ANGLE,
+        LINE_DOES_NOT_INTERSECT_1,
+        LINE_DOES_NOT_INTERSECT_2,
+    }
+
+    public FuelVisionFailReason failReason = FuelVisionFailReason.NONE;
 
     CircularBuffer<TimestampedPose2d> robotPoseBuffer;
 
@@ -95,32 +106,33 @@ public class FuelVision extends SubsystemBase {
                     (float) inputs.now
                             - ((float) inputs.now - inputs.rioTime) / 2.0f
                             - inputs.imageTime;
-            inputs.fuelData = new FuelVisionData[5];
-            inputs.fuelData[0] = new FuelVisionData();
-            inputs.fuelData[0].distance = 19;
-            inputs.fuelData[0].angle = 35;
-            inputs.fuelData[0].orientation = 2;
-            inputs.fuelData[0].amount = 1;
-            inputs.fuelData[1] = new FuelVisionData();
-            inputs.fuelData[1].distance = 34;
-            inputs.fuelData[1].angle = -40;
-            inputs.fuelData[1].orientation = 2;
-            inputs.fuelData[1].amount = 1;
-            inputs.fuelData[2] = new FuelVisionData();
-            inputs.fuelData[2].distance = 55;
-            inputs.fuelData[2].angle = 40;
-            inputs.fuelData[2].orientation = 2;
-            inputs.fuelData[2].amount = 1;
-            inputs.fuelData[3] = new FuelVisionData();
-            inputs.fuelData[3].distance = 80;
-            inputs.fuelData[3].angle = 45;
-            inputs.fuelData[3].orientation = 2;
-            inputs.fuelData[3].amount = 1;
-            inputs.fuelData[4] = new FuelVisionData();
-            inputs.fuelData[4].distance = 100;
-            inputs.fuelData[4].angle = 30;
-            inputs.fuelData[4].orientation = 2;
-            inputs.fuelData[4].amount = 1;
+            inputs.fuelData = new FuelVisionData[0];
+            // inputs.fuelData = new FuelVisionData[5];
+            // inputs.fuelData[0] = new FuelVisionData();
+            // inputs.fuelData[0].distance = 19;
+            // inputs.fuelData[0].angle = 35;
+            // inputs.fuelData[0].orientation = 2;
+            // inputs.fuelData[0].amount = 1;
+            // inputs.fuelData[1] = new FuelVisionData();
+            // inputs.fuelData[1].distance = 34;
+            // inputs.fuelData[1].angle = -40;
+            // inputs.fuelData[1].orientation = 2;
+            // inputs.fuelData[1].amount = 1;
+            // inputs.fuelData[2] = new FuelVisionData();
+            // inputs.fuelData[2].distance = 55;
+            // inputs.fuelData[2].angle = 40;
+            // inputs.fuelData[2].orientation = 2;
+            // inputs.fuelData[2].amount = 1;
+            // inputs.fuelData[3] = new FuelVisionData();
+            // inputs.fuelData[3].distance = 80;
+            // inputs.fuelData[3].angle = 45;
+            // inputs.fuelData[3].orientation = 2;
+            // inputs.fuelData[3].amount = 1;
+            // inputs.fuelData[4] = new FuelVisionData();
+            // inputs.fuelData[4].distance = 100;
+            // inputs.fuelData[4].angle = 30;
+            // inputs.fuelData[4].orientation = 2;
+            // inputs.fuelData[4].amount = 1;
         }
 
         double ballSum = 0;
@@ -240,7 +252,10 @@ public class FuelVision extends SubsystemBase {
 
         // abort if data is too old
         // TODO: just follow the edge paths?
-        if (Timer.getTimestamp() - inputs.realTime > oldestAllowedImage) return new ArrayList<>();
+        if (Timer.getTimestamp() - inputs.realTime > oldestAllowedImage) {
+            failReason = FuelVisionFailReason.IMAGE_TOO_OLD;
+            return new ArrayList<>();
+        }
 
         // step1
         Pose2d botPose = getPoseAtCamTime(inputs.realTime);
@@ -354,6 +369,7 @@ public class FuelVision extends SubsystemBase {
         if (mostBalls == 0) {
             // if there are no balls, cast the ray along the robot angle
             rayAngle = botPose.getRotation().getRadians();
+            failReason = FuelVisionFailReason.NO_BALLS;
         }
         for (int ball = 0; ball < lineBallCount[bestLineIdx]; ball++) {
             // we want the robot path to be pointed in the direction of the line for each ball
@@ -377,8 +393,11 @@ public class FuelVision extends SubsystemBase {
             pathPoses.add(new Pose2d(intersection.getX(), rect[1], intersection.getRotation()));
         } else if (intersection.getRotation().getCos() == -1) {
             pathPoses.add(new Pose2d(rect[2], intersection.getY(), intersection.getRotation()));
+        } else if (intersection.getRotation().getSin() == -1) {
+            pathPoses.add(new Pose2d(intersection.getX(), rect[3], intersection.getRotation()));
         } else {
             pathPoses.add(new Pose2d(intersection.getX(), rect[3], intersection.getRotation()));
+            failReason = FuelVisionFailReason.INCORRECT_END_ANGLE;
         }
 
         return pathPoses;
@@ -422,9 +441,11 @@ public class FuelVision extends SubsystemBase {
                 || (p3 == 0 && q3 < 0)
                 || (p4 == 0 && q4 < 0)) {
             // line does not intersect
+            failReason = FuelVisionFailReason.LINE_DOES_NOT_INTERSECT_1;
             if (lineAngle == 0 || lineAngle == Math.PI) {
                 // we tried twice and it still doesnt intersect
-                return new Pose2d(botPose.getTranslation(), Rotation2d.fromRadians(lineAngle));
+                failReason = FuelVisionFailReason.LINE_DOES_NOT_INTERSECT_2;
+                return new Pose2d(botPose.getTranslation(), Rotation2d.fromRadians(0));
             }
             return getIntersection(rect, botPose, botPose.getRotation().getCos() > 0 ? 0 : Math.PI);
         }

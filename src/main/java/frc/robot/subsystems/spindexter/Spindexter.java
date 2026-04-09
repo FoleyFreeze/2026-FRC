@@ -119,7 +119,8 @@ public class Spindexter extends SubsystemBase {
         gateSet.setDouble(gateSetpoint);
 
         io.gateSpeed(gateSetpoint);
-        if (spinLatch || r.shooter.wontMiss(r.drive.getPose()) && r.drive.wontMiss(r.shooter)) {
+        if (r.shooter.wontMiss(r.drive.getPose(), spinLatch)
+                && r.drive.wontMiss(r.shooter, spinLatch)) {
             spinLatch = true;
             io.spinSpeed(spinSet.getDouble(spinSpeed));
         } else {

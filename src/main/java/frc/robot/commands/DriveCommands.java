@@ -41,8 +41,8 @@ public class DriveCommands {
     private static double ANGLE_MAX_VELOCITY = 8.0;
     private static double ANGLE_MAX_ACCELERATION = 10.0;
 
-    public static double xyExpo = 2.5;
-    public static double thetaExpo = 3;
+    public static double xyExpo = 2.4;
+    public static double thetaExpo = 2.8;
 
     private DriveCommands() {}
 

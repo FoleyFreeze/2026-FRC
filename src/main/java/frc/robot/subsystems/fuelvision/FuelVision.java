@@ -123,6 +123,12 @@ public class FuelVision extends SubsystemBase {
             inputs.fuelData[4].amount = 1;
         }
 
+        double ballSum = 0;
+        for (int ball = 0; ball < inputs.fuelData.length; ball++) {
+            ballSum += inputs.fuelData[ball].amount;
+        }
+        Logger.recordOutput("FuelVision/TotalBalls", ballSum);
+
         TimestampedPose2d now = new TimestampedPose2d();
         now.pose = r.drive.getPose();
         now.time = inputs.now;

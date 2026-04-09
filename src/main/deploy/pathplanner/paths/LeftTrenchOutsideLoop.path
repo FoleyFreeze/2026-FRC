@@ -80,11 +80,11 @@
     },
     {
       "anchor": {
-        "x": 3.3,
+        "x": 3.6,
         "y": 7.415636363640065
       },
       "prevControl": {
-        "x": 4.896154179036377,
+        "x": 5.196154179036377,
         "y": 7.452045617358206
       },
       "nextControl": null,
@@ -122,10 +122,10 @@
     },
     {
       "name": "slow for balls",
-      "minWaypointRelativePos": 0.8078994614003567,
-      "maxWaypointRelativePos": 3.5906642728904776,
+      "minWaypointRelativePos": 0.9677419354838652,
+      "maxWaypointRelativePos": 2.923076923076962,
       "constraints": {
-        "maxVelocity": 1.75,
+        "maxVelocity": 1.0,
         "maxAcceleration": 4.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -138,8 +138,8 @@
       "minWaypointRelativePos": 0,
       "maxWaypointRelativePos": 5.0,
       "constraints": {
-        "maxVelocity": 2.0,
-        "maxAcceleration": 4.0,
+        "maxVelocity": 2.5,
+        "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,

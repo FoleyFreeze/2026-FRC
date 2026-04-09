@@ -263,20 +263,21 @@ public class PathAutos {
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
         double initialShootWait = 1.6;
-        double firstShootTime = 5;
+        double firstShootTime = 3.5;
         double secondShootTime = 5;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(new InstantCommand(r.intake::extend, r.intake))
                         .withTimeout(initialShootWait)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
-                                    r.intake.stopIntake().execute();
+                                    r.intake.stopIntake().initialize();
                                 }));
 
         // drive the profile while intaking
@@ -300,7 +301,7 @@ public class PathAutos {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
-                                    r.intake.stopIntake().execute();
+                                    r.intake.stopIntake().initialize();
                                 })
                         .alongWith(
                                 AutoBuilder.pathfindToPoseFlipped(
@@ -332,13 +333,14 @@ public class PathAutos {
         // first drop the intake as fast as possible
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(new InstantCommand(r.intake::extend, r.intake))
                         .withTimeout(initialShootWait)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
-                                    r.intake.stopIntake().execute();
+                                    r.intake.stopIntake().initialize();
                                 }));
 
         // drive the profile while intaking
@@ -398,7 +400,7 @@ public class PathAutos {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
-                                    r.intake.stopIntake().execute();
+                                    r.intake.stopIntake().initialize();
                                 }));
         ParallelDeadlineGroup parallelGroup =
                 new ParallelDeadlineGroup(
@@ -418,13 +420,14 @@ public class PathAutos {
         // first drop the intake as fast as possible
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(new InstantCommand(r.intake::extend, r.intake))
                         .withTimeout(initialShootWait)
                         .finallyDo(
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
                                     r.intake.extend();
-                                    r.intake.stopIntake().execute();
+                                    r.intake.stopIntake().initialize();
                                 }));
 
         // drive the profile while intaking

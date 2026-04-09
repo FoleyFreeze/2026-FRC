@@ -182,8 +182,8 @@ public class ShooterIOHardware implements ShooterIO {
         cfgT.Slot1.kA = 0;
         cfgT.TorqueCurrent.PeakForwardTorqueCurrent = 100;
         cfgT.TorqueCurrent.PeakReverseTorqueCurrent = -100;
-        cfgT.MotionMagic.MotionMagicAcceleration = 2;
-        cfgT.MotionMagic.MotionMagicCruiseVelocity = 1.5;
+        cfgT.MotionMagic.MotionMagicAcceleration = 2.25;
+        cfgT.MotionMagic.MotionMagicCruiseVelocity = 1.75;
         cfgT.Feedback.SensorToMechanismRatio = turretGearRatio;
         PhoenixUtil.tryUntilOk(5, () -> turret.getConfigurator().apply(cfgT));
 

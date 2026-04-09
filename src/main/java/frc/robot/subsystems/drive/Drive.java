@@ -647,9 +647,13 @@ public class Drive extends SubsystemBase {
         };
     }
 
-    public boolean wontMiss(Shooter shooter) {
+    public boolean wontMiss(Shooter shooter, boolean isShooting) {
         // allow wider thresholds for passing
         double angleThresh = shooter.shootMode == ShootMode.HUB ? 90 : 180;
+
+        if (isShooting) {
+            angleThresh *= 10;
+        }
 
         if (Math.abs(robotVelocity.omegaRadiansPerSecond) > Units.degreesToRadians(angleThresh)) {
             missReason = MissReasonDrive.ANGLE_VEL;

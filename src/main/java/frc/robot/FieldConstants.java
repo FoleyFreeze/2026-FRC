@@ -84,9 +84,9 @@ public class FieldConstants {
 
     public static class Locations {
         public static Translation2d passLeft =
-                new Translation2d(Units.feetToMeters(3), fieldWidth - Units.feetToMeters(3));
+                new Translation2d(Units.feetToMeters(3), fieldWidth - Units.feetToMeters(6));
         public static Translation2d passRight =
-                new Translation2d(Units.feetToMeters(3), Units.feetToMeters(3));
+                new Translation2d(Units.feetToMeters(3), Units.feetToMeters(6));
         public static Pose2d locationHubShoot =
                 new Pose2d(
                         Hub.frontLeft.getX() - Constants.robotLength / 2,

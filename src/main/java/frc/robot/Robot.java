@@ -10,11 +10,17 @@ package frc.robot;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.IterativeRobotBase;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.Mode;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.LimelightHelpers;
+import java.lang.reflect.Field;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedPowerDistribution;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -74,6 +80,18 @@ public class Robot extends LoggedRobot {
                 break;
         }
 
+        try {
+            Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");
+            watchdogField.setAccessible(true);
+            Watchdog watchdog = (Watchdog) watchdogField.get(this);
+            watchdog.setTimeout(0.1);
+        } catch (Exception e) {
+            DriverStation.reportWarning("Failed to disable loop overrun warnings", false);
+        }
+        CommandScheduler.getInstance().setPeriod(0.1);
+
+        RobotController.setBrownoutVoltage(6.0);
+
         // Start AdvantageKit logger
         LoggedPowerDistribution.getInstance(1, ModuleType.kRev);
         Logger.start();
@@ -106,6 +124,16 @@ public class Robot extends LoggedRobot {
         Logger.recordOutput(
                 "Vision/LeftHB", LimelightHelpers.getHeartbeat(VisionConstants.camera1Name));
 
+        if (Constants.currentMode == Mode.REAL) {
+            var canStatus = TunerConstants.kCANBus.getStatus();
+            Logger.recordOutput("CANivore/Status", canStatus.Status.getName());
+            Logger.recordOutput("CANivore/Utilization", canStatus.BusUtilization);
+            Logger.recordOutput("CANivore/OffCount", canStatus.BusOffCount);
+            Logger.recordOutput("CANivore/TxFullCount", canStatus.TxFullCount);
+            Logger.recordOutput("CANivore/ReceiveErrors", canStatus.REC);
+            Logger.recordOutput("CANivore/TransmitErrors", canStatus.TEC);
+        }
+
         // Return to non-RT thread priority (do not modify the first argument)
         // Threads.setCurrentThreadPriority(false, 10);
     }
@@ -117,7 +145,7 @@ public class Robot extends LoggedRobot {
         Constants.isEnabled = false;
         Constants.isAuto = false;
 
-        robotContainer.drive.setTurnBrakeMode(false);
+        // robotContainer.drive.setTurnBrakeMode(false);
     }
 
     boolean wasTeleop = false;

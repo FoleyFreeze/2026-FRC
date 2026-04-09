@@ -513,10 +513,15 @@ public class Shooter extends SubsystemBase {
                 && hubY > FieldConstants.Hub.backRight.getY();
     }
 
-    public boolean wontMiss(Pose2d botLoc) {
+    public boolean wontMiss(Pose2d botLoc, boolean alreadyShooting) {
         // allow wider thresholds for passing
         double speedThresh = shootMode == ShootMode.HUB ? 100 : 300;
         double angleThresh = shootMode == ShootMode.HUB ? 3 : 5;
+
+        if (alreadyShooting) {
+            angleThresh *= 6;
+            speedThresh *= 10;
+        }
 
         if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;
@@ -598,6 +603,8 @@ public class Shooter extends SubsystemBase {
                                 // TODO: use some other kind of logic to rezero?
                                 // maybe limelight angle vs gyro?
                                 // io.setTurretZero(turretAngleAbs);
+                            } else {
+                                turretBroke.set(false);
                             }
                         })
                 .andThen(new WaitCommand(2))
@@ -646,6 +653,8 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/CRT_MinError", minError);
         if (minError > 0.1) {
             RobotContainer.getInstance().shooter.turretCRTbroke.set(true);
+        } else {
+            RobotContainer.getInstance().shooter.turretCRTbroke.set(false);
         }
 
         return turretAngle;

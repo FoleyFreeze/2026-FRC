@@ -150,6 +150,9 @@ public class MatchPhaseUtil {
     private boolean wonAutonQuestion() {
         String gameData = DriverStation.getGameSpecificMessage();
         boolean theBoolean = false;
+        if (gameData.isBlank()) {
+            return theBoolean;
+        }
         if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
             switch (gameData.charAt(0)) {
                 case 'R' -> theBoolean = true;

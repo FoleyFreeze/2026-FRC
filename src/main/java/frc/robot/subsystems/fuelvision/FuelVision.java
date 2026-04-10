@@ -275,12 +275,13 @@ public class FuelVision extends SubsystemBase {
         int ballPosLen = 0;
         Translation2d[] ballPos = new Translation2d[inputs.fuelData.length];
         int[] ballCounts = new int[inputs.fuelData.length];
-        if(!imageTooOld){
+        if (!imageTooOld) {
             for (int ball = 0; ball < inputs.fuelData.length; ball++) {
                 // data provided as x, theta
                 // turn into field xy via adding to robot position
                 // note cam angles are inverted (cw positive) so flip them
-                // TODO: is cam data robot or camera relative (I think its center front bumper, which is
+                // TODO: is cam data robot or camera relative (I think its center front bumper,
+                // which is
                 // neither)
                 double x = Units.inchesToMeters(inputs.fuelData[ball].distance);
                 double t = -Math.toRadians(inputs.fuelData[ball].angle);

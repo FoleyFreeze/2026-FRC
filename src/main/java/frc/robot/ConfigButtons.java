@@ -121,7 +121,7 @@ public class ConfigButtons {
 
         // camera gather (LB maybe)
         controller.leftBumper().and(ballCamSw).whileTrue(new CameraBallGatherCmd(r));
-        controller.leftBumper().and(ballCamSw.negate()).whileTrue(new CloseBallGatherCmd(r));
+        controller.leftBumper().and(ballCamSw.negate()).whileTrue(new CloseBallGatherCmd(r).repeatedly());
 
         // unjam back
         controller

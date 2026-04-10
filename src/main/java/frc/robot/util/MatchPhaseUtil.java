@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class MatchPhaseUtil {
+
     private double lastMatchTime;
     private double remainingTime;
     private double lastRobotTime;
@@ -57,8 +58,10 @@ public class MatchPhaseUtil {
     //     case Red -> !redInactiveFirst;
     //     case Blue -> redInactiveFirst;
     //   };
-
+    @AutoLogOutput(key = "RemainingShotTime")
     public static double remainingShotTime;
+
+    @AutoLogOutput(key = "TimeUntilShot")
     public static double timeUntilShot;
 
     @AutoLogOutput(key = "MatchPhase")

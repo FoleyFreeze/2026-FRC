@@ -27,11 +27,11 @@ public class ConfigButtons {
     // note that xbox controller takes the first 3 spots
 
     // used to enable/disable shooting in opponents shift
-    public static Trigger fieldOrientSw = driveStation.button(7).negate();
+    public static Trigger fieldOrientSw = driveStation.button(7);
     // used as turret enable switch
     public static Trigger shotCamSw = driveStation.button(10).negate();
     // used to enable/disable path generation for ball gather vs just driving to closest ball
-    public static Trigger ballCamSw = driveStation.button(6).negate();
+    public static Trigger ballCamSw = driveStation.button(6);
 
     public static void config(RobotContainer r) {
         Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
@@ -68,7 +68,7 @@ public class ConfigButtons {
         controller
                 .rightTrigger()
                 .or(controller.rightBumper())
-                // dont run if turret disabled
+                // run if turret disabled
                 .and(shotCamSw.negate())
                 .whileTrue(
                         DriveCommands.driveAtAngleFFw(
@@ -121,7 +121,10 @@ public class ConfigButtons {
 
         // camera gather (LB maybe)
         controller.leftBumper().and(ballCamSw).whileTrue(new CameraBallGatherCmd(r));
-        controller.leftBumper().and(ballCamSw.negate()).whileTrue(new CloseBallGatherCmd(r).repeatedly());
+        controller
+                .leftBumper()
+                .and(ballCamSw.negate())
+                .whileTrue(new CloseBallGatherCmd(r).repeatedly());
 
         // unjam back
         controller

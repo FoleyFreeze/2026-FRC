@@ -254,11 +254,14 @@ public class FuelVision extends SubsystemBase {
         // step4 - pick the ray with the most balls and construct a path that will travel that line
         // gathering them
 
-        // abort if data is too old
+        failReason = FuelVisionFailReason.NONE;
+
+        // act like there are 0 balls if data is too old
         // TODO: just follow the edge paths?
+        boolean imageTooOld = false;
         if (Timer.getTimestamp() - inputs.realTime > oldestAllowedImage) {
             failReason = FuelVisionFailReason.IMAGE_TOO_OLD;
-            return new ArrayList<>();
+            imageTooOld = true;
         }
 
         // step1
@@ -272,33 +275,35 @@ public class FuelVision extends SubsystemBase {
         int ballPosLen = 0;
         Translation2d[] ballPos = new Translation2d[inputs.fuelData.length];
         int[] ballCounts = new int[inputs.fuelData.length];
-        for (int ball = 0; ball < inputs.fuelData.length; ball++) {
-            // data provided as x, theta
-            // turn into field xy via adding to robot position
-            // note cam angles are inverted (cw positive) so flip them
-            // TODO: is cam data robot or camera relative (I think its center front bumper, which is
-            // neither)
-            double x = Units.inchesToMeters(inputs.fuelData[ball].distance);
-            double t = -Math.toRadians(inputs.fuelData[ball].angle);
-            Translation2d baseOffset = new Translation2d(x, x * Math.tan(t));
-            // construct the final field position by:
-            // 1) adding the camera relative location
-            // 2) rotating by the robot angle
-            // 3) adding the robot field position
-            Translation2d pos =
-                    baseOffset
-                            .plus(camLocation)
-                            .rotateBy(botPose.getRotation())
-                            .plus(botPose.getTranslation());
+        if(!imageTooOld){
+            for (int ball = 0; ball < inputs.fuelData.length; ball++) {
+                // data provided as x, theta
+                // turn into field xy via adding to robot position
+                // note cam angles are inverted (cw positive) so flip them
+                // TODO: is cam data robot or camera relative (I think its center front bumper, which is
+                // neither)
+                double x = Units.inchesToMeters(inputs.fuelData[ball].distance);
+                double t = -Math.toRadians(inputs.fuelData[ball].angle);
+                Translation2d baseOffset = new Translation2d(x, x * Math.tan(t));
+                // construct the final field position by:
+                // 1) adding the camera relative location
+                // 2) rotating by the robot angle
+                // 3) adding the robot field position
+                Translation2d pos =
+                        baseOffset
+                                .plus(camLocation)
+                                .rotateBy(botPose.getRotation())
+                                .plus(botPose.getTranslation());
 
-            // if this ball is on the field add it to the list
-            if (pos.getX() < rect[0]
-                    && pos.getX() > rect[2]
-                    && pos.getY() < rect[1]
-                    && pos.getY() > rect[3]) {
-                ballPos[ballPosLen] = pos;
-                ballCounts[ballPosLen] = inputs.fuelData[ball].amount;
-                ballPosLen++;
+                // if this ball is on the field add it to the list
+                if (pos.getX() < rect[0]
+                        && pos.getX() > rect[2]
+                        && pos.getY() < rect[1]
+                        && pos.getY() > rect[3]) {
+                    ballPos[ballPosLen] = pos;
+                    ballCounts[ballPosLen] = inputs.fuelData[ball].amount;
+                    ballPosLen++;
+                }
             }
         }
 

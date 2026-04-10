@@ -14,6 +14,7 @@ public class FuelVisionIO_HW implements FuelVisionIO {
     private ByteBuffer poseDataFuel;
 
     private BooleanEntry fuelActive;
+    private BooleanEntry bumperActive;
 
     public static class FuelVisionHeader {
         int seqNum;
@@ -32,6 +33,11 @@ public class FuelVisionIO_HW implements FuelVisionIO {
                         .getBooleanTopic("/Vision/Fuel Enable")
                         .getEntry(true);
         fuelActive.set(true);
+        bumperActive =
+                NetworkTableInstance.getDefault()
+                        .getBooleanTopic("/Vision/Bumper/Enable")
+                        .getEntry(true);
+        bumperActive.set(true);
 
         poseMsgFuel =
                 NetworkTableInstance.getDefault()

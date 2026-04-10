@@ -187,20 +187,24 @@ public class FuelVision extends SubsystemBase {
     public Pose2d getClosestFuel() {
 
         // if data is too old just return the robots current location
-        if (Timer.getTimestamp() - inputs.realTime > oldestAllowedImage) return r.drive.getPose();
+        if (Timer.getTimestamp() - inputs.realTime > oldestAllowedImage) {
+            failReason = FuelVisionFailReason.IMAGE_TOO_OLD;
+            return null;
+        }
 
         // if no balls in image, return robots current location
-        if (inputs.fuelData.length == 0) return r.drive.getPose();
+        if (inputs.fuelData.length == 0) {
+            failReason = FuelVisionFailReason.NO_BALLS;
+            return null;
+        }
 
         Pose2d botPose = getPoseAtCamTime(inputs.realTime);
 
         // simple version, just get the closest fuel
         FuelVisionData closeBall = inputs.fuelData[0];
-        double minDist = closeBall.distance;
         for (int ball = 1; ball < inputs.fuelData.length; ball++) {
             if (inputs.fuelData[ball].distance < closeBall.distance) {
                 closeBall = inputs.fuelData[ball];
-                minDist = closeBall.distance;
             }
         }
 

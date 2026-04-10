@@ -3,6 +3,7 @@ package frc.robot.util;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class MatchPhaseUtil {
     private double lastMatchTime;
@@ -57,9 +58,10 @@ public class MatchPhaseUtil {
     //     case Blue -> redInactiveFirst;
     //   };
 
-    public double remainingShotTime;
-    public double timeUntilShot;
+    public static double remainingShotTime;
+    public static double timeUntilShot;
 
+    @AutoLogOutput(key = "MatchPhase")
     public static MatchPhase matchPhaseState = MatchPhase.NONE;
 
     public void matchPhaseUtil() {

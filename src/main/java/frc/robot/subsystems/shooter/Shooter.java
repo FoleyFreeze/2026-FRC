@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -23,6 +22,7 @@ import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ShooterCommands.Thing;
 import frc.robot.subsystems.shooter.ShooterInterp1d.DataPoint;
+import frc.robot.util.MatchPhaseUtil;
 import frc.robot.util.Util2;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -39,7 +39,7 @@ public class Shooter extends SubsystemBase {
 
     private final ShooterInterp1d lerp = new ShooterInterp1d();
 
-    public double rpmTarget, hoodTarget, turretTarget;
+    public double rpmTarget, hoodTarget, turretTarget, timeTarget;
     public Rotation2d botAngleTarget = Rotation2d.kZero;
 
     public static final double minHoodAngle = 48;
@@ -83,6 +83,7 @@ public class Shooter extends SubsystemBase {
         HOOD_ANGLE,
         WHEEL_SPEED,
         HUB_INTERSECTION,
+        BAD_TIME,
     }
 
     @AutoLogOutput(key = "Shooter/MissReasonShooter")
@@ -316,7 +317,7 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
         Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
-        Timer.getTimestamp();
+        Logger.recordOutput("Shooter/AirTime", setpoints.time());
         // hoodTarget = setpoints.hood();
         // rpmTarget = setpoints.rpm();
         manageTurretWrap(angleSetpoint, setpoints.turretVel());
@@ -358,6 +359,7 @@ public class Shooter extends SubsystemBase {
 
         // hoodTarget = setpoints.hood();
         // rpmTarget = setpoints.rpm();
+        timeTarget = setpoints.time();
         // manageTurretWrap(angleSetpoint, setpoints.turretVel());
 
         // provide the angle the robot should point at
@@ -512,6 +514,19 @@ public class Shooter extends SubsystemBase {
         return hubY < FieldConstants.Hub.backLeft.getY()
                 && hubY > FieldConstants.Hub.backRight.getY();
     }
+    /** Returns true if it is NOT time for us to shoot */
+    public boolean notShootTime() {
+        double hubProcessTime = 2;
+        // amount of time that we can subtract from the final number so that the built in post-shift
+        // "grace period" is accounted for
+        double shiftEndTime = -3;
+        if (MatchPhaseUtil.timeUntilShot > hubProcessTime + timeTarget
+                || MatchPhaseUtil.remainingShotTime < shiftEndTime + hubProcessTime + timeTarget) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public boolean wontMiss(Pose2d botLoc, boolean alreadyShooting) {
         // allow wider thresholds for passing
@@ -543,6 +558,9 @@ public class Shooter extends SubsystemBase {
             return false;
         } else if (willHitHub(botLoc)) {
             missReason = MissReason.HUB_INTERSECTION;
+            return false;
+        } else if (ConfigButtons.fieldOrientSw.getAsBoolean() && notShootTime()) {
+            missReason = MissReason.BAD_TIME;
             return false;
         } else {
             missReason = MissReason.NONE;

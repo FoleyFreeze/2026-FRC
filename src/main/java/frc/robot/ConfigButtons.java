@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.CameraBallGatherCmd;
+import frc.robot.commands.CloseBallGatherCmd;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.ShooterCommands.Thing;
@@ -24,6 +25,13 @@ public class ConfigButtons {
     public static final CommandJoystick driveStation = new CommandJoystick(3);
     private static final CommandJoystick driveStation2 = new CommandJoystick(4);
     // note that xbox controller takes the first 3 spots
+
+    // used to enable/disable shooting in opponents shift
+    public static Trigger fieldOrientSw = driveStation.button(7).negate();
+    // used as turret enable switch
+    public static Trigger shotCamSw = driveStation.button(10).negate();
+    // used to enable/disable path generation for ball gather vs just driving to closest ball
+    public static Trigger ballCamSw = driveStation.button(6).negate();
 
     public static void config(RobotContainer r) {
         Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
@@ -47,7 +55,7 @@ public class ConfigButtons {
                 .rightTrigger()
                 .or(controller.rightBumper())
                 // dont run if turret disabled
-                .and(driveStation.button(10).negate())
+                .and(shotCamSw)
                 .whileTrue(
                         DriveCommands.joystickDriveTurnOut(
                                 r.drive,
@@ -61,7 +69,7 @@ public class ConfigButtons {
                 .rightTrigger()
                 .or(controller.rightBumper())
                 // dont run if turret disabled
-                .and(driveStation.button(10))
+                .and(shotCamSw.negate())
                 .whileTrue(
                         DriveCommands.driveAtAngleFFw(
                                 r.drive,
@@ -112,7 +120,8 @@ public class ConfigButtons {
                 .whileTrue(r.intake.shakeTheIntake());
 
         // camera gather (LB maybe)
-        controller.leftBumper().whileTrue(new CameraBallGatherCmd(r));
+        controller.leftBumper().and(ballCamSw).whileTrue(new CameraBallGatherCmd(r));
+        controller.leftBumper().and(ballCamSw.negate()).whileTrue(new CloseBallGatherCmd(r));
 
         // unjam back
         controller
@@ -139,11 +148,11 @@ public class ConfigButtons {
         // pass right RB
         controller
                 .rightBumper()
-                .and(driveStation.button(10).negate()) // with turret
+                .and(shotCamSw) // with turret
                 .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passRight));
         controller
                 .rightBumper()
-                .and(driveStation.button(10)) // without turret
+                .and(shotCamSw.negate()) // without turret
                 .whileTrue(
                         ShooterCommands.smartShootNoTurret(
                                 r,
@@ -154,11 +163,11 @@ public class ConfigButtons {
         // shoot hub RT
         controller
                 .rightTrigger()
-                .and(driveStation.button(10).negate())
+                .and(shotCamSw)
                 .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
         controller
                 .rightTrigger()
-                .and(driveStation.button(10))
+                .and(shotCamSw.negate())
                 .whileTrue(
                         ShooterCommands.smartShootNoTurret(
                                 r, FieldConstants.Hub.center, rotationThing, velocityThing));

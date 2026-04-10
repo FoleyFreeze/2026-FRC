@@ -30,6 +30,7 @@ import frc.robot.subsystems.spindexter.Spindexter;
 import frc.robot.subsystems.spindexter.SpindexterIOSim;
 import frc.robot.subsystems.stats.StatsSubsystem;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.MatchPhaseUtil;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -54,6 +55,7 @@ public class RobotContainer {
     public final Intake intake;
     public final Climber climber;
     public final StatsSubsystem stats;
+    public final MatchPhaseUtil matchPhaseUtil;
 
     public final ChoreoAutos chAutos;
     public final PathAutos pathAutos;
@@ -72,6 +74,7 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         instance = this;
+        matchPhaseUtil = new MatchPhaseUtil();
         SpindexterIOSim spinSim = null;
         IntakeIOSim iis = null;
         ShooterIOSim shootSim = null;

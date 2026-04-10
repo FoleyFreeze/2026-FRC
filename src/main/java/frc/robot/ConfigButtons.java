@@ -110,7 +110,14 @@ public class ConfigButtons {
         controller.b().onTrue(new InstantCommand(r.intake::retract));
 
         // intake spin
-        controller.leftTrigger().or(controller.leftBumper()).whileTrue(r.intake.smartIntake());
+        controller
+                .leftTrigger()
+                .or(controller.leftBumper())
+                .whileTrue(
+                        r.intake
+                                .smartIntake()
+                                .beforeStarting(new InstantCommand(r.intake::reallyExtend))
+                                .finallyDo(r.intake::extend));
 
         // shake while shoot unless gathering
         controller

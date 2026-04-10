@@ -30,6 +30,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drive.Drive;
 
 public class IntakeIOHardware implements IntakeIO {
 
@@ -76,11 +77,11 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         cfg.Slot0.kP = 6;
-        cfg.Slot0.kS = 4;
+        cfg.Slot0.kS = 1;
         cfg.Slot0.kV = 0.01;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 60;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -60;
-        cfg.MotionMagic.MotionMagicAcceleration = 300;
+        cfg.MotionMagic.MotionMagicAcceleration = 400;
         cfg.MotionMagic.MotionMagicJerk = 0;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
         cfg.CurrentLimits.StatorCurrentLimit = 60;
@@ -131,7 +132,7 @@ public class IntakeIOHardware implements IntakeIO {
 
         positionArm = intakeBar.getPosition();
         voltageArm = intakeBar.getMotorVoltage();
-        currentArm = intakeBar.getStatorCurrent();
+        currentArm = intakeBar.getTorqueCurrent();
         tempArm = intakeBar.getDeviceTemp();
         angularVelocityArm = intakeBar.getVelocity();
         supplyCurrentArm = intakeBar.getSupplyCurrent();
@@ -139,7 +140,7 @@ public class IntakeIOHardware implements IntakeIO {
 
         positionWheelL = wheelL.getPosition();
         voltageWheelL = wheelL.getMotorVoltage();
-        currentWheelL = wheelL.getStatorCurrent();
+        currentWheelL = wheelL.getTorqueCurrent();
         tempWheelL = wheelL.getDeviceTemp();
         angularVelocityWheelL = wheelL.getVelocity();
         supplyCurrentWheelL = wheelL.getSupplyCurrent();
@@ -148,13 +149,14 @@ public class IntakeIOHardware implements IntakeIO {
         tempWheelR = wheelR.getDeviceTemp();
         supplyCurrentWheelR = wheelR.getSupplyCurrent();
 
+        BaseStatusSignal.setUpdateFrequencyForAll(Drive.ODOMETRY_FREQUENCY, currentWheelL);
+
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50,
                 positionWheelL,
                 positionArm,
                 voltageWheelL,
                 voltageArm,
-                currentWheelL,
                 currentArm,
                 tempWheelL,
                 tempArm,

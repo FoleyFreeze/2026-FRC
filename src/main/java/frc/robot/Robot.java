@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import au.grapplerobotics.CanBridge;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -81,6 +82,8 @@ public class Robot extends LoggedRobot {
                         new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
                 break;
         }
+
+        CanBridge.runTCP();
 
         try {
             Field watchdogField = IterativeRobotBase.class.getDeclaredField("m_watchdog");

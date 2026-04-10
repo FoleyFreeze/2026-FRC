@@ -27,6 +27,7 @@ public class Intake extends SubsystemBase {
     public static final double armStartWheelPos = 0.07;
     private static final double armOutPos =
             -0.03; // -0.042; // intentionally below zero, actual is -0.013
+    private static final double armVeryOutPos = -0.055;
     private static final double armWontHitTrenchPos = 0.05;
     private static final double armTol = 0.04;
 
@@ -70,6 +71,12 @@ public class Intake extends SubsystemBase {
         io.armMotion(armOutPos);
         overrideToSpinWheels = true;
         Logger.recordOutput("Intake/ArmSetpoint", armOutPos);
+    }
+
+    public void reallyExtend() {
+        io.armMotion(armVeryOutPos);
+        overrideToSpinWheels = true;
+        Logger.recordOutput("Intake/ArmSetpoint", armVeryOutPos);
     }
 
     public void retract() {
@@ -127,7 +134,7 @@ public class Intake extends SubsystemBase {
     public Command velDependentIntake() {
         return new RunCommand(
                 () -> {
-                    double speed = 3100;
+                    double speed = 4000;
 
                     // reduce speed by 120rpm per meter per second
                     double reductionRatio = 120;

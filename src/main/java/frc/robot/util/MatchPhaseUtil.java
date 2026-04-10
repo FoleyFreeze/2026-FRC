@@ -7,8 +7,12 @@ import org.littletonrobotics.junction.AutoLogOutput;
 
 public class MatchPhaseUtil {
 
+    @AutoLogOutput(key = "Timing/ReportedTime")
     private double lastMatchTime;
+
+    @AutoLogOutput(key = "Timing/EstMatchTime")
     private double remainingTime;
+
     private double lastRobotTime;
 
     public static enum MatchPhase {
@@ -58,13 +62,13 @@ public class MatchPhaseUtil {
     //     case Red -> !redInactiveFirst;
     //     case Blue -> redInactiveFirst;
     //   };
-    @AutoLogOutput(key = "RemainingShotTime")
+    @AutoLogOutput(key = "Timing/RemainingShotTime")
     public static double remainingShotTime;
 
-    @AutoLogOutput(key = "TimeUntilShot")
+    @AutoLogOutput(key = "Timing/TimeUntilShot")
     public static double timeUntilShot;
 
-    @AutoLogOutput(key = "MatchPhase")
+    @AutoLogOutput(key = "Timing/MatchPhase")
     public static MatchPhase matchPhaseState = MatchPhase.NONE;
 
     public void matchPhaseUtil() {
@@ -77,15 +81,15 @@ public class MatchPhaseUtil {
             remainingTime = matchTime;
         }
 
-        // if the timer is counting up, not in real match, so always allow shoot
-        if (matchTime > lastMatchTime) {
+        lastRobotTime = robotTime;
+        lastMatchTime = matchTime;
+
+        // if the timer -1, not in real match, so always allow shoot
+        if (matchTime == -1) {
             remainingShotTime = 999;
             timeUntilShot = 0;
             return;
         }
-
-        lastRobotTime = robotTime;
-        lastMatchTime = matchTime;
 
         boolean wonAuton = wonAutonQuestion();
 

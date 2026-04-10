@@ -3,6 +3,8 @@ package frc.robot.subsystems.spindexter;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
 
+import au.grapplerobotics.ConfigurationFailedException;
+import au.grapplerobotics.LaserCan;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -51,6 +53,8 @@ public class SpindexterIOHardware implements SpindexterIO {
 
     private final Debouncer spinConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
     private final Debouncer gateConnectedDebounce = new Debouncer(0.5, DebounceType.kFalling);
+
+    private final LaserCan laserCan;
 
     public SpindexterIOHardware() {
 
@@ -115,6 +119,15 @@ public class SpindexterIOHardware implements SpindexterIO {
         // BaseStatusSignal.setUpdateFrequencyForAll(200, currentGate, currentSpin);
 
         ParentDevice.optimizeBusUtilizationForAll(spin, gate);
+
+        laserCan = new LaserCan(21);
+        try {
+            laserCan.setRangingMode(LaserCan.RangingMode.SHORT);
+            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(4, 8, 8, 8));
+            laserCan.setTimingBudget(LaserCan.TimingBudget.TIMING_BUDGET_33MS);
+        } catch (ConfigurationFailedException e) {
+            System.out.println("LaserCan Config Failed: " + e);
+        }
     }
 
     @Override
@@ -149,6 +162,17 @@ public class SpindexterIOHardware implements SpindexterIO {
         inputs.gateTemp = tempGate.getValueAsDouble();
         inputs.gateVelocity = angularVelocityGate.getValue().in(RPM);
         inputs.gateSupplyCurrent = supplyCurrentGate.getValueAsDouble();
+
+        LaserCan.Measurement lcmm = laserCan.getMeasurement();
+        if (lcmm != null) {
+            inputs.laserCanStatus = lcmm.status;
+            inputs.laserCanDistmm = lcmm.distance_mm;
+            inputs.laserCanAmbient = lcmm.ambient;
+            inputs.laserCanLong = lcmm.is_long;
+            inputs.laserCanTiming = lcmm.budget_ms;
+        } else {
+            inputs.laserCanStatus = -1;
+        }
     }
 
     @Override

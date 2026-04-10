@@ -20,6 +20,12 @@ public interface SpindexterIO {
         public double spinVelocity = 0;
         public double spinTemp = 0;
         public double spinSupplyCurrent = 0;
+
+        public int laserCanStatus = 0;
+        public int laserCanDistmm = 0;
+        public int laserCanAmbient = 0;
+        public boolean laserCanLong = false;
+        public int laserCanTiming = 0;
     }
 
     public default void updateInputs(SpindexterIOInputs inputs) {}

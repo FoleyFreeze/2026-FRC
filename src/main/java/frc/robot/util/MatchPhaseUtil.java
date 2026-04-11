@@ -18,6 +18,7 @@ public class MatchPhaseUtil {
     public static enum MatchPhase {
         NONE,
         AUTO,
+        TRANSITION,
         PHASE_1,
         PHASE_2,
         PHASE_3,
@@ -88,6 +89,14 @@ public class MatchPhaseUtil {
         if (matchTime == -1) {
             remainingShotTime = 999;
             timeUntilShot = 0;
+            matchPhaseState = MatchPhase.NONE;
+            return;
+        }
+
+        if (DriverStation.isAutonomous()) {
+            remainingShotTime = 999;
+            timeUntilShot = 0;
+            matchPhaseState = MatchPhase.AUTO;
             return;
         }
 
@@ -101,7 +110,7 @@ public class MatchPhaseUtil {
                 remainingShotTime = remainingTime - 105;
             }
             timeUntilShot = remainingTime - 160;
-
+            matchPhaseState = MatchPhase.TRANSITION;
         } else if (remainingTime > 105) {
             // phase 1
             if (wonAuton) {
@@ -158,6 +167,7 @@ public class MatchPhaseUtil {
         String gameData = DriverStation.getGameSpecificMessage();
         boolean theBoolean = false;
         if (gameData.isBlank()) {
+            // default to us losing
             return theBoolean;
         }
         if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {

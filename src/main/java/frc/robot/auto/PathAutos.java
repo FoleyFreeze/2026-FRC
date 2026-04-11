@@ -43,6 +43,8 @@ public class PathAutos {
     public PathPlannerPath forwardRightBump2 = forwardLeftBump2.mirrorPath();
     public PathPlannerPath neutralPassLeft = loadPath("NeutralPass");
     public PathPlannerPath neutralPassRight = neutralPassLeft.mirrorPath();
+    public PathPlannerPath leftSideNibble = loadPath("LeftTrenchNibble");
+    public PathPlannerPath rightSideNibble = leftSideNibble.mirrorPath();
 
     // map some runnable with each auton. Using these to zero the robot to the auton start as soon
     // as its selected
@@ -72,6 +74,7 @@ public class PathAutos {
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
         autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
+        autoChooser.addOption("leftTrenchTwoNibble", leftTrenchNibble());
         autoChooser.addOption("RightTrenchTwoScoop", rightTrenchOutsideLoop());
         autoChooser.addOption("ForwardLeftBump", buildFwdLeftBump());
         autoChooser.addOption("ForwardRightBump", buildFwdRightBump());
@@ -222,6 +225,19 @@ public class PathAutos {
         return auto;
     }
 
+    public Command leftTrenchNibble() {
+        Command auto = twoScoopAuto(leftSideNibble, leftSideTrenchToInside);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = leftSideNibble.getIdealStartingState().rotation();
+                    Translation2d tx = leftSideNibble.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
     public Command rightTrenchOutsideLoop() {
         Command auto = twoScoopAuto(rightSideToNeutralZone, rightSideTrenchToInside);
         Runnable run =
@@ -262,8 +278,8 @@ public class PathAutos {
     }
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
-        double initialShootWait = 1.6;
-        double firstShootTime = 3.5;
+        double initialShootWait = 1.0;
+        double firstShootTime = 4.5;
         double secondShootTime = 5;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
@@ -325,8 +341,8 @@ public class PathAutos {
     }
 
     public Command twoMiddleScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
-        double initialShootWait = 1.2;
-        double firstShootTime = 3.8;
+        double initialShootWait = 1.0;
+        double firstShootTime = 4;
         double secondShootTime = 5;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
@@ -372,7 +388,7 @@ public class PathAutos {
                         .andThen(
                                 DriveCommands.driveToPoint(
                                         r, () -> FieldConstants.flipIfRed(nextPathStart))));
-        sequence.addCommands(r.intake.fastDrop());
+        //sequence.addCommands(r.intake.fastDrop());
 
         // drive the second profile while intaking
         parallelGroup =

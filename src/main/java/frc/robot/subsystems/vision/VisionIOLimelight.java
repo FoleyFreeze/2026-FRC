@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOLimelight implements VisionIO {
@@ -75,11 +76,13 @@ public class VisionIOLimelight implements VisionIO {
                 table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
 
         // transform 90 deg camera pose to the true zero degree camera pose
+        Logger.recordOutput("Vision/" + name + "/InitialCamPose", robotToCamXform);
         Pose3d cam90pose =
                 new Pose3d(robotToCamXform.getTranslation(), robotToCamXform.getRotation());
         initialCameraPose =
                 cam90pose.rotateAround(
                         Constants.shooterLocOnBot3d, new Rotation3d(0, 0, Math.toRadians(-90)));
+        Logger.recordOutput("Vision/" + name + "/InitialZeroCamPose", initialCameraPose);
 
         this.cameraRotationSupplier = cameraRotationSupplier;
 
@@ -125,7 +128,7 @@ public class VisionIOLimelight implements VisionIO {
             LimelightHelpers.setCameraPose_RobotSpace(
                     name,
                     finalCamPose.getX(),
-                    finalCamPose.getY(),
+                    -finalCamPose.getY(),
                     finalCamPose.getZ(),
                     Math.toDegrees(finalCamPose.getRotation().getX()),
                     Math.toDegrees(finalCamPose.getRotation().getY()),

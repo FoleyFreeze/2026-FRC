@@ -32,48 +32,48 @@
     },
     {
       "anchor": {
-        "x": 7.584251069900143,
-        "y": 5.115378031383738
+        "x": 8.029590361445782,
+        "y": 5.62
       },
       "prevControl": {
-        "x": 8.188092221050434,
-        "y": 5.266154278448927
+        "x": 8.048748930099856,
+        "y": 6.135067751748792
       },
       "nextControl": {
-        "x": 7.270181744238992,
-        "y": 5.036956423066261
+        "x": 8.02029773497597,
+        "y": 5.370172765509257
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.665606276747502,
-        "y": 5.982268188302426
-      },
-      "prevControl": {
-        "x": 6.78068242972958,
-        "y": 5.317886064283567
-      },
-      "nextControl": {
-        "x": 6.588942204611807,
-        "y": 6.42488151662059
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 6.4663068181828205,
+        "x": 7.480741797432238,
         "y": 7.054897727276427
       },
       "prevControl": {
-        "x": 6.8674912351366695,
-        "y": 6.473434124162035
+        "x": 8.008000835007016,
+        "y": 6.634607309830724
       },
       "nextControl": {
-        "x": 6.1351212553495005,
-        "y": 7.53490727532097
+        "x": 6.827542168674698,
+        "y": 7.575578313253011
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.9423975903614465,
+        "y": 7.416
+      },
+      "prevControl": {
+        "x": 6.643418256349885,
+        "y": 7.328713781096332
+      },
+      "nextControl": {
+        "x": 5.450650602409639,
+        "y": 7.477228915662651
       },
       "isLocked": false,
       "linkedName": null
@@ -109,10 +109,10 @@
   "constraintZones": [
     {
       "name": "Slow for turn",
-      "minWaypointRelativePos": 1.5888689407540375,
-      "maxWaypointRelativePos": 2.7378815080789987,
+      "minWaypointRelativePos": 1.3846153846153895,
+      "maxWaypointRelativePos": 2.198511166253114,
       "constraints": {
-        "maxVelocity": 1.25,
+        "maxVelocity": 1.0,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -122,10 +122,10 @@
     },
     {
       "name": "slow for balls",
-      "minWaypointRelativePos": 0.9677419354838652,
-      "maxWaypointRelativePos": 2.923076923076962,
+      "minWaypointRelativePos": 2.1588089330024554,
+      "maxWaypointRelativePos": 2.337468982630303,
       "constraints": {
-        "maxVelocity": 1.0,
+        "maxVelocity": 0.75,
         "maxAcceleration": 4.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -138,8 +138,8 @@
       "minWaypointRelativePos": 0,
       "maxWaypointRelativePos": 5.0,
       "constraints": {
-        "maxVelocity": 2.5,
-        "maxAcceleration": 5.0,
+        "maxVelocity": 3.5,
+        "maxAcceleration": 5.25,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,

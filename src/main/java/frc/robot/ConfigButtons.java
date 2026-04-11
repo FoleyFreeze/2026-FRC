@@ -37,7 +37,7 @@ public class ConfigButtons {
         Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
 
         // drive functions
-        final double thetaReduction = Math.pow(0.58, 1.0 / DriveCommands.thetaExpo);
+        final double thetaReduction = Math.pow(0.50, 1.0 / DriveCommands.thetaExpo);
         r.drive.setDefaultCommand(
                 DriveCommands.joystickDriveTurnOut(
                         r.drive,

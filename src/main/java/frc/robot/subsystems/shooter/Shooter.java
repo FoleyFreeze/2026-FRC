@@ -239,10 +239,19 @@ public class Shooter extends SubsystemBase {
     }
 
     public Translation2d getClosestPass(Pose2d botLoc) {
+        var isRed = Util2.isRedAlliance();
         if (botLoc.getY() < FieldConstants.fieldWidth / 2) {
-            goal = FieldConstants.flipIfRed(FieldConstants.Locations.passLeft);
+            if (isRed) {
+                goal = FieldConstants.flipIfRed(FieldConstants.Locations.passLeft);
+            } else {
+                goal = FieldConstants.flipIfRed(FieldConstants.Locations.passRight);
+            }
         } else {
-            goal = FieldConstants.flipIfRed(FieldConstants.Locations.passRight);
+            if (isRed) {
+                goal = FieldConstants.flipIfRed(FieldConstants.Locations.passRight);
+            } else {
+                goal = FieldConstants.flipIfRed(FieldConstants.Locations.passLeft);
+            }
         }
         return goal;
     }
@@ -518,7 +527,7 @@ public class Shooter extends SubsystemBase {
         // "grace period" is accounted for
         double shiftEndTime = -3;
         if (MatchPhaseUtil.timeUntilShot > hubProcessTime + timeTarget
-                || MatchPhaseUtil.remainingShotTime < shiftEndTime + hubProcessTime + timeTarget) {
+                && MatchPhaseUtil.remainingShotTime < shiftEndTime + hubProcessTime + timeTarget) {
             return true;
         } else {
             return false;
@@ -553,10 +562,12 @@ public class Shooter extends SubsystemBase {
         } else if (!isWithin(hoodTarget, inputs.hoodPositionDeg, angleThresh)) {
             missReason = MissReason.HOOD_ANGLE;
             return false;
-        } else if (willHitHub(botLoc)) {
+        } else if (false && willHitHub(botLoc)) {
             missReason = MissReason.HUB_INTERSECTION;
             return false;
-        } else if (ConfigButtons.fieldOrientSw.getAsBoolean() && notShootTime()) {
+        } else if (shootMode == ShootMode.HUB
+                && ConfigButtons.fieldOrientSw.getAsBoolean()
+                && notShootTime()) {
             missReason = MissReason.BAD_TIME;
             return false;
         } else {

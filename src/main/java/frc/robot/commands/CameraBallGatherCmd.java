@@ -23,7 +23,7 @@ import org.littletonrobotics.junction.Logger;
 public class CameraBallGatherCmd extends Command {
     RobotContainer r;
     private Command c; // captured command
-    private final PathConstraints globalConstraints = new PathConstraints(2, 0.5, 1, 2);
+    private final PathConstraints globalConstraints = new PathConstraints(2, 1.25, 1, 2);
 
     public CameraBallGatherCmd(RobotContainer r) {
         this.r = r;

@@ -388,7 +388,7 @@ public class PathAutos {
                         .andThen(
                                 DriveCommands.driveToPoint(
                                         r, () -> FieldConstants.flipIfRed(nextPathStart))));
-        //sequence.addCommands(r.intake.fastDrop());
+        // sequence.addCommands(r.intake.fastDrop());
 
         // drive the second profile while intaking
         parallelGroup =

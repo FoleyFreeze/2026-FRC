@@ -42,9 +42,9 @@ public class Shooter extends SubsystemBase {
     public double rpmTarget, hoodTarget, turretTarget, timeTarget;
     public Rotation2d botAngleTarget = Rotation2d.kZero;
 
-    public static final double minHoodAngle = 48;
-    public static final double maxHoodAngle = 87;
-
+    public static final double minHoodAngle = 49.5; // deg
+    public final double maxHoodAngle = 81.4;
+    
     private double jogHubRpm = 0;
     private double jogHubAngle = 0;
     private double jogPassRpm = 0;
@@ -292,18 +292,23 @@ public class Shooter extends SubsystemBase {
         // io.setSpeed(setpoints.rpm());
     }
 
+    public void newPrime(Translation2d localGoal, Pose2d botLoc){
+        newPrime(localGoal, botLoc, false);
+    }
+
     // for the current no-turret
     // scratch that, for the current yes-turret
-    public void newPrime(Translation2d localgoal, Pose2d botLoc) {
+    public void newPrime(Translation2d localGoal, Pose2d botLoc, boolean noHood) {
+
         // 0 what are we shooting at? (goal vs pass)
         ChassisSpeeds botVel;
 
         botVel = r.drive.getFieldVelocity();
-        this.goal = FieldConstants.flipIfRed(localgoal);
+        this.goal = FieldConstants.flipIfRed(localGoal);
 
         // 1 call the lerp
         DataPoint setpoints;
-        if (localgoal == FieldConstants.Hub.center) {
+        if (localGoal == FieldConstants.Hub.center) {
             // we are shooting at the hub
             setpoints = lerp.getHub(this.goal, botLoc, botVel);
             shootMode = ShootMode.HUB;
@@ -314,21 +319,28 @@ public class Shooter extends SubsystemBase {
             shootMode = ShootMode.PASS;
         }
         lastPredFlightTime = setpoints.time();
-
+        
         // 2 use setpoints from lerp to set motors
         double angleSetpoint = setpoints.angle();
+        double hoodAngle = setpoints.hood();
         // botAngleTarget = angleSetpoint;
+        if(noHood){
+            hoodAngle = this.maxHoodAngle;
+        }
+            
         Logger.recordOutput("Shooter/RawTurretSetpoint", angleSetpoint);
         Logger.recordOutput("Shooter/TurretVelocity", setpoints.turretVel());
-        Logger.recordOutput("Shooter/HoodSetpoint", setpoints.hood());
+        Logger.recordOutput("Shooter/HoodSetpoint", hoodAngle);
         Logger.recordOutput("Shooter/RPMSetpoint", setpoints.rpm());
         Logger.recordOutput("Shooter/TargetDistance", setpoints.dist());
         Logger.recordOutput("Shooter/AirTime", setpoints.time());
         // hoodTarget = setpoints.hood();
         // rpmTarget = setpoints.rpm();
         manageTurretWrap(angleSetpoint, setpoints.turretVel());
+
         setShotSpeedAngle(
-                setpoints.hood(), setpoints.rpm(), localgoal != FieldConstants.Hub.center);
+                hoodAngle, setpoints.rpm(), localGoal != FieldConstants.Hub.center);
+        
         // io.setHoodAngle(setpoints.hood());
         // io.setSpeed(setpoints.rpm());
     }

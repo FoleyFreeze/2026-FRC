@@ -11,12 +11,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
+import frc.robot.subsystems.drive.Drive;
+
 import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -296,17 +299,32 @@ public class PathAutos {
                                     r.intake.stopIntake().initialize();
                                 }));
 
+        Pose2d nextPathStart =
+                new Pose2d(path2.getPoint(0).position, path2.getIdealStartingState().rotation());
+
+        Pose2d endPose;
+        double endTime;
+        try{
+            var end = path1.getIdealTrajectory(Drive.PP_CONFIG).get().getEndState();
+            endPose = end.pose;
+            endTime = end.timeSeconds;
+        } catch(Exception e){
+            e.printStackTrace();
+            endPose = nextPathStart;
+            endTime = 5.5;
+        }
+        final Pose2d endPose1 = endPose;
+
         // drive the profile while intaking
         ParallelDeadlineGroup parallelGroup =
                 new ParallelDeadlineGroup(
                         AutoBuilder.followPath(path1),
                         r.intake.smartIntake(),
-                        r.shooter.pointAtHub());
+                        r.shooter.pointAtHub().withTimeout(endTime-0.4).andThen(new RunCommand(() -> r.shooter.newPrime(FieldConstants.Hub.center, endPose1, true))));
         sequence.addCommands(parallelGroup);
 
         // shoot the balls while potentially moving
-        Pose2d nextPathStart =
-                new Pose2d(path2.getPoint(0).position, path2.getIdealStartingState().rotation());
+        
         PathConstraints moveAndShootLimits = new PathConstraints(0.75, 0.75, 1, 1);
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
@@ -324,12 +342,23 @@ public class PathAutos {
                                         nextPathStart, moveAndShootLimits)));
         sequence.addCommands(r.intake.fastDrop());
 
+        try{
+            var end = path2.getIdealTrajectory(Drive.PP_CONFIG).get().getEndState();
+            endPose = end.pose;
+            endTime = end.timeSeconds;
+        } catch(Exception e){
+            e.printStackTrace();
+            endPose = nextPathStart;
+            endTime = 5.5;
+        }
+        final Pose2d endPose2 = endPose;
+
         // drive the second profile while intaking
         parallelGroup =
                 new ParallelDeadlineGroup(
                         AutoBuilder.followPath(path2),
                         r.intake.smartIntake(),
-                        r.shooter.pointAtHub());
+                        r.shooter.pointAtHub().withTimeout(endTime-0.4).andThen(new RunCommand(() -> r.shooter.newPrime(FieldConstants.Hub.center, endPose2, true))));
         sequence.addCommands(parallelGroup);
 
         // shoot again for the remaining time

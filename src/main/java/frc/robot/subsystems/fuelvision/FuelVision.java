@@ -341,6 +341,12 @@ public class FuelVision extends SubsystemBase {
                         Math.cos(lineAngle) * (camFieldLoc.getY() - pos.getY())
                                 - Math.sin(lineAngle) * (camFieldLoc.getX() - pos.getX());
                 if (Math.abs(dist) < maxDeviation) {
+
+                    //loop through all of the balls already in this line
+                    //if any conflict then keep the one with the most balls, throw away the other
+                    
+
+
                     // track that this line will gather this many balls
                     ballCount[line] += ballCounts[ball];
 

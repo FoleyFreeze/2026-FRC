@@ -21,7 +21,7 @@ import java.util.ArrayList;
 public class ConfigButtons {
 
     // Controller
-    private static final CommandXboxController controller = new CommandXboxController(0);
+    public static final CommandXboxController controller = new CommandXboxController(0);
     public static final CommandJoystick driveStation = new CommandJoystick(3);
     private static final CommandJoystick driveStation2 = new CommandJoystick(4);
     // note that xbox controller takes the first 3 spots
@@ -31,7 +31,7 @@ public class ConfigButtons {
     // used as turret enable switch
     public static Trigger shotCamSw = driveStation.button(10).negate();
     // used to enable/disable path generation for ball gather vs just driving to closest ball
-    public static Trigger ballCamSw = driveStation.button(6);
+    public static Trigger ballCamSw = driveStation.button(6).negate();
 
     public static void config(RobotContainer r) {
         Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());

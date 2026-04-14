@@ -110,7 +110,7 @@
     {
       "name": "Slow for turn",
       "minWaypointRelativePos": 1.5888689407540375,
-      "maxWaypointRelativePos": 2.7378815080789987,
+      "maxWaypointRelativePos": 2.2203389830508495,
       "constraints": {
         "maxVelocity": 1.25,
         "maxAcceleration": 3.0,
@@ -123,7 +123,7 @@
     {
       "name": "slow for balls",
       "minWaypointRelativePos": 0.9677419354838652,
-      "maxWaypointRelativePos": 2.923076923076962,
+      "maxWaypointRelativePos": 2.084745762711864,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 4.0,

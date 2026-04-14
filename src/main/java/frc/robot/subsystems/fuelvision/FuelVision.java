@@ -106,33 +106,33 @@ public class FuelVision extends SubsystemBase {
                     (float) inputs.now
                             - ((float) inputs.now - inputs.rioTime) / 2.0f
                             - inputs.imageTime;
-            inputs.fuelData = new FuelVisionData[0];
-            // inputs.fuelData = new FuelVisionData[5];
-            // inputs.fuelData[0] = new FuelVisionData();
-            // inputs.fuelData[0].distance = 19;
-            // inputs.fuelData[0].angle = 35;
-            // inputs.fuelData[0].orientation = 2;
-            // inputs.fuelData[0].amount = 1;
-            // inputs.fuelData[1] = new FuelVisionData();
-            // inputs.fuelData[1].distance = 34;
-            // inputs.fuelData[1].angle = -40;
-            // inputs.fuelData[1].orientation = 2;
-            // inputs.fuelData[1].amount = 1;
-            // inputs.fuelData[2] = new FuelVisionData();
-            // inputs.fuelData[2].distance = 55;
-            // inputs.fuelData[2].angle = 40;
-            // inputs.fuelData[2].orientation = 2;
-            // inputs.fuelData[2].amount = 1;
-            // inputs.fuelData[3] = new FuelVisionData();
-            // inputs.fuelData[3].distance = 80;
-            // inputs.fuelData[3].angle = 45;
-            // inputs.fuelData[3].orientation = 2;
-            // inputs.fuelData[3].amount = 1;
-            // inputs.fuelData[4] = new FuelVisionData();
-            // inputs.fuelData[4].distance = 100;
-            // inputs.fuelData[4].angle = 30;
-            // inputs.fuelData[4].orientation = 2;
-            // inputs.fuelData[4].amount = 1;
+            // inputs.fuelData = new FuelVisionData[0];
+            inputs.fuelData = new FuelVisionData[5];
+            inputs.fuelData[0] = new FuelVisionData();
+            inputs.fuelData[0].distance = 19;
+            inputs.fuelData[0].angle = 35;
+            inputs.fuelData[0].orientation = 2;
+            inputs.fuelData[0].amount = 1;
+            inputs.fuelData[1] = new FuelVisionData();
+            inputs.fuelData[1].distance = 34;
+            inputs.fuelData[1].angle = -40;
+            inputs.fuelData[1].orientation = 2;
+            inputs.fuelData[1].amount = 1;
+            inputs.fuelData[2] = new FuelVisionData();
+            inputs.fuelData[2].distance = 55;
+            inputs.fuelData[2].angle = 40;
+            inputs.fuelData[2].orientation = 2;
+            inputs.fuelData[2].amount = 1;
+            inputs.fuelData[3] = new FuelVisionData();
+            inputs.fuelData[3].distance = 80;
+            inputs.fuelData[3].angle = 45;
+            inputs.fuelData[3].orientation = 2;
+            inputs.fuelData[3].amount = 1;
+            inputs.fuelData[4] = new FuelVisionData();
+            inputs.fuelData[4].distance = 100;
+            inputs.fuelData[4].angle = 30;
+            inputs.fuelData[4].orientation = 2;
+            inputs.fuelData[4].amount = 1;
         }
 
         double ballSum = 0;
@@ -275,6 +275,7 @@ public class FuelVision extends SubsystemBase {
         // step zero, convert cam data to useful representations
         int ballPosLen = 0;
         Translation2d[] ballPos = new Translation2d[inputs.fuelData.length];
+        Translation2d[] ballPosCamRel = new Translation2d[inputs.fuelData.length];
         int[] ballCounts = new int[inputs.fuelData.length];
         if (!imageTooOld) {
             for (int ball = 0; ball < inputs.fuelData.length; ball++) {
@@ -303,6 +304,7 @@ public class FuelVision extends SubsystemBase {
                         && pos.getY() < rect[1]
                         && pos.getY() > rect[3]) {
                     ballPos[ballPosLen] = pos;
+                    ballPosCamRel[ballPosLen] = baseOffset;
                     ballCounts[ballPosLen] = inputs.fuelData[ball].amount;
                     ballPosLen++;
                 }
@@ -327,11 +329,14 @@ public class FuelVision extends SubsystemBase {
             // fixed line it intersects
             // however, we can also represent the infinite line as the starting point (cam location)
             // and an angle (lineAngle) which will make some math easier
-            double lineAngle = line * lineWidth + startAngle + botPose.getRotation().getRadians();
+            double lineOffset = line * lineWidth + startAngle;
+            Rotation2d lineOffsetRot = Rotation2d.fromRadians(lineOffset);
+            double lineAngle = lineOffset + botPose.getRotation().getRadians();
             ballCount[line] = 0;
 
             for (int ball = 0; ball < ballPosLen; ball++) {
                 Translation2d pos = ballPos[ball];
+                Translation2d posCamRel = ballPosCamRel[ball].rotateBy(lineOffsetRot);
                 // the distance between a point and a line in 2d can be calculated via:
                 // where the line is defined by a point and an angle (P, A)
                 // where the point is (x, y)
@@ -341,18 +346,46 @@ public class FuelVision extends SubsystemBase {
                         Math.cos(lineAngle) * (camFieldLoc.getY() - pos.getY())
                                 - Math.sin(lineAngle) * (camFieldLoc.getX() - pos.getX());
                 if (Math.abs(dist) < maxDeviation) {
+                    double rejectedAmount = 0;
+                    int rejectBallCount = 0;
+                    int[] rejectBallCountIdxs = new int[ballPosLen];
 
-                    //loop through all of the balls already in this line
-                    //if any conflict then keep the one with the most balls, throw away the other
-                    
+                    // loop through all of the balls already in this line
+                    // if any conflict then keep the one with the most balls, throw away the other
+                    for (int lineBall = 0; lineBall < lineBallCount[line]; lineBall++) {
+                        // if this ball got rejected already, skip it
+                        if (lineBallIdxs[line][lineBall] == -1) continue;
 
+                        Translation2d ballLocCamRel =
+                                ballPosCamRel[lineBallIdxs[line][lineBall]].rotateBy(lineOffsetRot);
+                        // find out if y values conflict
+                        double dy = posCamRel.getY() - ballLocCamRel.getY();
+                        double dx = posCamRel.getX() - ballLocCamRel.getX();
+                        if (Math.abs(dx * maxDeviationSlope) < Math.abs(dy)) {
+                            // cannot reach both balls, keep track of all the balls we would reject
+                            // to pickup this ball
+                            rejectedAmount += ballCounts[lineBallIdxs[line][lineBall]];
+                            rejectBallCountIdxs[rejectBallCount] = lineBall;
+                            rejectBallCount++;
+                        }
+                    }
 
-                    // track that this line will gather this many balls
-                    ballCount[line] += ballCounts[ball];
+                    // determine to reject this ball, or all of the ones it conflicts with
+                    if (rejectedAmount < ballCounts[ball]) {
+                        for (int rejectedIdx = 0; rejectedIdx < rejectBallCount; rejectedIdx++) {
+                            // remove the contribution of this ball group from this line
+                            // then delete the ball group from the list of balls to gather
+                            ballCount[line] -= ballCounts[lineBallIdxs[line][rejectedIdx]];
+                            lineBallIdxs[line][rejectBallCountIdxs[rejectedIdx]] = -1;
+                        }
+                        // track that this line will gather this many balls
+                        ballCount[line] += ballCounts[ball];
 
-                    // track that this line will need to remember to gather this ball
-                    lineBallIdxs[line][lineBallCount[line]] = ball;
-                    lineBallCount[line]++;
+                        // track that this line will need to remember to gather this ball
+                        lineBallIdxs[line][lineBallCount[line]] = ball;
+                        lineBallCount[line]++;
+                    }
+                    // else we skip this ball, so do nothing
                 }
             }
 
@@ -389,11 +422,20 @@ public class FuelVision extends SubsystemBase {
             failReason = FuelVisionFailReason.NO_BALLS;
         }
         for (int ball = 0; ball < lineBallCount[bestLineIdx]; ball++) {
+            // ignore balls that were later rejected
+            if (lineBallIdxs[bestLineIdx][ball] == -1) continue;
+
             // we want the robot path to be pointed in the direction of the line for each ball
             // gather
             // consider adding a little nudge towards the next ball if there is one though
+            Rotation2d rayRotation = Rotation2d.fromRadians(rayAngle);
+            // robot location so the ball position is in the intake
+            Translation2d halfARobotBackward =
+                    new Translation2d(-Constants.frameLength / 2, 0).rotateBy(rayRotation);
             Pose2d targetPose =
-                    new Pose2d(ballPos[lineBallIdxs[bestLineIdx][ball]], new Rotation2d(rayAngle));
+                    new Pose2d(
+                            ballPos[lineBallIdxs[bestLineIdx][ball]].plus(halfARobotBackward),
+                            rayRotation);
             pathPoses.add(targetPose);
         }
 

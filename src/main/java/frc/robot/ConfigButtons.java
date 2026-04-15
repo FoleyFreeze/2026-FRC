@@ -13,6 +13,7 @@ import frc.robot.commands.CloseBallGatherCmd;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.ShooterCommands.Thing;
+import frc.robot.subsystems.led.Led.LED_MODES;
 import frc.robot.subsystems.shooter.Shooter.ManualShotLoc;
 import frc.robot.util.EdgeDetector;
 import frc.robot.util.EdgeDetector.EdgeType;
@@ -47,6 +48,7 @@ public class ConfigButtons {
         r.shooter.setDefaultCommand(r.shooter.stopAll());
         r.spindexter.setDefaultCommand(r.spindexter.stop());
         r.intake.setDefaultCommand(r.intake.stopIntake());
+        r.led.setDefaultCommand(r.led.setLEDMode(LED_MODES.BREATHE_BLUE));
 
         // drive while shooting
         final double shootXyReduce = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);

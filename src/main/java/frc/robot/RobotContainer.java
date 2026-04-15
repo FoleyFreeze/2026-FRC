@@ -24,6 +24,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.fuelvision.FuelVision;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.led.Led;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.spindexter.Spindexter;
@@ -56,6 +57,7 @@ public class RobotContainer {
     public final Climber climber;
     public final StatsSubsystem stats;
     public final MatchPhaseUtil matchPhaseUtil;
+    public final Led led;
 
     public final ChoreoAutos chAutos;
     public final PathAutos pathAutos;
@@ -99,6 +101,7 @@ public class RobotContainer {
         vision = Vision.create(this, drive, shooter, driveSimulation);
         intake = Intake.create(this, iis);
         climber = Climber.create(this);
+        led = new Led(this);
 
         if (Constants.currentMode == Mode.SIM) {
             shootSim.registerShooter(shooter);

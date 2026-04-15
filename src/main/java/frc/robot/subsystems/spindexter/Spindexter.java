@@ -31,7 +31,7 @@ public class Spindexter extends SubsystemBase {
     boolean spinLatch = false;
 
     private final SpindexterIO io;
-    private final SpindexterIOInputsAutoLogged inputs = new SpindexterIOInputsAutoLogged();
+    public final SpindexterIOInputsAutoLogged inputs = new SpindexterIOInputsAutoLogged();
 
     NetworkTableEntry gateSet =
             NetworkTableInstance.getDefault().getTable("Tuning").getEntry("GateSet");

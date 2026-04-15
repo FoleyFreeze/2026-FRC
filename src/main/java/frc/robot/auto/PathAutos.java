@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.CameraBallGatherCmd;
@@ -317,7 +318,7 @@ public class PathAutos {
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
         double initialShootWait = 1.0;
-        double firstShootTime = 4.5;
+        double firstShootTime = 5;
         double secondShootTime = 5;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
@@ -373,7 +374,7 @@ public class PathAutos {
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(r.intake.shakeTheIntake())
-                        .withTimeout(firstShootTime)
+                        .raceWith(waitForTimeOrNoBalls(firstShootTime))
                         .finallyDo(
                                 () -> {
                                     r.shooter.stopAll().execute();
@@ -418,7 +419,31 @@ public class PathAutos {
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(r.intake.shakeTheIntake())
-                        .withTimeout(secondShootTime));
+                        .raceWith(waitForTimeOrNoBalls(secondShootTime)));
+
+        // if somehow theres time left run path 2 again
+        // drive the second (third) profile while intaking
+        parallelGroup =
+                new ParallelDeadlineGroup(
+                        AutoBuilder.followPath(path2),
+                        r.intake.smartIntake(),
+                        r.shooter
+                                .pointAtHub()
+                                .withTimeout(endTime - prePrimeTime)
+                                .andThen(
+                                        new RunCommand(
+                                                () ->
+                                                        r.shooter.newPrime(
+                                                                FieldConstants.Hub.center,
+                                                                endPose2,
+                                                                true))));
+        sequence.addCommands(parallelGroup);
+
+        // shoot again for the remaining time
+        sequence.addCommands(
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(r.intake.shakeTheIntake())
+                        .raceWith(waitForTimeOrNoBalls(secondShootTime)));
 
         return new ConditionalCommand(abortCommand(), sequence, this::shouldAbort);
     }
@@ -743,5 +768,19 @@ public class PathAutos {
 
     private Command abortCommand() {
         return new InstantCommand();
+    }
+
+    private Command waitForTimeOrNoBalls(double time) {
+        return new WaitCommand(time)
+                .raceWith(
+                        new WaitCommand(time / 2)
+                                .andThen(
+                                        new WaitUntilCommand(
+                                                () ->
+                                                        r.spindexter.inputs.laserCanDistmm > 300
+                                                                && r.spindexter
+                                                                                .inputs
+                                                                                .laserCanStatus
+                                                                        != -1)));
     }
 }

@@ -16,6 +16,9 @@ public class SpindexterIOSim implements SpindexterIO {
         } else {
             inputs.spinVoltage = 0;
         }
+
+        inputs.laserCanStatus = 1;
+        inputs.laserCanDistmm = 400;
     }
 
     public void spinSpeed(double speed) {

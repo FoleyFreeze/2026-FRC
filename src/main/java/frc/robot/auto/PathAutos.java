@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
+import frc.robot.commands.CameraBallGatherCmd;
+import frc.robot.commands.CloseBallGatherCmd;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.drive.Drive;
@@ -47,6 +49,10 @@ public class PathAutos {
     public PathPlannerPath neutralPassRight = neutralPassLeft.mirrorPath();
     public PathPlannerPath leftSideNibble = loadPath("LeftTrenchNibble");
     public PathPlannerPath rightSideNibble = leftSideNibble.mirrorPath();
+    public PathPlannerPath leftCamStart = loadPath("StartCamLeft");
+    public PathPlannerPath rightCamStart = leftCamStart.mirrorPath();
+    public PathPlannerPath leftCamEnd = loadPath("EndCamLeft");
+    public PathPlannerPath rightCamEnd = leftCamEnd.mirrorPath();
 
     double prePrimeTime = 0.8;
 
@@ -91,6 +97,8 @@ public class PathAutos {
         autoChooser.addOption("SitStillAndShoot", buildSitStillAndShoot());
         autoChooser.addOption("LeftPassNeutral", buildPassNeutralLeft());
         autoChooser.addOption("RightPassNeutral", buildPassNeutralRight());
+        autoChooser.addOption("LeftCamAuto", buildCamGatherPathLeft());
+        autoChooser.addOption("RightCamAuto", buildCamGatherPathRight());
     }
 
     private Command buildMiddleLeftDepot() {
@@ -138,6 +146,32 @@ public class PathAutos {
                 () -> {
                     Rotation2d rot = neutralPassRight.getIdealStartingState().rotation();
                     Translation2d tx = neutralPassRight.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
+    private Command buildCamGatherPathLeft() {
+        Command auto = twoMiddleScoopAuto(leftCamStart, leftCamEnd);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = leftCamStart.getIdealStartingState().rotation();
+                    Translation2d tx = leftCamEnd.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
+    private Command buildCamGatherPathRight() {
+        Command auto = twoMiddleScoopAuto(rightCamStart, rightCamEnd);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = rightCamStart.getIdealStartingState().rotation();
+                    Translation2d tx = rightCamEnd.getPoint(0).position;
                     Pose2d pose = new Pose2d(tx, rot);
                     r.drive.setPose(FieldConstants.flipIfRed(pose));
                 };
@@ -379,6 +413,120 @@ public class PathAutos {
                                                                 endPose2,
                                                                 true))));
         sequence.addCommands(parallelGroup);
+
+        // shoot again for the remaining time
+        sequence.addCommands(
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(r.intake.shakeTheIntake())
+                        .withTimeout(secondShootTime));
+
+        return new ConditionalCommand(abortCommand(), sequence, this::shouldAbort);
+    }
+
+    public Command CamGatherAuto(PathPlannerPath path1, PathPlannerPath path2) {
+        double initialShootWait = 1.0;
+        double firstShootTime = 4.5;
+        double secondShootTime = 5;
+
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        // first drop the intake as fast as possible
+        sequence.addCommands(
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(new InstantCommand(r.intake::extend, r.intake))
+                        .withTimeout(initialShootWait)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stopAll().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().initialize();
+                                }));
+
+        Pose2d nextPathStart =
+                new Pose2d(path2.getPoint(0).position, path2.getIdealStartingState().rotation());
+
+        Pose2d endPose;
+        double endTime;
+        try {
+            var end = path1.getIdealTrajectory(Drive.PP_CONFIG).get().getEndState();
+            endPose = end.pose;
+            endTime = end.timeSeconds;
+        } catch (Exception e) {
+            e.printStackTrace();
+            endPose = nextPathStart;
+            endTime = 5.5;
+        }
+        final Pose2d endPose1 = endPose;
+        // drive the profile while intaking
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(
+                        new WaitCommand(7 + 3.2), // 7 is guestimate for how long to intake for: 3.2
+                        // is another guestimate based off from how long the
+                        // start auto takes,
+                        AutoBuilder.followPath(path1)
+                                .andThen(
+                                        new CameraBallGatherCmd(r)
+                                                .handleInterrupt(
+                                                        (Runnable) new CloseBallGatherCmd(r))),
+                        r.intake.smartIntake(),
+                        r.shooter
+                                .pointAtHub()
+                                .withTimeout(endTime - prePrimeTime)
+                                .andThen(
+                                        new RunCommand(
+                                                () ->
+                                                        r.shooter.newPrime(
+                                                                FieldConstants.Hub.center,
+                                                                endPose1,
+                                                                true))));
+        sequence.addCommands(parallelGroup);
+        sequence.addCommands(
+                AutoBuilder.pathfindToPoseFlipped(endPose1, path2.getGlobalConstraints()));
+
+        // shoot the balls while potentially moving
+
+        PathConstraints moveAndShootLimits = new PathConstraints(0.75, 0.75, 1, 1);
+        sequence.addCommands(
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(r.intake.shakeTheIntake())
+                        .withTimeout(firstShootTime)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stopAll().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.extend();
+                                    r.intake.stopIntake().initialize();
+                                })
+                        .alongWith(
+                                AutoBuilder.pathfindToPoseFlipped(
+                                        nextPathStart, moveAndShootLimits)));
+        // sequence.addCommands(r.intake.fastDrop());
+
+        // drive the second profile while intaking
+        parallelGroup =
+                new ParallelDeadlineGroup(
+                        new WaitCommand(8 + 3.2), // 8 is guestimate for how long to intake for: 3.2
+                        // is another guestimate based off from how long the
+                        // start auto takes,
+                        AutoBuilder.followPath(path1)
+                                .andThen(
+                                        new CameraBallGatherCmd(r)
+                                                .handleInterrupt(
+                                                        (Runnable) new CloseBallGatherCmd(r))),
+                        r.intake.smartIntake(),
+                        r.shooter
+                                .pointAtHub()
+                                .withTimeout(endTime - prePrimeTime)
+                                .andThen(
+                                        new RunCommand(
+                                                () ->
+                                                        r.shooter.newPrime(
+                                                                FieldConstants.Hub.center,
+                                                                endPose1,
+                                                                true))));
+        sequence.addCommands(parallelGroup);
+        sequence.addCommands(
+                AutoBuilder.pathfindToPoseFlipped(endPose1, path2.getGlobalConstraints()));
 
         // shoot again for the remaining time
         sequence.addCommands(

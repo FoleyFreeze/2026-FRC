@@ -550,9 +550,14 @@ public class Shooter extends SubsystemBase {
         double speedThresh = shootMode == ShootMode.HUB ? 100 : 300;
         double angleThresh = shootMode == ShootMode.HUB ? 3 : 5;
 
+        // for far shots allow more error
+        if (rpmTarget > 5000) {
+            speedThresh *= 1.5;
+        }
+
         if (alreadyShooting) {
             angleThresh *= 6;
-            speedThresh *= 10;
+            speedThresh *= 7;
         }
 
         if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {

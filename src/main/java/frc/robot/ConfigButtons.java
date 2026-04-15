@@ -31,7 +31,7 @@ public class ConfigButtons {
     // used as turret enable switch
     public static Trigger shotCamSw = driveStation.button(10).negate();
     // used to enable/disable path generation for ball gather vs just driving to closest ball
-    public static Trigger ballCamSw = driveStation.button(6).negate();
+    public static Trigger ballCamSw = driveStation.button(6);
 
     public static void config(RobotContainer r) {
         Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
@@ -56,6 +56,8 @@ public class ConfigButtons {
                 .or(controller.rightBumper())
                 // dont run if turret disabled
                 .and(shotCamSw)
+                // let autogather keep control of the drivetrain
+                .and(controller.leftBumper().negate())
                 .whileTrue(
                         DriveCommands.joystickDriveTurnOut(
                                 r.drive,

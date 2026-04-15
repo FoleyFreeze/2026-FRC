@@ -123,7 +123,7 @@
     {
       "name": "slow for balls",
       "minWaypointRelativePos": 0.9677419354838652,
-      "maxWaypointRelativePos": 2.084745762711864,
+      "maxWaypointRelativePos": 2.2679900744416726,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 4.0,
@@ -138,8 +138,8 @@
       "minWaypointRelativePos": 0,
       "maxWaypointRelativePos": 5.0,
       "constraints": {
-        "maxVelocity": 2.5,
-        "maxAcceleration": 5.0,
+        "maxVelocity": 2.4,
+        "maxAcceleration": 4.75,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,

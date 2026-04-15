@@ -25,6 +25,7 @@ public class Spindexter extends SubsystemBase {
     double gatePower = 0.7;
     double gateSpeed = 2000;
     double spinSpeed = 1500;
+    double spinWaitForShotSpeed = -100;
     double spinUnjamSpeed = -2500;
 
     boolean spinLatch = false;
@@ -128,7 +129,7 @@ public class Spindexter extends SubsystemBase {
             io.spinSpeed(spinSet.getDouble(spinSpeed));
         } else {
             // io.spinPower(0);
-            io.spinSpeed(-500);
+            io.spinSpeed(spinWaitForShotSpeed);
         }
     }
 

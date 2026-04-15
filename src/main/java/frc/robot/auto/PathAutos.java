@@ -48,7 +48,7 @@ public class PathAutos {
     public PathPlannerPath leftSideNibble = loadPath("LeftTrenchNibble");
     public PathPlannerPath rightSideNibble = leftSideNibble.mirrorPath();
 
-    double prePrimeTime = 0.6;
+    double prePrimeTime = 0.8;
 
     // map some runnable with each auton. Using these to zero the robot to the auton start as soon
     // as its selected
@@ -350,7 +350,7 @@ public class PathAutos {
                         .alongWith(
                                 AutoBuilder.pathfindToPoseFlipped(
                                         nextPathStart, moveAndShootLimits)));
-        sequence.addCommands(r.intake.fastDrop());
+        // sequence.addCommands(r.intake.fastDrop());
 
         try {
             var end = path2.getIdealTrajectory(Drive.PP_CONFIG).get().getEndState();
@@ -383,6 +383,7 @@ public class PathAutos {
         // shoot again for the remaining time
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(r.intake.shakeTheIntake())
                         .withTimeout(secondShootTime));
 
         return new ConditionalCommand(abortCommand(), sequence, this::shouldAbort);

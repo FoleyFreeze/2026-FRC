@@ -39,7 +39,7 @@ public class ShooterInterp1d {
 
     // real passes with drag
     private static final double[] rpmTableRealPassing = {
-        2600, 3000, 3500, 4000, 5000, 5000, 5000, 5000
+        2600, 2800, 3300, 3900, 5200, 5300, 5400, 5400
     };
     private static final double[] hoodAngleTableRealPassing = {
         49.5, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5

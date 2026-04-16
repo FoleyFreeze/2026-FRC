@@ -3,10 +3,10 @@ package frc.robot.subsystems.fuelvision;
 import edu.wpi.first.util.struct.StructSerializable;
 
 public class FuelVisionData implements StructSerializable {
-    float distance;
-    float angle;
-    byte orientation;
-    int amount;
+    public float distance;
+    public float angle;
+    public byte orientation;
+    public int amount;
 
     public static final FuelVisionDataStruct struct = new FuelVisionDataStruct();
 }

@@ -24,7 +24,7 @@ import org.littletonrobotics.junction.Logger;
 public class FuelVision extends SubsystemBase {
     RobotContainer r;
     FuelVisionIO io;
-    FuelVisionIOInputsAutoLogged inputs = new FuelVisionIOInputsAutoLogged();
+    public FuelVisionIOInputsAutoLogged inputs = new FuelVisionIOInputsAutoLogged();
 
     public static final boolean isDisabled = false;
 

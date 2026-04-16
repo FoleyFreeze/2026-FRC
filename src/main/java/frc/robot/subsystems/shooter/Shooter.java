@@ -564,6 +564,7 @@ public class Shooter extends SubsystemBase {
             missReason = MissReason.WHEEL_SPEED;
             return false;
         } else if (!ConfigButtons.driveStation.getHID().getRawButton(10)
+                && shootMode != ShootMode.MANUAL
                 && !isWithin(turretTarget, inputs.turretPositionDeg, angleThresh)) {
             // if using turret and turret not in range
             missReason = MissReason.TURRET_ANGLE;

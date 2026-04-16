@@ -29,7 +29,7 @@ public class ShooterInterp1d {
     private static final double[] distAxisReal = {
         0.98, 1.317, 2.2, 2.75, 3.54, 3.91, 4.42, 5.03, 5.18, 5.79
     };
-    //                                                         139in 154in 180in 204in 17ft  19ft
+    // 139in 154in 180in 204in 17ft  19ft
 
     // for sim without drag
     private static final double[] rpmTableSim = {2860, 3403, 3963, 4473, 4938};
@@ -39,34 +39,36 @@ public class ShooterInterp1d {
 
     // real passes with drag
     private static final double[] rpmTableRealPassing = {
-        2600, 2800, 3300, 3900, 5200, 5300, 5400, 5400
+        2000, 2800, 3300, 4500, 5300, 5500
     };
     private static final double[] hoodAngleTableRealPassing = {
-        49.5, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5, 49.5
+        49.5, 49.5, 49.5, 49.5, 49.5, 49.5
     };
     private static final double[] timeTableRealPassing = {
-        0.214, 0.3, 0.367, 0.527, 0.686, 0.854, 1.059, 1.19
+        0.98, 1.3, 1.5, 1.57, 1.5, 1.38
     };
-    private static final double[] distAxisPassingReal = {1, 3, 6, 9, 12, 15, 18, 21};
+    private static final double[] distAxisPassingReal = {1, 4, 6, 9, 12, 15};
     // 49.5 for all
     // pairs
-    /*3750rpm, 247in landed, 141in roll
-    3700 244 102
-    3600 238 134
-    3400 233 189
-    3200 232 218
-    3000 218 260
-    2800 201 300
-    2650 195 339
-    2600 190 352
-    2600 188 368
-    2550 188 308
-    2400 172 255
-    2200 148 183
+    /*3750rpm, 247in landed, 141in roll | soft dist, hard dist, "normal"
+    5500 396     | 24.5' 33.5' 35.5'
+    5000 372     | 25' 33'
+    4500 360     | 23' 29
+    4000         | 21' 24'
+    3700 244 102 |
+    3600 238 134 | 20.5' 21.5'
+    3400 233 189 |
+    3200 232 218 |
+    3000 218 260 | 22' 24'
+    2800 201 300 |
+    2650 195 339 |
+    2600 190 352 |
+    2600 188 368 |
+    2550 188 308 |
+    2400 172 255 |
+    2200 148 183 |
 
-    5500 396
-    5000 372
-    4500 360
+
     */
     private static final double[] passLongData = {5000, 49.5, 1.5};
     private static final double[] passShortData = {2600, 49.5, 0.8};

@@ -12,11 +12,12 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 
-public class Led extends SubsystemBase{
+public class Led extends SubsystemBase {
     AddressableLED leds;
     private RobotContainer r;
     AddressableLEDBuffer buffer;
-        public enum LED_MODES {
+
+    public enum LED_MODES {
         OFF(LEDPattern.solid(Color.kBlack)),
         BLUE(LEDPattern.solid(Color.kBlue)),
         GREEN(LEDPattern.solid(Color.kGreen)),
@@ -34,19 +35,18 @@ public class Led extends SubsystemBase{
             this.pattern = pattern;
         }
     }
-    public Led(RobotContainer r){
+
+    public Led(RobotContainer r) {
         this.r = r;
         leds = new AddressableLED(9);
         buffer = new AddressableLEDBuffer(40);
     }
 
     @Override
-    public void periodic() {
-    }
+    public void periodic() {}
 
     public Command setLEDMode(LED_MODES mode) {
         Command c = new RunCommand(() -> mode.pattern.applyTo(buffer), this).ignoringDisable(true);
         return c;
     }
-
 }

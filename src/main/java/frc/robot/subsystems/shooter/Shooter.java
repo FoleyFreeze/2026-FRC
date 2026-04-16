@@ -562,7 +562,7 @@ public class Shooter extends SubsystemBase {
             speedThresh *= 7;
         }
 
-        if(isCloseToTrench()){
+        if (isCloseToTrench()) {
             missReason = MissReason.TRENCH;
             return false;
         } else if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
@@ -739,22 +739,25 @@ public class Shooter extends SubsystemBase {
         }
     }
 
-    private boolean isCloseToTrench(){
-        if(DriverStation.isAutonomous()) return false;
+    private boolean isCloseToTrench() {
+        if (DriverStation.isAutonomous()) return false;
 
         Translation2d botLoc = r.drive.getPose().getTranslation();
         double xBuffer = Units.inchesToMeters(20);
 
-        //if not aligned with l/r trench
-        if(botLoc.getY() > FieldConstants.RightTrench.yEdge && botLoc.getY() > FieldConstants.LeftTrench.yEdge){
+        // if not aligned with l/r trench
+        if (botLoc.getY() > FieldConstants.RightTrench.yEdge
+                && botLoc.getY() < FieldConstants.LeftTrench.yEdge) {
             return false;
         }
 
-        //we are aligned l/r, so check if in the x window
-        //need to check blue and red side trench regardless of which we are
-        if(Math.abs(botLoc.getX() - FieldConstants.LeftTrench.x) > xBuffer){
+        // we are aligned l/r, so check if in the x window
+        // need to check blue and red side trench regardless of which we are
+        if (Math.abs(botLoc.getX() - FieldConstants.LeftTrench.x) < xBuffer) {
             return true;
-        } else if(Math.abs(botLoc.getX() - (FieldConstants.fieldLength - FieldConstants.LeftTrench.x)) > xBuffer){
+        } else if (Math.abs(
+                        botLoc.getX() - (FieldConstants.fieldLength - FieldConstants.LeftTrench.x))
+                < xBuffer) {
             return true;
         }
 

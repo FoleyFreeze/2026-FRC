@@ -119,7 +119,7 @@ public class ConfigButtons {
                 .or(controller.leftBumper())
                 .whileTrue(
                         r.intake
-                                .smartIntake()
+                                .smartIntake().alongWith(r.led.setIsGather())
                                 .beforeStarting(new InstantCommand(r.intake::reallyExtend))
                                 .finallyDo(r.intake::extend));
 
@@ -131,11 +131,11 @@ public class ConfigButtons {
                 .whileTrue(r.intake.shakeTheIntake());
 
         // camera gather (LB maybe)
-        controller.leftBumper().and(ballCamSw).whileTrue(new CameraBallGatherCmd(r));
+        controller.leftBumper().and(ballCamSw).whileTrue(new CameraBallGatherCmd(r).alongWith(r.led.setIsGather()));
         controller
                 .leftBumper()
                 .and(ballCamSw.negate())
-                .whileTrue(new CloseBallGatherCmd(r).repeatedly());
+                .whileTrue(new CloseBallGatherCmd(r).repeatedly().alongWith(r.led.setIsGather()));
 
         // unjam back
         controller
@@ -163,7 +163,7 @@ public class ConfigButtons {
         controller
                 .rightBumper()
                 .and(shotCamSw) // with turret
-                .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passRight));
+                .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Locations.passRight).alongWith(r.led.setIsShoot()));
         controller
                 .rightBumper()
                 .and(shotCamSw.negate()) // without turret
@@ -172,19 +172,19 @@ public class ConfigButtons {
                                 r,
                                 FieldConstants.Locations.passRight,
                                 rotationThing,
-                                velocityThing));
+                                velocityThing).alongWith(r.led.setIsShoot()));
 
         // shoot hub RT
         controller
                 .rightTrigger()
                 .and(shotCamSw)
-                .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Hub.center));
+                .whileTrue(ShooterCommands.smartShoot(r, FieldConstants.Hub.center).alongWith(r.led.setIsShoot()));
         controller
                 .rightTrigger()
                 .and(shotCamSw.negate())
                 .whileTrue(
                         ShooterCommands.smartShootNoTurret(
-                                r, FieldConstants.Hub.center, rotationThing, velocityThing));
+                                r, FieldConstants.Hub.center, rotationThing, velocityThing).alongWith(r.led.setIsShoot()));
 
         // when not shooting and in autoPoint mode, point at the hub
         // shooter cam switch is active low

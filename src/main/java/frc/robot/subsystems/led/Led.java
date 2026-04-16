@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.AddressableLED.ColorOrder;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.AddressableLEDBufferView;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -26,6 +27,9 @@ public class Led extends SubsystemBase {
     private boolean isShoot;
     private boolean isGather;
 
+    private static Timer blinkTimer = new Timer();
+    private static boolean blinkBool = false;
+
     public enum LED_MODES {
         OFF(LEDPattern.solid(Color.kBlack)),
         BLUE(LEDPattern.solid(Color.kBlue)),
@@ -36,7 +40,13 @@ public class Led extends SubsystemBase {
         BREATHE_BLUE(LEDPattern.solid(Color.kBlue).breathe(Seconds.of(3))),
         WHITE(LEDPattern.solid(Color.kWhite).atBrightness(Percent.of(100))),
         YELLOW(LEDPattern.solid(Color.kYellow).atBrightness(Percent.of(100))),
-        // BLINK_GREEN_BLUE(LEDPattern),
+        // alternating green/blue blink
+        BLINK_GREEN_BLUE(
+                LEDPattern.solid(Color.kBlue)
+                        .synchronizedBlink(() -> blinkBool)
+                        .overlayOn(
+                                LEDPattern.solid(Color.kGreen)
+                                        .synchronizedBlink(() -> !blinkBool))),
 
         RAINBOW(LEDPattern.rainbow(255, 255).scrollAtRelativeSpeed(Seconds.of(5).asFrequency()));
 
@@ -61,12 +71,12 @@ public class Led extends SubsystemBase {
 
         leds.setLength(buffer.getLength());
         leds.start();
+
+        blinkTimer.restart();
     }
 
     @Override
     public void periodic() {
-        leds.setData(buffer);
-
         double ballCount = 0;
         for (int i = 0; i < r.fuelVision.inputs.fuelData.length; i++) {
             ballCount += r.fuelVision.inputs.fuelData[i].amount;
@@ -76,6 +86,13 @@ public class Led extends SubsystemBase {
         } else {
             LED_MODES.OFF.pattern.applyTo(tip);
         }
+
+        // flip every 0.3 seconds
+        if (blinkTimer.advanceIfElapsed(0.3)) {
+            blinkBool = !blinkBool;
+        }
+
+        leds.setData(buffer);
     }
 
     public Command setLEDMode(LED_MODES mode) {
@@ -85,11 +102,11 @@ public class Led extends SubsystemBase {
                                     LEDPattern p = mode.pattern;
 
                                     if (isGather && !isShoot) {
-                                        p = LED_MODES.GREEN.pattern;
+                                        p = LED_MODES.BLINK_GREEN.pattern;
                                     } else if (isShoot && !isGather) {
-                                        p = LED_MODES.BLUE.pattern;
+                                        p = LED_MODES.BLINK_BLUE.pattern;
                                     } else if (isShoot && isGather) {
-                                        p = LED_MODES.YELLOW.pattern;
+                                        p = LED_MODES.BLINK_GREEN_BLUE.pattern;
                                     }
 
                                     p.applyTo(front);

@@ -38,8 +38,8 @@ public class ShooterInterp1d {
     private static final double[] distAxisSim = {0, 1.524, 3.048, 4.572, 6.096};
 
     // real passes with drag
-    //not enough voltage for >5000rpm in match conditions
-    private static final double[] rpmTableRealPassing = {2000, 2800, 3300, 4500, 5000, 5000}; 
+    // not enough voltage for >5000rpm in match conditions
+    private static final double[] rpmTableRealPassing = {2000, 2800, 3300, 4600, 5000, 5000};
     private static final double[] hoodAngleTableRealPassing = {49.5, 49.5, 49.5, 49.5, 49.5, 49.5};
     private static final double[] timeTableRealPassing = {0.98, 1.3, 1.5, 1.57, 1.5, 1.38};
     private static final double[] distAxisPassingReal = {1, 4, 6, 9, 12, 15};

@@ -3,8 +3,6 @@ package frc.robot.subsystems.led;
 import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLED.ColorOrder;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -17,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.shooter.Shooter.MissReason;
+import org.littletonrobotics.junction.Logger;
 
 public class Led extends SubsystemBase {
     AddressableLED leds;
@@ -113,8 +112,8 @@ public class Led extends SubsystemBase {
                                         }
                                     }
 
-                                    Logger.recordOutput("Leds/Pattern",mode.toString());
-                                    
+                                    Logger.recordOutput("Leds/Pattern", mode.toString());
+
                                     mode.pattern.applyTo(front);
                                     mode.pattern.applyTo(back);
                                 },

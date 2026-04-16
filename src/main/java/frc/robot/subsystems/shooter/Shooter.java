@@ -643,7 +643,7 @@ public class Shooter extends SubsystemBase {
 
                                 // TODO: use some other kind of logic to rezero?
                                 // maybe limelight angle vs gyro?
-                                //io.zeroTurretToEnc();
+                                // io.zeroTurretToEnc();
                             } else {
                                 turretBroke.set(false);
                             }
@@ -662,10 +662,11 @@ public class Shooter extends SubsystemBase {
         // turret angle you can measure)
         final int arraySize =
                 (int)
-                        Math.ceil(
-                                (maxTurretDegrees / 360.0)
-                                        * t_teeth
-                                        / (Math.min(e1_teeth, e2_teeth)))+5;
+                                Math.ceil(
+                                        (maxTurretDegrees / 360.0)
+                                                * t_teeth
+                                                / (Math.min(e1_teeth, e2_teeth)))
+                        + 5;
 
         // stores all possible turret angles that match measured encoder angle
         double[] e1PossibleAngles = new double[arraySize]; // in degrees

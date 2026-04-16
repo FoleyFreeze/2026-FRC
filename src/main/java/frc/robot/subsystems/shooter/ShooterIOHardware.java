@@ -156,14 +156,14 @@ public class ShooterIOHardware implements ShooterIO {
         var encCfg27 = new CANcoderConfiguration();
         encCfg27.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         encCfg27.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg27.MagnetSensor.MagnetOffset = -0.4880;
+        encCfg27.MagnetSensor.MagnetOffset = -0.2753;
         PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc27.getConfigurator().apply(encCfg27));
 
         turretAbsEnc29 = new CANcoder(29, TunerConstants.kCANBus);
         var encCfg29 = new CANcoderConfiguration();
         encCfg29.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         encCfg29.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg29.MagnetSensor.MagnetOffset = -0.9740;
+        encCfg29.MagnetSensor.MagnetOffset = -0.3675;
         PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc29.getConfigurator().apply(encCfg29));
 
         turret = new TalonFX(7, TunerConstants.kCANBus);

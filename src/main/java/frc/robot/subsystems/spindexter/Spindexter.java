@@ -90,12 +90,18 @@ public class Spindexter extends SubsystemBase {
     public Command smarterSpinCmd() {
         // complex use of debounce, but we are looking for if time has elapsed since shooting a ball
         Debouncer shotDebounce = new Debouncer(0.75, DebounceType.kFalling);
+        Debouncer distDebounce = new Debouncer(0.1);
         double unjamTime = 0.15;
 
         // index sequence
         SequentialCommandGroup indexerSequence = new SequentialCommandGroup();
         // first reset debouncer as if we have just made a shot
-        indexerSequence.addCommands(new InstantCommand(() -> shotDebounce.calculate(true)));
+        indexerSequence.addCommands(
+                new InstantCommand(
+                        () -> {
+                            shotDebounce.calculate(true);
+                            distDebounce.calculate(false);
+                        }));
         // then run indexer until it gets jammed
         indexerSequence.addCommands(
                 r.spindexter
@@ -105,8 +111,10 @@ public class Spindexter extends SubsystemBase {
                                         !shotDebounce.calculate(
                                                 r.shooter.ballShotEdge
                                                         || !spinLatch
-                                                        || inputs.laserCanDistmm > 300
-                                                                && inputs.laserCanStatus != -1)));
+                                                        || distDebounce.calculate(
+                                                                inputs.laserCanDistmm > 400
+                                                                        && inputs.laserCanStatus
+                                                                                != -1))));
         // then run the unjam sequence
         indexerSequence.addCommands(r.spindexter.smartUnjam().withTimeout(unjamTime));
 

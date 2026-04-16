@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Alert;
@@ -84,6 +85,7 @@ public class Shooter extends SubsystemBase {
         WHEEL_SPEED,
         HUB_INTERSECTION,
         BAD_TIME,
+        TRENCH,
     }
 
     @AutoLogOutput(key = "Shooter/MissReasonShooter")
@@ -324,7 +326,7 @@ public class Shooter extends SubsystemBase {
         double angleSetpoint = setpoints.angle();
         double hoodAngle = setpoints.hood();
         // botAngleTarget = angleSetpoint;
-        if (noHood) {
+        if (noHood || missReason == MissReason.TRENCH) {
             hoodAngle = this.maxHoodAngle;
         }
 
@@ -551,7 +553,7 @@ public class Shooter extends SubsystemBase {
         double angleThresh = shootMode == ShootMode.HUB ? 3 : 5;
 
         // for far shots allow more error
-        if (rpmTarget > 5000) {
+        if (rpmTarget > 4900) {
             speedThresh *= 1.5;
         }
 
@@ -560,7 +562,10 @@ public class Shooter extends SubsystemBase {
             speedThresh *= 7;
         }
 
-        if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
+        if(isCloseToTrench()){
+            missReason = MissReason.TRENCH;
+            return false;
+        } else if (!isWithin(rpmTarget, inputs.wheelVelocityRPM, speedThresh)) {
             missReason = MissReason.WHEEL_SPEED;
             return false;
         } else if (!ConfigButtons.driveStation.getHID().getRawButton(10)
@@ -732,6 +737,28 @@ public class Shooter extends SubsystemBase {
             prevRpm = 0;
             sharpDrop = false;
         }
+    }
+
+    private boolean isCloseToTrench(){
+        if(DriverStation.isAutonomous()) return false;
+
+        Translation2d botLoc = r.drive.getPose().getTranslation();
+        double xBuffer = Units.inchesToMeters(20);
+
+        //if not aligned with l/r trench
+        if(botLoc.getY() > FieldConstants.RightTrench.yEdge && botLoc.getY() > FieldConstants.LeftTrench.yEdge){
+            return false;
+        }
+
+        //we are aligned l/r, so check if in the x window
+        //need to check blue and red side trench regardless of which we are
+        if(Math.abs(botLoc.getX() - FieldConstants.LeftTrench.x) > xBuffer){
+            return true;
+        } else if(Math.abs(botLoc.getX() - (FieldConstants.fieldLength - FieldConstants.LeftTrench.x)) > xBuffer){
+            return true;
+        }
+
+        return false;
     }
 
     public Command jogHubRpmUp() {

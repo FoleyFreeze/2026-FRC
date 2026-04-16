@@ -56,9 +56,15 @@ public class FieldConstants {
 
     public static class RightBump {}
 
-    public static class LeftTrench {}
+    public static class LeftTrench {
+        public static double x = Hub.center.getX();
+        public static double yEdge = fieldWidth - Units.inchesToMeters(65.5);
+    }
 
-    public static class RightTrench {}
+    public static class RightTrench {
+        public static double x = Hub.center.getX();
+        public static double yEdge = Units.inchesToMeters(65.5);
+    }
 
     public static class Tower {
         public static final double halfWidth = Units.inchesToMeters(49.25 / 2.0);

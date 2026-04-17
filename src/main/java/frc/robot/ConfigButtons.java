@@ -34,6 +34,9 @@ public class ConfigButtons {
     // used to enable/disable path generation for ball gather vs just driving to closest ball
     public static Trigger ballCamSw = driveStation.button(6);
 
+    public static Trigger shift = driveStation2.button(12);
+    public static Trigger unjam = driveStation.button(8);
+
     public static void config(RobotContainer r) {
         Trigger botDisabled = new Trigger(() -> DriverStation.isDisabled());
 
@@ -112,6 +115,8 @@ public class ConfigButtons {
         // intake out
         controller.a().onTrue(new InstantCommand(r.intake::extend));
         controller.b().onTrue(new InstantCommand(r.intake::retract));
+        shift.and(unjam).onTrue(new InstantCommand(r.intake::retractToDepot));
+        
 
         // intake spin
         controller

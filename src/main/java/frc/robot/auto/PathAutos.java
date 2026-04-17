@@ -28,8 +28,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.Util2;
-
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -148,7 +146,10 @@ public class PathAutos {
                                                 ? Rotation2d.fromDegrees(72)
                                                 : Rotation2d.fromDegrees(-108)),
                         ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
-                        Commands.sequence(new InstantCommand(r.intake::retractToDepot),new WaitCommand(0.6), r.intake.smartIntake()));
+                        Commands.sequence(
+                                new InstantCommand(r.intake::retractToDepot),
+                                new WaitCommand(0.6),
+                                r.intake.smartIntake()));
         sequence.addCommands(parallelGroup);
 
         sequence.addCommands(
@@ -462,8 +463,10 @@ public class PathAutos {
 
         PathConstraints moveAndShootLimits = new PathConstraints(0.5, 0.5, 1, 1);
         sequence.addCommands(
-                new ConditionalCommand(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
-                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center), () -> isInNeutralZone())
+                new ConditionalCommand(
+                                ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
+                                ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
+                                () -> isInNeutralZone())
                         .alongWith(r.intake.shakeTheIntake())
                         .raceWith(waitForTimeOrNoBalls(firstShootTime))
                         .finallyDo(
@@ -508,8 +511,10 @@ public class PathAutos {
 
         // shoot again for the remaining time
         sequence.addCommands(
-                new ConditionalCommand(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
-                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center), () -> isInNeutralZone())
+                new ConditionalCommand(
+                                ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
+                                ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
+                                () -> isInNeutralZone())
                         .alongWith(r.intake.shakeTheIntake())
                         .raceWith(waitForTimeOrNoBalls(secondShootTime)));
         sequence.addCommands(r.intake.fastDrop());
@@ -534,8 +539,10 @@ public class PathAutos {
 
         // shoot again for the remaining time
         sequence.addCommands(
-                new ConditionalCommand(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
-                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center), () -> isInNeutralZone())
+                new ConditionalCommand(
+                                ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
+                                ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
+                                () -> isInNeutralZone())
                         .alongWith(r.intake.shakeTheIntake())
                         .raceWith(waitForTimeOrNoBalls(secondShootTime)));
 
@@ -893,10 +900,10 @@ public class PathAutos {
                                                                                                 != -1)))));
     }
 
-    private boolean isInNeutralZone(){
+    private boolean isInNeutralZone() {
         Translation2d loc = r.drive.getPose().getTranslation();
-        if(loc.getX() < FieldConstants.fieldLength - FieldConstants.Hub.center.getX() && 
-            loc.getX() > FieldConstants.Hub.center.getX()){
+        if (loc.getX() < FieldConstants.fieldLength - FieldConstants.Hub.center.getX()
+                && loc.getX() > FieldConstants.Hub.center.getX()) {
             return true;
         } else {
             return false;

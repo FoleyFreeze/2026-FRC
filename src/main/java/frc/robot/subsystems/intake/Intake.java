@@ -86,7 +86,7 @@ public class Intake extends SubsystemBase {
         Logger.recordOutput("Intake/ArmSetpoint", armInPos);
     }
 
-    public void retractToDepot(){
+    public void retractToDepot() {
         io.armMotion(armDepotPos);
         overrideToSpinWheels = true;
         Logger.recordOutput("Intake/ArmSetpoint", armInPos);

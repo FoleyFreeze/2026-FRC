@@ -93,7 +93,8 @@ public class Intake extends SubsystemBase {
 
     public Command fastDrop() {
         return new RunCommand(this::reallyExtend, this)
-                .until(() -> inputs.armPosition < armWontHitTrenchPos).raceWith(new WaitCommand(1));
+                .until(() -> inputs.armPosition < armWontHitTrenchPos)
+                .raceWith(new WaitCommand(1));
     }
 
     public Command runIntake() {

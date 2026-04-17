@@ -16,15 +16,15 @@
     },
     {
       "anchor": {
-        "x": 7.480741797432238,
+        "x": 7.0,
         "y": 7.054897727276427
       },
       "prevControl": {
-        "x": 6.529916884851069,
+        "x": 6.049175087418831,
         "y": 7.746278561731666
       },
       "nextControl": {
-        "x": 8.244122681883024,
+        "x": 7.763380884450786,
         "y": 6.499814550641941
       },
       "isLocked": false,
@@ -32,15 +32,15 @@
     },
     {
       "anchor": {
-        "x": 8.029590361445782,
+        "x": 7.6,
         "y": 5.95
       },
       "prevControl": {
-        "x": 8.048748930099856,
+        "x": 7.619158568654074,
         "y": 6.4650677517487924
       },
       "nextControl": {
-        "x": 8.02029773497597,
+        "x": 7.590707373530186,
         "y": 5.700172765509257
       },
       "isLocked": false,
@@ -48,15 +48,15 @@
     },
     {
       "anchor": {
-        "x": 7.480741797432238,
+        "x": 7.0,
         "y": 7.054897727276427
       },
       "prevControl": {
-        "x": 8.008000835007016,
+        "x": 7.527259037574778,
         "y": 6.634607309830724
       },
       "nextControl": {
-        "x": 6.827542168674698,
+        "x": 6.346800371242461,
         "y": 7.575578313253011
       },
       "isLocked": false,
@@ -110,7 +110,7 @@
     {
       "name": "Slow for turn",
       "minWaypointRelativePos": 1.3846153846153895,
-      "maxWaypointRelativePos": 2.198511166253114,
+      "maxWaypointRelativePos": 2.4713031735313926,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 3.0,
@@ -138,8 +138,8 @@
       "minWaypointRelativePos": 0,
       "maxWaypointRelativePos": 5.0,
       "constraints": {
-        "maxVelocity": 3.3,
-        "maxAcceleration": 4.75,
+        "maxVelocity": 3.1,
+        "maxAcceleration": 4.5,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,

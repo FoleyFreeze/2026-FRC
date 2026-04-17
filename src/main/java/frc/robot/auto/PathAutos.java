@@ -111,7 +111,7 @@ public class PathAutos {
     }
 
     private Command buildJustDepot() {
-        double initialShootWait = 1.2;
+        double initialShootWait = 3.0;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible

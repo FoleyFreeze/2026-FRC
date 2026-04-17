@@ -146,10 +146,8 @@ public class PathAutos {
                                                 ? Rotation2d.fromDegrees(72)
                                                 : Rotation2d.fromDegrees(-108)),
                         ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
-                        Commands.sequence(
-                                new InstantCommand(r.intake::retractToDepot),
-                                new WaitCommand(0.6),
-                                r.intake.smartIntake()));
+                        
+                                r.intake.smartIntake());
         sequence.addCommands(parallelGroup);
 
         sequence.addCommands(

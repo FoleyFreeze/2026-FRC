@@ -123,7 +123,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.reallyExtend();
+                                    r.intake.extend();
                                     r.intake.stopIntake().initialize();
                                 }));
 

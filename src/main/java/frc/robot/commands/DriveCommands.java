@@ -324,8 +324,9 @@ public class DriveCommands {
                         });
     }
 
-    public static Command driveToPoint(RobotContainer r, Supplier<Pose2d> pose, double maxTime, Supplier<Rotation2d> angle){
-        driveToPoint(r, pose, maxTime, angle, 0.75);
+    public static Command driveToPoint(
+            RobotContainer r, Supplier<Pose2d> pose, double maxTime, Supplier<Rotation2d> angle) {
+        return driveToPoint(r, pose, maxTime, angle, 0.75);
     }
 
     public static Command driveToPoint(

@@ -30,6 +30,7 @@ public class Intake extends SubsystemBase {
     private static final double armVeryOutPos = -0.125;
     private static final double armWontHitTrenchPos = 0.03;
     private static final double armDepotPos = 0.03;
+    private static final double armAvoidNetPos = 0.12;
     private static final double armTol = 0.04;
 
     private static final double wheelSpeed = 1500; // rpm
@@ -89,13 +90,19 @@ public class Intake extends SubsystemBase {
     public void retractToDepot() {
         io.armMotion(armDepotPos);
         overrideToSpinWheels = true;
-        Logger.recordOutput("Intake/ArmSetpoint", armInPos);
+        Logger.recordOutput("Intake/ArmSetpoint", armDepotPos);
+    }
+
+    public void extendToAvoidNet() {
+        io.armMotion(armAvoidNetPos);
+        overrideToSpinWheels = true;
+        Logger.recordOutput("Intake/ArmSetpoint", armAvoidNetPos);
     }
 
     public void retractForShot() {
         io.armMotion(armInShotPos);
         overrideToSpinWheels = false;
-        Logger.recordOutput("Intake/ArmSetpoint", armInPos);
+        Logger.recordOutput("Intake/ArmSetpoint", armInShotPos);
     }
 
     public Command fastDrop() {

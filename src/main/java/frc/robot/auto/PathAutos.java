@@ -123,7 +123,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.extendToAvoidNet();
                                     r.intake.stopIntake().initialize();
                                 }));
 
@@ -133,22 +133,57 @@ public class PathAutos {
                         AutoBuilder.followPath(depotPath), r.shooter.pointAtHub());
         sequence.addCommands(parallelGroup);
 
-        Pose2d depotPose = new Pose2d(0.806, 5.284, new Rotation2d());
+        Pose2d preDepotPose = new Pose2d(0.74, 4.7, new Rotation2d());
+        Pose2d depotPose = new Pose2d(0.74, 7.0, new Rotation2d());
+        Pose2d postDepotPose = new Pose2d(0.70, 7.5, new Rotation2d());
+        Pose2d finalShootPose = new Pose2d(1.67, 6.77, new Rotation2d());
+
+        // back up slightly
+        sequence.addCommands(
+                DriveCommands.driveToPoint(
+                        r,
+                        () -> FieldConstants.flipIfRed(preDepotPose),
+                        1,
+                        () -> FieldConstants.flipIfRed(Rotation2d.fromDegrees(108)),
+                        0.75));
+
+        // drop the intake
+        sequence.addCommands(new InstantCommand(r.intake::extend), new WaitCommand(1.5));
+
+        // drive over the depot
         parallelGroup =
                 new ParallelDeadlineGroup(
                         DriveCommands.driveToPoint(
                                 r,
                                 () -> FieldConstants.flipIfRed(depotPose),
-                                6,
+                                5,
                                 () ->
                                         Util2.isRedAlliance()
-                                                ? Rotation2d.fromDegrees(72)
-                                                : Rotation2d.fromDegrees(-108),
-                                1.3),
+                                                ? Rotation2d.fromDegrees(-72)
+                                                : Rotation2d.fromDegrees(108),
+                                1.0),
                         ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
                         r.intake.smartIntake());
         sequence.addCommands(parallelGroup);
 
+        // drive into the wall
+        sequence.addCommands(
+                DriveCommands.driveToPoint(
+                                r,
+                                () -> FieldConstants.flipIfRed(postDepotPose),
+                                2,
+                                () -> FieldConstants.flipIfRed(Rotation2d.kCCW_90deg))
+                        .alongWith(r.intake.smartIntake()));
+
+        // backup and shoot
+        sequence.addCommands(
+                DriveCommands.driveToPoint(
+                        r,
+                        () -> FieldConstants.flipIfRed(finalShootPose),
+                        3,
+                        () -> FieldConstants.flipIfRed(Rotation2d.kCCW_90deg)));
+
+        // shoot any last balls
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(r.intake.shakeTheIntake())

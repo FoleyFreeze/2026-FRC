@@ -355,6 +355,7 @@ public class DriveCommands {
                             Translation2d pointErr =
                                     target.getTranslation().minus(meas.getTranslation());
                             error[0] = pointErr.getNorm();
+                            Logger.recordOutput("Odometry/DriveToPointTarget", target);
                             Logger.recordOutput("Odometry/PointErr", pointErr);
                             Logger.recordOutput("Odometry/PointErrNorm", error[0]);
                             // using error to calc the vel

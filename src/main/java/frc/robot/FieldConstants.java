@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.util.Util2;
 
 // field according to the blue side
 // inspired by 6328's FieldConstants class
@@ -149,6 +150,14 @@ public class FieldConstants {
             return flip(pos);
         } else {
             return pos;
+        }
+    }
+
+    public static Rotation2d flipIfRed(Rotation2d rot) {
+        if (Util2.isRedAlliance()) {
+            return rot.plus(Rotation2d.k180deg);
+        } else {
+            return rot;
         }
     }
 }

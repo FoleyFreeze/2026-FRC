@@ -324,12 +324,19 @@ public class DriveCommands {
                         });
     }
 
-    public static Command driveToPoint(RobotContainer r, Supplier<Pose2d> supplier) {
+    public static Command driveToPoint(
+            RobotContainer r,
+            Supplier<Pose2d> supplier,
+            double maxTime,
+            Supplier<Rotation2d> angleSupplier) {
         PIDController pidX = new PIDController(8, 0, 0);
         PIDController pidY = new PIDController(8, 0, 0);
+        PIDController pidA = new PIDController(ANGLE_KP, 0, ANGLE_KD);
+        pidA.enableContinuousInput(-Math.PI, Math.PI);
         final double POS_TOL = Units.inchesToMeters(0.5);
         final double POS_MAX_VEL = 0.75; // may change
-        final double POS_MAX_TIME = 2;
+        final double ANGLE_MAX_VEL = 1.5; //
+        final double POS_MAX_TIME = maxTime;
         double[] error = new double[1];
         Timer timer = new Timer();
 
@@ -347,15 +354,28 @@ public class DriveCommands {
                             // using error to calc the vel
                             double xVel = pidX.calculate(meas.getX(), target.getX());
                             double yVel = pidY.calculate(meas.getY(), target.getY());
+                            double aVel;
+                            if (angleSupplier == null) {
+                                aVel = 0;
+                            } else {
+                                Rotation2d diff = angleSupplier.get().minus(meas.getRotation());
+                                Logger.recordOutput("Odometry/AngleErr", diff);
+                                aVel =
+                                        pidA.calculate(
+                                                meas.getRotation().getRadians(),
+                                                angleSupplier.get().getRadians());
+                            }
+
                             // limits vel (its turtle time)
                             xVel = MathUtil.clamp(xVel, -POS_MAX_VEL, POS_MAX_VEL);
                             yVel = MathUtil.clamp(yVel, -POS_MAX_VEL, POS_MAX_VEL);
+                            aVel = MathUtil.clamp(aVel, -ANGLE_MAX_VEL, ANGLE_MAX_VEL);
 
                             // TODO: run angle PID in parallel
                             if (r.drive.gyroInputs.connected || r.drive.gyroInputs2.connected) {
                                 r.drive.runVelocity(
                                         ChassisSpeeds.fromFieldRelativeSpeeds(
-                                                new ChassisSpeeds(xVel, yVel, 0),
+                                                new ChassisSpeeds(xVel, yVel, aVel),
                                                 r.drive.getRotation()));
                             } else {
                                 // revert to bot relative

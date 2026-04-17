@@ -9,9 +9,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.CircularBuffer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -274,8 +272,7 @@ public class FuelVision extends SubsystemBase {
         // set region bounds and ignore balls outside of them
         double[] rect = fixedRects[zone.ordinal()];
 
-
-        //TOOD: make logic for using this in auto
+        // TOOD: make logic for using this in auto
         // if(DriverStation.isAutonomous()){
 
         //     if(Util2.isRedAlliance()){

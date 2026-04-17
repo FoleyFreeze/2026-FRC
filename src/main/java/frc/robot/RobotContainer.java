@@ -62,7 +62,7 @@ public class RobotContainer {
     public final ChoreoAutos chAutos;
     public final PathAutos pathAutos;
 
-    private SwerveDriveSimulation driveSimulation;
+    public SwerveDriveSimulation driveSimulation;
 
     // Dashboard inputs
     public final LoggedDashboardChooser<Command> autoChooser;

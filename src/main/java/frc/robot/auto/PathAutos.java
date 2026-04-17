@@ -16,13 +16,17 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
+import frc.robot.Constants.Mode;
 import frc.robot.FieldConstants;
+import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.commands.CameraBallGatherCmd;
 import frc.robot.commands.CloseBallGatherCmd;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.Util2;
 import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -106,7 +110,7 @@ public class PathAutos {
         autoChooser.addOption("RightCamAuto", buildCamGatherPathRight());
     }
 
-    private Command buildJustDepot(){
+    private Command buildJustDepot() {
         double initialShootWait = 1.2;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
@@ -126,10 +130,49 @@ public class PathAutos {
         // drive the profile while intaking
         ParallelDeadlineGroup parallelGroup =
                 new ParallelDeadlineGroup(
-                        AutoBuilder.followPath(depotPath),
-                        r.shooter.pointAtHub());
+                        AutoBuilder.followPath(depotPath), r.shooter.pointAtHub());
         sequence.addCommands(parallelGroup);
 
+        Pose2d depotPose = new Pose2d(0.806, 5.284, new Rotation2d());
+        parallelGroup =
+                new ParallelDeadlineGroup(
+                        DriveCommands.driveToPoint(
+                                r,
+                                () -> FieldConstants.flipIfRed(depotPose),
+                                5,
+                                () ->
+                                        Util2.isRedAlliance()
+                                                ? Rotation2d.fromDegrees(72)
+                                                : Rotation2d.fromDegrees(-108)),
+                        ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
+                        r.intake.smartIntake());
+        sequence.addCommands(parallelGroup);
+
+        sequence.addCommands(
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(r.intake.shakeTheIntake())
+                        .raceWith(new WaitCommand(3)));
+
+        sequence.addCommands(
+                new InstantCommand(
+                        () -> {
+                            r.shooter.stopAll().execute();
+                            r.spindexter.stop().execute();
+                            r.intake.extend();
+                            r.intake.stopIntake().initialize();
+                        }));
+
+        Runnable run =
+                () -> {
+                    Rotation2d rot = depotPath.getIdealStartingState().rotation();
+                    Translation2d tx = depotPath.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                    if (Robot.isSimulation() && Constants.currentMode == Mode.SIM) {
+                        r.driveSimulation.setSimulationWorldPose(FieldConstants.flipIfRed(pose));
+                    }
+                };
+        pathMap.put(sequence, run);
         return sequence;
     }
 
@@ -678,7 +721,10 @@ public class PathAutos {
                                         nextPathStart, moveAndShootLimits))
                         .andThen(
                                 DriveCommands.driveToPoint(
-                                        r, () -> FieldConstants.flipIfRed(nextPathStart))));
+                                        r,
+                                        () -> FieldConstants.flipIfRed(nextPathStart),
+                                        2,
+                                        null)));
         // sequence.addCommands(r.intake.fastDrop());
 
         try {
@@ -785,7 +831,10 @@ public class PathAutos {
                                         nextPathStart, moveAndShootLimits))
                         .andThen(
                                 DriveCommands.driveToPoint(
-                                        r, () -> FieldConstants.flipIfRed(nextPathStart))));
+                                        r,
+                                        () -> FieldConstants.flipIfRed(nextPathStart),
+                                        2,
+                                        null)));
         sequence.addCommands(r.intake.fastDrop());
 
         // drive the second profile while intaking
@@ -797,7 +846,9 @@ public class PathAutos {
                                                 FieldConstants.flipIfRed(
                                                         new Pose2d(
                                                                 FieldConstants.Depot.depotWall,
-                                                                Rotation2d.k180deg)))
+                                                                Rotation2d.k180deg)),
+                                        2,
+                                        null)
                                 .andThen(new WaitCommand(secondShootTime)),
                         r.intake.smartIntake(),
                         ShooterCommands.smartShoot(r, FieldConstants.Hub.center));

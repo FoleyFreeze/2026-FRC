@@ -28,7 +28,7 @@ public class ClimbCommands {
                         .alongWith(setClimbEnum(r, AutoClimbState.PRECLIMB))
                         .unless(() -> getDist(r, offsetPose.get()) < Units.inchesToMeters(9.5)));
         sc.addCommands(
-                DriveCommands.driveToPoint(r, () -> climbLoc.get())
+                DriveCommands.driveToPoint(r, () -> climbLoc.get(), 1, null)
                         .alongWith(setClimbEnum(r, AutoClimbState.PATHFIND_DONE))
                         .unless(checkEnum(r, AutoClimbState.POINT_DRIVEN)));
         sc.addCommands(

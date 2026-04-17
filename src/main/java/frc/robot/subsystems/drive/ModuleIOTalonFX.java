@@ -37,7 +37,6 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.led.Led;
-
 import java.util.Queue;
 
 /**
@@ -284,9 +283,10 @@ public class ModuleIOTalonFX implements ModuleIO {
         double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
         driveTalon.setControl(
                 switch (constants.DriveMotorClosedLoopOutput) {
-                    //abusing led state to determine if we want full power drive or not
+                        // abusing led state to determine if we want full power drive or not
                     case Voltage -> velocityVoltageRequest
-                            .withVelocity(velocityRotPerSec).withAcceleration(Led.isGather || Led.isShoot ? 36 : 60)
+                            .withVelocity(velocityRotPerSec)
+                            .withAcceleration(Led.isGather || Led.isShoot ? 36 : 60)
                             .withOverrideBrakeDurNeutral(brakeMode);
                     case TorqueCurrentFOC -> velocityTorqueCurrentRequest.withVelocity(
                             velocityRotPerSec);

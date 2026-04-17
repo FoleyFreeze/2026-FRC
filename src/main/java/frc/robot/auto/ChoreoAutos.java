@@ -335,7 +335,9 @@ public class ChoreoAutos {
                                                                                                 .robotLength
                                                                                         / 2.0),
                                                                 0.0,
-                                                                Rotation2d.kZero)))));
+                                                                Rotation2d.kZero)),
+                                2,
+                                null)));
         return sequence;
     }
 

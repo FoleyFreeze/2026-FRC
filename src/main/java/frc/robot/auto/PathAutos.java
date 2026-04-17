@@ -242,7 +242,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().execute();
                                 }));
         return sequence;
@@ -332,7 +332,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().initialize();
                                 }));
 
@@ -380,13 +380,13 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().initialize();
                                 })
                         .alongWith(
                                 AutoBuilder.pathfindToPoseFlipped(
                                         nextPathStart, moveAndShootLimits)));
-        // sequence.addCommands(r.intake.fastDrop());
+        sequence.addCommands(r.intake.fastDrop());
 
         try {
             var end = path2.getIdealTrajectory(Drive.PP_CONFIG).get().getEndState();
@@ -421,6 +421,7 @@ public class PathAutos {
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(r.intake.shakeTheIntake())
                         .raceWith(waitForTimeOrNoBalls(secondShootTime)));
+        sequence.addCommands(r.intake.fastDrop());
 
         // if somehow theres time left run path 2 again
         // drive the second (third) profile while intaking
@@ -464,7 +465,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().initialize();
                                 }));
 
@@ -520,7 +521,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().initialize();
                                 })
                         .alongWith(
@@ -578,7 +579,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().initialize();
                                 }));
 
@@ -626,7 +627,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().execute();
                                 })
                         .alongWith(
@@ -682,7 +683,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().initialize();
                                 }));
         ParallelDeadlineGroup parallelGroup =
@@ -710,7 +711,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().initialize();
                                 }));
 
@@ -733,7 +734,7 @@ public class PathAutos {
                                 () -> {
                                     r.shooter.stopAll().execute();
                                     r.spindexter.stop().execute();
-                                    r.intake.extend();
+                                    r.intake.reallyExtend();
                                     r.intake.stopIntake().execute();
                                 })
                         .alongWith(

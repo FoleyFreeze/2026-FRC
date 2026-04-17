@@ -324,17 +324,22 @@ public class DriveCommands {
                         });
     }
 
+    public static Command driveToPoint(RobotContainer r, Supplier<Pose2d> pose, double maxTime, Supplier<Rotation2d> angle){
+        driveToPoint(r, pose, maxTime, angle, 0.75);
+    }
+
     public static Command driveToPoint(
             RobotContainer r,
             Supplier<Pose2d> supplier,
             double maxTime,
-            Supplier<Rotation2d> angleSupplier) {
+            Supplier<Rotation2d> angleSupplier,
+            double maxVel) {
         PIDController pidX = new PIDController(8, 0, 0);
         PIDController pidY = new PIDController(8, 0, 0);
         PIDController pidA = new PIDController(ANGLE_KP, 0, ANGLE_KD);
         pidA.enableContinuousInput(-Math.PI, Math.PI);
         final double POS_TOL = Units.inchesToMeters(0.5);
-        final double POS_MAX_VEL = 0.75; // may change
+        final double POS_MAX_VEL = maxVel;
         final double ANGLE_MAX_VEL = 1.5; //
         final double POS_MAX_TIME = maxTime;
         double[] error = new double[1];

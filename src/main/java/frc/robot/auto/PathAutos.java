@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -144,10 +143,10 @@ public class PathAutos {
                                 () ->
                                         Util2.isRedAlliance()
                                                 ? Rotation2d.fromDegrees(72)
-                                                : Rotation2d.fromDegrees(-108)),
+                                                : Rotation2d.fromDegrees(-108),
+                                1.3),
                         ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
-                        
-                                r.intake.smartIntake());
+                        r.intake.smartIntake());
         sequence.addCommands(parallelGroup);
 
         sequence.addCommands(

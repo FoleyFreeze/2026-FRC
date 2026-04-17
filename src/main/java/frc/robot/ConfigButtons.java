@@ -116,7 +116,6 @@ public class ConfigButtons {
         controller.a().onTrue(new InstantCommand(r.intake::extend));
         controller.b().onTrue(new InstantCommand(r.intake::retract));
         shift.and(unjam).onTrue(new InstantCommand(r.intake::retractToDepot));
-        
 
         // intake spin
         controller

@@ -99,7 +99,7 @@ public class Shooter extends SubsystemBase {
     Alert turretBroke = new Alert("Oops, turrets broke", AlertType.kError);
     Alert turretCRTbroke = new Alert("Oops, CRT algo's broke", AlertType.kError);
 
-    double turretEncDisagrees = 0;
+    int turretEncDisagrees = 0;
 
     public static Shooter create(RobotContainer r, ShooterIOSim shootSim) {
         if (isDisabled) {

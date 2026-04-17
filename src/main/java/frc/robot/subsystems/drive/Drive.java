@@ -419,7 +419,7 @@ public class Drive extends SubsystemBase {
         // Calculate module setpoints
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates;
-        if (r.intake.inputs.armPosition < Intake.armStartWheelPos) {
+        if (false && r.intake.inputs.armPosition < Intake.armStartWheelPos) {
             setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds, rotationPoint);
         } else {
             setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);

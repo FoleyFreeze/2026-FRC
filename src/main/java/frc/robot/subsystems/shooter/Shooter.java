@@ -99,6 +99,8 @@ public class Shooter extends SubsystemBase {
     Alert turretBroke = new Alert("Oops, turrets broke", AlertType.kError);
     Alert turretCRTbroke = new Alert("Oops, CRT algo's broke", AlertType.kError);
 
+    double turretEncDisagrees = 0;
+
     public static Shooter create(RobotContainer r, ShooterIOSim shootSim) {
         if (isDisabled) {
             return new Shooter(new ShooterIO() {}, r);
@@ -127,6 +129,8 @@ public class Shooter extends SubsystemBase {
         Logger.recordOutput("Jogs/PassRpm", jogPassRpm);
         Logger.recordOutput("Jogs/HubAngle", jogHubAngle);
         Logger.recordOutput("Jogs/PassAngle", jogPassAngle);
+
+        Logger.recordOutput("Shooter/EncDisagreeCnt", turretEncDisagrees);
     }
 
     @Override
@@ -640,6 +644,8 @@ public class Shooter extends SubsystemBase {
                             Logger.recordOutput("Shooter/lastCRTerror", error);
                             if (Math.abs(error) > 3) {
                                 turretBroke.set(true);
+                                turretEncDisagrees++;
+                                Logger.recordOutput("Shooter/EncDisagreeCnt", turretEncDisagrees);
 
                                 // TODO: use some other kind of logic to rezero?
                                 // maybe limelight angle vs gyro?

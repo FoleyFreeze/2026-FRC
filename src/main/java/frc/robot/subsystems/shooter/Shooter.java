@@ -638,12 +638,12 @@ public class Shooter extends SubsystemBase {
                             double error = turretAngleAbs - turretAngle;
 
                             Logger.recordOutput("Shooter/lastCRTerror", error);
-                            if (Math.abs(error) > 1) {
+                            if (Math.abs(error) > 3) {
                                 turretBroke.set(true);
 
                                 // TODO: use some other kind of logic to rezero?
                                 // maybe limelight angle vs gyro?
-                                // io.zeroTurretToEnc();
+                                io.zeroTurretToEnc();
                             } else {
                                 turretBroke.set(false);
                             }

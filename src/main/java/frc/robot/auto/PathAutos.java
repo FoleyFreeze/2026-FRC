@@ -332,7 +332,7 @@ public class PathAutos {
     }
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
-        double initialShootWait = 1.0;
+        double initialShootWait = 1.2;
         double firstShootTime = 10;
         double secondShootTime = 10;
 
@@ -790,7 +790,7 @@ public class PathAutos {
         Debouncer debouncer = new Debouncer(0.3);
         return new WaitCommand(time)
                 .raceWith(
-                        new WaitCommand(time / 2)
+                        new WaitCommand(1)
                                 .andThen(
                                         new InstantCommand(() -> debouncer.calculate(false))
                                                 .andThen(

@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase {
     private static final double armOutPos =
             -0.03; // -0.042; // intentionally below zero, actual is -0.013
     private static final double armVeryOutPos = -0.125;
-    private static final double armWontHitTrenchPos = 0.05;
+    private static final double armWontHitTrenchPos = 0.03;
     private static final double armTol = 0.04;
 
     private static final double wheelSpeed = 1500; // rpm
@@ -93,7 +93,7 @@ public class Intake extends SubsystemBase {
 
     public Command fastDrop() {
         return new RunCommand(this::reallyExtend, this)
-                .until(() -> inputs.armPosition < armWontHitTrenchPos)
+                .until(() -> inputs.armPosition < armWontHitTrenchPos).andThen(new WaitCommand(0.1))
                 .raceWith(new WaitCommand(1));
     }
 

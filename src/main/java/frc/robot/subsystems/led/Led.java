@@ -25,8 +25,8 @@ public class Led extends SubsystemBase {
     AddressableLEDBufferView tip;
     AddressableLEDBufferView back;
 
-    private boolean isShoot;
-    private boolean isGather;
+    public static boolean isShoot;
+    public static boolean isGather;
 
     public enum LED_MODES {
         OFF(LEDPattern.solid(Color.kBlack)),

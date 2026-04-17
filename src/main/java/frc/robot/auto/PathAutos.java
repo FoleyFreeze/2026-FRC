@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -27,6 +28,8 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.Util2;
+
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -139,19 +142,19 @@ public class PathAutos {
                         DriveCommands.driveToPoint(
                                 r,
                                 () -> FieldConstants.flipIfRed(depotPose),
-                                5,
+                                6,
                                 () ->
                                         Util2.isRedAlliance()
                                                 ? Rotation2d.fromDegrees(72)
                                                 : Rotation2d.fromDegrees(-108)),
                         ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
-                        r.intake.smartIntake());
+                        Commands.sequence(new InstantCommand(r.intake::retractToDepot),new WaitCommand(0.6), r.intake.smartIntake()));
         sequence.addCommands(parallelGroup);
 
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(r.intake.shakeTheIntake())
-                        .raceWith(new WaitCommand(3)));
+                        .raceWith(new WaitCommand(5)));
 
         sequence.addCommands(
                 new InstantCommand(
@@ -459,7 +462,8 @@ public class PathAutos {
 
         PathConstraints moveAndShootLimits = new PathConstraints(0.5, 0.5, 1, 1);
         sequence.addCommands(
-                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                new ConditionalCommand(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
+                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center), () -> isInNeutralZone())
                         .alongWith(r.intake.shakeTheIntake())
                         .raceWith(waitForTimeOrNoBalls(firstShootTime))
                         .finallyDo(
@@ -504,7 +508,8 @@ public class PathAutos {
 
         // shoot again for the remaining time
         sequence.addCommands(
-                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                new ConditionalCommand(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
+                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center), () -> isInNeutralZone())
                         .alongWith(r.intake.shakeTheIntake())
                         .raceWith(waitForTimeOrNoBalls(secondShootTime)));
         sequence.addCommands(r.intake.fastDrop());
@@ -529,7 +534,8 @@ public class PathAutos {
 
         // shoot again for the remaining time
         sequence.addCommands(
-                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                new ConditionalCommand(ShooterCommands.smartShoot(r, FieldConstants.Locations.passLeft),
+                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center), () -> isInNeutralZone())
                         .alongWith(r.intake.shakeTheIntake())
                         .raceWith(waitForTimeOrNoBalls(secondShootTime)));
 
@@ -885,5 +891,15 @@ public class PathAutos {
                                                                                                         .inputs
                                                                                                         .laserCanStatus
                                                                                                 != -1)))));
+    }
+
+    private boolean isInNeutralZone(){
+        Translation2d loc = r.drive.getPose().getTranslation();
+        if(loc.getX() < FieldConstants.fieldLength - FieldConstants.Hub.center.getX() && 
+            loc.getX() > FieldConstants.Hub.center.getX()){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

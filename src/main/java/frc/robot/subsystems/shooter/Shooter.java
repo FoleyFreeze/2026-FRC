@@ -648,7 +648,7 @@ public class Shooter extends SubsystemBase {
                                 turretBroke.set(false);
                             }
                         })
-                .andThen(new WaitCommand(2))
+                .andThen(new WaitCommand(1))
                 .repeatedly()
                 .ignoringDisable(true);
     }

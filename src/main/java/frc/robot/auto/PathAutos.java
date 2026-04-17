@@ -55,6 +55,7 @@ public class PathAutos {
     public PathPlannerPath rightCamStart = leftCamStart.mirrorPath();
     public PathPlannerPath leftCamEnd = loadPath("EndCamLeft");
     public PathPlannerPath rightCamEnd = leftCamEnd.mirrorPath();
+    public PathPlannerPath depotPath = loadPath("DriveToDepot");
 
     double prePrimeTime = 0.8;
 
@@ -93,6 +94,7 @@ public class PathAutos {
         autoChooser.addOption("ForwardRightBump", buildFwdRightBump());
         autoChooser.addOption("MiddleLeftDepot", buildMiddleLeftDepot());
         autoChooser.addOption("MiddleRightDepot", buildMiddleRightDepot());
+        autoChooser.addOption("JustDepot", buildJustDepot());
         autoChooser.addOption("MiddleLeftBump", buildMiddleLeftMiddle());
         autoChooser.addOption("MiddleRightBump", buildMiddleRightMiddle());
         autoChooser.addOption("LeftBumpTwoScoop", leftBumpOutside());
@@ -102,6 +104,33 @@ public class PathAutos {
         autoChooser.addOption("RightPassNeutral", buildPassNeutralRight());
         autoChooser.addOption("LeftCamAuto", buildCamGatherPathLeft());
         autoChooser.addOption("RightCamAuto", buildCamGatherPathRight());
+    }
+
+    private Command buildJustDepot(){
+        double initialShootWait = 1.2;
+
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        // first drop the intake as fast as possible
+        sequence.addCommands(
+                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                        .alongWith(new InstantCommand(r.intake::extend, r.intake))
+                        .withTimeout(initialShootWait)
+                        .finallyDo(
+                                () -> {
+                                    r.shooter.stopAll().execute();
+                                    r.spindexter.stop().execute();
+                                    r.intake.reallyExtend();
+                                    r.intake.stopIntake().initialize();
+                                }));
+
+        // drive the profile while intaking
+        ParallelDeadlineGroup parallelGroup =
+                new ParallelDeadlineGroup(
+                        AutoBuilder.followPath(depotPath),
+                        r.shooter.pointAtHub());
+        sequence.addCommands(parallelGroup);
+
+        return sequence;
     }
 
     private Command buildMiddleLeftDepot() {
@@ -385,7 +414,7 @@ public class PathAutos {
 
         // shoot the balls while potentially moving
 
-        PathConstraints moveAndShootLimits = new PathConstraints(0.75, 0.75, 1, 1);
+        PathConstraints moveAndShootLimits = new PathConstraints(0.5, 0.5, 1, 1);
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(r.intake.shakeTheIntake())

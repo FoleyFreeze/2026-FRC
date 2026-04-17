@@ -51,7 +51,7 @@ public class CloseBallGatherCmd extends Command {
                             new IdealStartingState(
                                     Util2.getScalarVel(r.drive.getChassisSpeeds()),
                                     r.drive.getRotation()),
-                            new GoalEndState(0, r.drive.getRotation()),
+                            new GoalEndState(globalConstraints.maxVelocity(), r.drive.getRotation()),
                             false);
             path.preventFlipping = true;
 

@@ -85,8 +85,9 @@ public class PathAutos {
     }
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
-        autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
         autoChooser.addOption("leftTrenchTwoNibble", leftTrenchNibble());
+        autoChooser.addOption("rightTrenchTwoNibble", rightTrenchNibble());
+        autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
         autoChooser.addOption("RightTrenchTwoScoop", rightTrenchOutsideLoop());
         autoChooser.addOption("ForwardLeftBump", buildFwdLeftBump());
         autoChooser.addOption("ForwardRightBump", buildFwdRightBump());
@@ -278,6 +279,19 @@ public class PathAutos {
         return auto;
     }
 
+    public Command rightTrenchNibble() {
+        Command auto = twoScoopAuto(rightSideNibble, rightSideTrenchToInside);
+        Runnable run =
+                () -> {
+                    Rotation2d rot = rightSideNibble.getIdealStartingState().rotation();
+                    Translation2d tx = rightSideNibble.getPoint(0).position;
+                    Pose2d pose = new Pose2d(tx, rot);
+                    r.drive.setPose(FieldConstants.flipIfRed(pose));
+                };
+        pathMap.put(auto, run);
+        return auto;
+    }
+
     public Command rightTrenchOutsideLoop() {
         Command auto = twoScoopAuto(rightSideToNeutralZone, rightSideTrenchToInside);
         Runnable run =
@@ -319,8 +333,8 @@ public class PathAutos {
 
     public Command twoScoopAuto(PathPlannerPath path1, PathPlannerPath path2) {
         double initialShootWait = 1.0;
-        double firstShootTime = 5;
-        double secondShootTime = 5;
+        double firstShootTime = 10;
+        double secondShootTime = 10;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible

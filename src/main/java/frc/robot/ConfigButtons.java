@@ -110,6 +110,9 @@ public class ConfigButtons {
         // TODO: blink LEDs or something
         controller.start().debounce(0.5).onTrue(new InstantCommand(() -> r.drive.zeroDrive()));
 
+        //lock the wheels
+        controller.y().onTrue(new InstantCommand(() -> r.drive.stopWithX(), r.drive));
+
         // intake functions
         // intake in
         // intake out

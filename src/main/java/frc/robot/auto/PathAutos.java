@@ -548,7 +548,7 @@ public class PathAutos {
                                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
                                 () -> isInNeutralZone())
                         .alongWith(r.intake.shakeTheIntake())
-                        //.raceWith(waitForTimeOrNoBalls(secondShootTime)));
+                        // .raceWith(waitForTimeOrNoBalls(secondShootTime)));
                         .raceWith(new WaitCommand(secondShootTime)));
         sequence.addCommands(r.intake.fastDrop());
 
@@ -930,7 +930,9 @@ public class PathAutos {
                                                                                         && r.spindexter
                                                                                                         .inputs
                                                                                                         .laserCanStatus
-                                                                                                != -1 && !r.shooter.ballShotEdge)))));
+                                                                                                != -1
+                                                                                        && !r.shooter
+                                                                                                .ballShotEdge)))));
     }
 
     private boolean isInNeutralZone() {

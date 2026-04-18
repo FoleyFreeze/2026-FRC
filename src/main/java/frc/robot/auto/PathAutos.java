@@ -548,7 +548,8 @@ public class PathAutos {
                                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center),
                                 () -> isInNeutralZone())
                         .alongWith(r.intake.shakeTheIntake())
-                        .raceWith(waitForTimeOrNoBalls(secondShootTime)));
+                        //.raceWith(waitForTimeOrNoBalls(secondShootTime)));
+                        .raceWith(new WaitCommand(secondShootTime)));
         sequence.addCommands(r.intake.fastDrop());
 
         // if somehow theres time left run path 2 again
@@ -912,7 +913,7 @@ public class PathAutos {
     }
 
     private Command waitForTimeOrNoBalls(double time) {
-        Debouncer debouncer = new Debouncer(0.3);
+        Debouncer debouncer = new Debouncer(0.6);
         return new WaitCommand(time)
                 .raceWith(
                         new WaitCommand(1)
@@ -929,7 +930,7 @@ public class PathAutos {
                                                                                         && r.spindexter
                                                                                                         .inputs
                                                                                                         .laserCanStatus
-                                                                                                != -1)))));
+                                                                                                != -1 && !r.shooter.ballShotEdge)))));
     }
 
     private boolean isInNeutralZone() {

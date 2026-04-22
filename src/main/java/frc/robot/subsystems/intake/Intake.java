@@ -2,7 +2,9 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -63,10 +65,30 @@ public class Intake extends SubsystemBase {
         this.io = io;
     }
 
+    MedianFilter medFilt = new MedianFilter(5);
+    double sumFiltCurr = 0;
+    Debouncer startupDebounce = new Debouncer(0.1, DebounceType.kRising);
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
+
+        double filtCurr = medFilt.calculate(inputs.wheelLCurrent + inputs.wheelRCurrent);
+
+        Logger.recordOutput("Intake/MedFilt", filtCurr);
+
+        boolean startupRaw = Math.abs(velSetpoint - inputs.wheelLVelocity) < 700;
+        boolean skipStartup = startupDebounce.calculate(startupRaw);
+        Logger.recordOutput("Intake/startupRaw", startupRaw);
+        Logger.recordOutput("Intake/skipStart", skipStartup);
+
+        if (skipStartup) {
+            sumFiltCurr += Math.max(0, filtCurr - 20) * 0.02;
+        } else {
+            sumFiltCurr = 0;
+        }
+        Logger.recordOutput("Intake/sumFiltCurr", sumFiltCurr);
     }
 
     public void extend() {

@@ -66,7 +66,7 @@ public class Intake extends SubsystemBase {
 
     MedianFilter medFilt = new MedianFilter(5);
     double sumFiltCurr = 0;
-    Debouncer startupDebounce = new Debouncer(0.1, DebounceType.kRising);
+    Debouncer startupDebounce = new Debouncer(0.3, DebounceType.kRising);
 
     @Override
     public void periodic() {
@@ -77,9 +77,8 @@ public class Intake extends SubsystemBase {
 
         Logger.recordOutput("Intake/MedFilt", filtCurr);
 
-        boolean startupRaw = Math.abs(velSetpoint - inputs.wheelLVelocity) < 700;
-        boolean skipStartup = startupDebounce.calculate(startupRaw);
-        Logger.recordOutput("Intake/startupRaw", startupRaw);
+        boolean atSetpoint = Math.abs(velSetpoint - inputs.wheelLVelocity) < 700;
+        boolean skipStartup = startupDebounce.calculate(atSetpoint);
         Logger.recordOutput("Intake/skipStart", skipStartup);
 
         if (skipStartup) {

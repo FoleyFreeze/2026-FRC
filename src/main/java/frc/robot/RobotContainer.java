@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.Mode;
+import frc.robot.auto.BlineAutos;
 import frc.robot.auto.ChoreoAutos;
 import frc.robot.auto.PathAutos;
 import frc.robot.commands.DriveCommands;
@@ -61,6 +62,7 @@ public class RobotContainer {
 
     public final ChoreoAutos chAutos;
     public final PathAutos pathAutos;
+    public final BlineAutos blineAutos;
 
     public SwerveDriveSimulation driveSimulation;
 
@@ -109,9 +111,11 @@ public class RobotContainer {
 
         chAutos = new ChoreoAutos(this);
         pathAutos = new PathAutos(this);
+        blineAutos = new BlineAutos(this);
 
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         // Set up auto routines
+        blineAutos.buildAutos(autoChooser);
         pathAutos.buildAutos(autoChooser);
         // chAutos.buildAutos(autoChooser);
 

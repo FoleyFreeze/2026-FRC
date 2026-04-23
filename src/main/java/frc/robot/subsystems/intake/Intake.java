@@ -1,7 +1,9 @@
 package frc.robot.subsystems.intake;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
+import frc.robot.Constants.Mode;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
@@ -67,19 +70,41 @@ public class Intake extends SubsystemBase {
     MedianFilter medFilt = new MedianFilter(5);
     double sumFiltCurr = 0;
     Debouncer startupDebounce = new Debouncer(0.3, DebounceType.kRising);
+    LinearFilter linFilt = LinearFilter.singlePoleIIR(1.0, 0.02);
+    double filtRpmDiff = 0;
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
 
+        calcInputBallsFromCurrent();
+
+        calcInputBallRateFromRPM();
+    }
+
+    public void calcInputBallRateFromRPM() {
+        boolean atSetpoint = Math.abs(velSetpoint - inputs.wheelLVelocity) < 1000;
+        boolean skipStartup = startupDebounce.calculate(atSetpoint);
+        Logger.recordOutput("Intake/skipStartRPM", skipStartup);
+
+        if (skipStartup) {
+            filtRpmDiff = linFilt.calculate(velSetpoint - inputs.wheelLVelocity);
+        } else {
+            filtRpmDiff = linFilt.calculate(0);
+        }
+
+        Logger.recordOutput("Intake/filtRpmDiff", filtRpmDiff);
+    }
+
+    public void calcInputBallsFromCurrent() {
         double filtCurr = medFilt.calculate(inputs.wheelLCurrent + inputs.wheelRCurrent);
 
         Logger.recordOutput("Intake/MedFilt", filtCurr);
 
-        boolean atSetpoint = Math.abs(velSetpoint - inputs.wheelLVelocity) < 700;
+        boolean atSetpoint = Math.abs(velSetpoint - inputs.wheelLVelocity) < 1000;
         boolean skipStartup = startupDebounce.calculate(atSetpoint);
-        Logger.recordOutput("Intake/skipStart", skipStartup);
+        Logger.recordOutput("Intake/skipStartCurr", skipStartup);
 
         if (skipStartup) {
             sumFiltCurr += Math.max(0, filtCurr - 20) * 0.02;
@@ -138,28 +163,46 @@ public class Intake extends SubsystemBase {
                     if (!armDisabled || overrideToSpinWheels) {
                         if (inputs.armPosition <= armStartWheelPos) {
                             io.wheelSpeed(wheelSpeed);
+                            velSetpoint = wheelSpeed;
                             // io.wheelPower(intakeInPower);
                         } else {
                             io.wheelPower(0);
+                            velSetpoint = 0;
                         }
                     } else {
                         io.wheelPower(0);
+                        velSetpoint = 0;
                     }
                 },
                 this);
     }
 
     public Command stopIntake() {
-        return new InstantCommand(() -> io.wheelPower(0), this);
+        return new InstantCommand(
+                () -> {
+                    io.wheelPower(0);
+                    velSetpoint = 0;
+                },
+                this);
     }
 
     public Command dumbIntake() {
-        return new RunCommand(() -> io.wheelSpeed(wheelSpeed), this);
+        return new RunCommand(
+                () -> {
+                    io.wheelSpeed(wheelSpeed);
+                    velSetpoint = wheelSpeed;
+                },
+                this);
         // return new RunCommand(() -> io.wheelPower(intakeInPower), this);
     }
 
     public Command unjamIntake() {
-        return new RunCommand(() -> io.wheelSpeed(unjamWheelSpeed), this);
+        return new RunCommand(
+                () -> {
+                    io.wheelSpeed(unjamWheelSpeed);
+                    velSetpoint = unjamWheelSpeed;
+                },
+                this);
         // return new RunCommand(() -> io.wheelPower(intakeOutPower), this);
     }
 
@@ -223,5 +266,12 @@ public class Intake extends SubsystemBase {
 
     public double getAngle() {
         return Units.rotationsToDegrees(inputs.armPosition);
+    }
+
+    public double calcIntakeSpeed() {
+        if (Constants.currentMode == Mode.SIM) return 1;
+
+        // return a 0-1 value based on how hard the intake is working at gathering
+        return MathUtil.inverseInterpolate(500, 0, filtRpmDiff);
     }
 }

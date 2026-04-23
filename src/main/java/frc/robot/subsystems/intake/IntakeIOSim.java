@@ -41,7 +41,7 @@ public class IntakeIOSim implements IntakeIO {
                         Inches.of(6),
                         IntakeSide.FRONT,
                         hopperCapacity);
-        intakeSimulation.addGamePiecesToIntake(100);
+        // intakeSimulation.addGamePiecesToIntake(100);
 
         arm =
                 new SingleJointedArmSim(

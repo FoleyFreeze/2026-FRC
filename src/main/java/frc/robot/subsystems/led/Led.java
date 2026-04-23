@@ -64,11 +64,11 @@ public class Led extends SubsystemBase {
         // leds.setSyncTime(280);
         // leds.setBitTiming(0,0,0,0);
         leds.setColorOrder(ColorOrder.kRGB);
-        buffer = new AddressableLEDBuffer(49);
+        buffer = new AddressableLEDBuffer(50);
 
         front = buffer.createView(0, 24);
         tip = buffer.createView(25, 30);
-        back = buffer.createView(31, 48);
+        back = buffer.createView(31, 49);
 
         leds.setLength(buffer.getLength());
         leds.start();

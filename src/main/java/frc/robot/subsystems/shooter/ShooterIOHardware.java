@@ -45,8 +45,8 @@ public class ShooterIOHardware implements ShooterIO {
     // total angle range of 32.4deg
     public static final double hoodMinAngle = 49.5; // deg
     public static final double hoodMaxAngle = 81.4;
-    public static final double hoodMinRot = 0; // rotations
-    public static final double hoodMaxRot = 0.0915;
+    public static final double hoodMinRot = 0.0261; // 0.0; // rotations
+    public static final double hoodMaxRot = 0.1174; // 0.0915;
 
     public static final double turretMaxTemp = 65; // deg C
     public static final double turretMaxTempHyst = 60;
@@ -156,14 +156,14 @@ public class ShooterIOHardware implements ShooterIO {
         var encCfg27 = new CANcoderConfiguration();
         encCfg27.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         encCfg27.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg27.MagnetSensor.MagnetOffset = -0.2753;
+        encCfg27.MagnetSensor.MagnetOffset = -0.8164;
         PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc27.getConfigurator().apply(encCfg27));
 
         turretAbsEnc29 = new CANcoder(29, TunerConstants.kCANBus);
         var encCfg29 = new CANcoderConfiguration();
         encCfg29.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         encCfg29.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        encCfg29.MagnetSensor.MagnetOffset = -0.3675;
+        encCfg29.MagnetSensor.MagnetOffset = -0.0461;
         PhoenixUtil.tryUntilOk(5, () -> turretAbsEnc29.getConfigurator().apply(encCfg29));
 
         turret = new TalonFX(7, TunerConstants.kCANBus);

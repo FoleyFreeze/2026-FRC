@@ -10,6 +10,8 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -27,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.ConfigButtons;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import java.util.function.DoubleSupplier;
@@ -127,42 +130,85 @@ public class DriveCommands {
             DoubleSupplier xSupplier,
             DoubleSupplier ySupplier,
             DoubleSupplier omegaSupplier) {
+        return joystickDriveTurnOut(drive, xSupplier, ySupplier, omegaSupplier, false);
+    }
+
+    private static final double shakeFreq = 0.1;
+    private static final Rotation2d shakeMag = Rotation2d.fromDegrees(5);
+
+    public static Command joystickDriveTurnOut(
+            Drive drive,
+            DoubleSupplier xSupplier,
+            DoubleSupplier ySupplier,
+            DoubleSupplier omegaSupplier,
+            boolean shake) {
+
+        final ShooterCommands.Thing<Rotation2d> angleThing = new ShooterCommands.Thing<>();
+        final Debouncer rotationDebounce = new Debouncer(0.3, DebounceType.kRising);
+
         return Commands.run(
-                () -> {
-                    // Get linear velocity
-                    Translation2d linearVelocity =
-                            getLinearVelocityFromJoysticks(
-                                    xSupplier.getAsDouble(), ySupplier.getAsDouble());
+                        () -> {
+                            // Get linear velocity
+                            Translation2d linearVelocity =
+                                    getLinearVelocityFromJoysticks(
+                                            xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
-                    // Apply rotation deadband
-                    double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+                            // Apply rotation deadband
+                            double omega =
+                                    MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
-                    // Square rotation value for more precise control
-                    omega = Math.copySign(Math.pow(Math.abs(omega), thetaExpo), omega);
+                            // Square rotation value for more precise control
+                            omega = Math.copySign(Math.pow(Math.abs(omega), thetaExpo), omega);
 
-                    // Convert to field relative speeds & send command
-                    ChassisSpeeds speeds =
-                            new ChassisSpeeds(
-                                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                                    omega * drive.getMaxAngularSpeedRadPerSec());
+                            // Convert to field relative speeds & send command
+                            ChassisSpeeds speeds =
+                                    new ChassisSpeeds(
+                                            linearVelocity.getX()
+                                                    * drive.getMaxLinearSpeedMetersPerSec(),
+                                            linearVelocity.getY()
+                                                    * drive.getMaxLinearSpeedMetersPerSec(),
+                                            omega * drive.getMaxAngularSpeedRadPerSec());
 
-                    if (drive.gyroInputs.connected || drive.gyroInputs2.connected) {
-                        boolean isFlipped =
-                                DriverStation.getAlliance().isPresent()
-                                        && DriverStation.getAlliance().get() == Alliance.Red;
-                        drive.runVelocityTurnOut(
-                                ChassisSpeeds.fromFieldRelativeSpeeds(
-                                        speeds,
-                                        isFlipped
-                                                ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                                                : drive.getRotation()));
-                    } else {
-                        // revert to bot relative
-                        drive.runVelocity(speeds);
-                    }
-                },
-                drive);
+                            if (shake
+                                    && ConfigButtons.pitModeSw.getAsBoolean()
+                                    && rotationDebounce.calculate(
+                                            Math.abs(omegaSupplier.getAsDouble()) < 0.15)) {
+                                double delta =
+                                        (Timer.getFPGATimestamp() % (shakeFreq * 2)) - shakeFreq;
+                                Rotation2d setpoint;
+                                if (delta > 0) {
+                                    setpoint = angleThing.get().plus(shakeMag);
+                                } else {
+                                    setpoint = angleThing.get().minus(shakeMag);
+                                }
+                                speeds.omegaRadiansPerSecond +=
+                                        MathUtil.angleModulus(
+                                                        setpoint.minus(drive.getRotation())
+                                                                .getRadians())
+                                                * ANGLE_KP;
+                            } else {
+                                angleThing.accept(drive.getRotation());
+                            }
+
+                            if (drive.gyroInputs.connected || drive.gyroInputs2.connected) {
+                                boolean isFlipped =
+                                        DriverStation.getAlliance().isPresent()
+                                                && DriverStation.getAlliance().get()
+                                                        == Alliance.Red;
+                                drive.runVelocityTurnOut(
+                                        ChassisSpeeds.fromFieldRelativeSpeeds(
+                                                speeds,
+                                                isFlipped
+                                                        ? drive.getRotation()
+                                                                .plus(new Rotation2d(Math.PI))
+                                                        : drive.getRotation()));
+                            } else {
+                                // revert to bot relative
+                                drive.runVelocity(speeds);
+                            }
+                        },
+                        drive)
+                .beforeStarting(new InstantCommand(() -> angleThing.accept(drive.getRotation())));
     }
 
     /**

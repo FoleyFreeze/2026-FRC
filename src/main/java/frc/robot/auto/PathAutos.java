@@ -90,6 +90,7 @@ public class PathAutos {
     }
 
     public void buildAutos(LoggedDashboardChooser<Command> autoChooser) {
+        // autoChooser.addOption("TestShake", robotShake());
         autoChooser.addOption("leftTrenchTwoNibble", leftTrenchNibble());
         autoChooser.addOption("rightTrenchTwoNibble", rightTrenchNibble());
         autoChooser.addOption("leftTrenchTwoScoop", leftTrenchOutsideLoop());
@@ -930,13 +931,7 @@ public class PathAutos {
                                                                 () ->
                                                                         debouncer.calculate(
                                                                                 r.spindexter
-                                                                                                        .inputs
-                                                                                                        .laserCanDistmm
-                                                                                                > 350
-                                                                                        && r.spindexter
-                                                                                                        .inputs
-                                                                                                        .laserCanStatus
-                                                                                                == 0
+                                                                                                .noBallsInSpindexer()
                                                                                         && !r.shooter
                                                                                                 .ballShotEdge)))));
     }
@@ -951,12 +946,22 @@ public class PathAutos {
         }
     }
 
-    private Command robotShake() {
+    public Command robotShake() {
         ShooterCommands.Thing<Rotation2d> rotationThing = new ShooterCommands.Thing<>();
         Command captureThing =
                 new InstantCommand(() -> rotationThing.accept(r.drive.getRotation()));
-        DriveCommands.joystickDriveAtAngle(r.drive, () -> 0, () -> 0, rotationThing);
+        Rotation2d extra = Rotation2d.fromDegrees(5);
 
-        return null;
+        SequentialCommandGroup sequence = new SequentialCommandGroup();
+        sequence.addCommands(
+                DriveCommands.joystickDriveAtAngle(
+                                r.drive, () -> 0, () -> 0, () -> rotationThing.get().plus(extra))
+                        .withTimeout(0.1));
+        sequence.addCommands(
+                DriveCommands.joystickDriveAtAngle(
+                                r.drive, () -> 0, () -> 0, () -> rotationThing.get().minus(extra))
+                        .withTimeout(0.1));
+
+        return sequence.repeatedly().beforeStarting(captureThing);
     }
 }

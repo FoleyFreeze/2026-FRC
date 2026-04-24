@@ -13,6 +13,7 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Spindexter extends SubsystemBase {
@@ -67,6 +68,8 @@ public class Spindexter extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Spindexter", inputs);
+
+        noBallsInSpindexerDebounced();
     }
 
     public Command spin() {
@@ -112,9 +115,7 @@ public class Spindexter extends SubsystemBase {
                                                 r.shooter.ballShotEdge
                                                         || !spinLatch
                                                         || distDebounce.calculate(
-                                                                inputs.laserCanDistmm > 350
-                                                                        && inputs.laserCanStatus
-                                                                                == 0))));
+                                                                noBallsInSpindexer()))));
         // then run the unjam sequence
         indexerSequence.addCommands(r.spindexter.smartUnjam().withTimeout(unjamTime));
 
@@ -148,5 +149,17 @@ public class Spindexter extends SubsystemBase {
 
     public Command smartUnjam() {
         return new RunCommand(() -> io.spinSpeed(spinUnjamSpeed));
+    }
+
+    public boolean noBallsInSpindexer() {
+        return inputs.laserCanDistmm > 350 && inputs.laserCanStatus == 0
+                || inputs.laserCanStatus == 2;
+    }
+
+    Debouncer noBallsDebounce = new Debouncer(0.6, DebounceType.kRising);
+
+    @AutoLogOutput(key = "Spindexter/noBallsDebounced")
+    public boolean noBallsInSpindexerDebounced() {
+        return noBallsDebounce.calculate(noBallsInSpindexer());
     }
 }

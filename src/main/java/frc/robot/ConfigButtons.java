@@ -34,6 +34,9 @@ public class ConfigButtons {
     // used to enable/disable path generation for ball gather vs just driving to closest ball
     public static Trigger ballCamSw = driveStation.button(6);
 
+    // used for enabling shooter shake
+    public static Trigger pitModeSw = driveStation.button(12);
+
     public static Trigger shift = driveStation2.button(12);
     public static Trigger unjam = driveStation.button(8);
 
@@ -68,7 +71,8 @@ public class ConfigButtons {
                                 r.drive,
                                 () -> -controller.getLeftY() * shootXyReduce,
                                 () -> -controller.getLeftX() * shootXyReduce,
-                                () -> -controller.getRightX() * shootZReduce));
+                                () -> -controller.getRightX() * shootZReduce,
+                                true));
 
         Thing<Rotation2d> rotationThing = new Thing<>();
         Thing<Double> velocityThing = new Thing<>();
@@ -111,7 +115,8 @@ public class ConfigButtons {
         controller.start().debounce(0.5).onTrue(new InstantCommand(() -> r.drive.zeroDrive()));
 
         // lock the wheels
-        controller.y().onTrue(new InstantCommand(() -> r.drive.stopWithX(), r.drive));
+        // controller.y().onTrue(new InstantCommand(() -> r.drive.stopWithX(), r.drive));
+        controller.y().whileTrue(r.pathAutos.robotShake());
 
         // intake functions
         // intake in

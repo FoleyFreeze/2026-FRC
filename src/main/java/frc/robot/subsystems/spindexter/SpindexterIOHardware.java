@@ -123,8 +123,8 @@ public class SpindexterIOHardware implements SpindexterIO {
         laserCan = new LaserCan(21);
         try {
             laserCan.setRangingMode(LaserCan.RangingMode.SHORT);
-            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(4, 0, 8, 8));
-            laserCan.setTimingBudget(LaserCan.TimingBudget.TIMING_BUDGET_20MS);
+            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(8, 4, 8, 8));
+            laserCan.setTimingBudget(LaserCan.TimingBudget.TIMING_BUDGET_100MS);
         } catch (ConfigurationFailedException e) {
             System.out.println("LaserCan Config Failed: " + e);
         }

@@ -112,9 +112,9 @@ public class Spindexter extends SubsystemBase {
                                                 r.shooter.ballShotEdge
                                                         || !spinLatch
                                                         || distDebounce.calculate(
-                                                                inputs.laserCanDistmm > 400
+                                                                inputs.laserCanDistmm > 350
                                                                         && inputs.laserCanStatus
-                                                                                != -1))));
+                                                                                == 0))));
         // then run the unjam sequence
         indexerSequence.addCommands(r.spindexter.smartUnjam().withTimeout(unjamTime));
 

@@ -33,15 +33,15 @@
     {
       "anchor": {
         "x": 7.6,
-        "y": 5.95
+        "y": 5.75
       },
       "prevControl": {
         "x": 7.619158568654074,
-        "y": 6.4650677517487924
+        "y": 6.265067751748792
       },
       "nextControl": {
         "x": 7.590707373530186,
-        "y": 5.700172765509257
+        "y": 5.500172765509257
       },
       "isLocked": false,
       "linkedName": null
@@ -109,8 +109,8 @@
   "constraintZones": [
     {
       "name": "Slow for turn",
-      "minWaypointRelativePos": 1.3846153846153895,
-      "maxWaypointRelativePos": 2.4713031735313926,
+      "minWaypointRelativePos": 1.2829169480081084,
+      "maxWaypointRelativePos": 2.4442943956785963,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 3.0,
@@ -122,8 +122,8 @@
     },
     {
       "name": "slow for balls",
-      "minWaypointRelativePos": 2.1588089330024554,
-      "maxWaypointRelativePos": 2.337468982630303,
+      "minWaypointRelativePos": 1.4449696151249198,
+      "maxWaypointRelativePos": 2.4037812288993794,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 4.0,

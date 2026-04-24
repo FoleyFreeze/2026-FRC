@@ -32,7 +32,7 @@ public class Intake extends SubsystemBase {
     private static final double armOutPos =
             -0.03; // -0.042; // intentionally below zero, actual is -0.013
     private static final double armVeryOutPos = -0.125;
-    private static final double armWontHitTrenchPos = 0.03;
+    private static final double armWontHitTrenchPos = 0.00;
     private static final double armDepotPos = 0.03;
     private static final double armAvoidNetPos = 0.12;
     private static final double armTol = 0.04;
@@ -153,7 +153,7 @@ public class Intake extends SubsystemBase {
     public Command fastDrop() {
         return new RunCommand(this::reallyExtend, this)
                 .until(() -> inputs.armPosition < armWontHitTrenchPos)
-                .andThen(new WaitCommand(0.1))
+                .andThen(new WaitCommand(0.2))
                 .raceWith(new WaitCommand(1));
     }
 
@@ -260,7 +260,7 @@ public class Intake extends SubsystemBase {
         shakeTheIntake.addCommands(r.intake.stopIntake());
         shakeTheIntake.addCommands(new WaitCommand(0.35));
         shakeTheIntake.addCommands(new InstantCommand(() -> r.intake.retractForShot()));
-        shakeTheIntake.addCommands(r.intake.smartIntake().withTimeout(1.5));
+        shakeTheIntake.addCommands(r.intake.smartIntake().withTimeout(0.7));
         return shakeTheIntake.repeatedly().finallyDo(() -> r.intake.extend());
     }
 

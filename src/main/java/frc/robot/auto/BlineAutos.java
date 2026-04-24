@@ -8,7 +8,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.FieldConstants;
@@ -80,7 +79,7 @@ public class BlineAutos {
 
         // drive the profile while intaking and passing after a delay
         Path passPath = new Path(name);
-        if(flipLR){
+        if (flipLR) {
             passPath.mirror();
         }
         ParallelCommandGroup parallelGroup =
@@ -103,14 +102,14 @@ public class BlineAutos {
 
     public void runDynamicVel(ChassisSpeeds speeds) {
         if (useDynamicVel) {
-            double maxVel = 1.5;
-            double factor = r.intake.calcIntakeSpeed();
+            double maxVel = 1.0;
+            double factor = 1; // r.intake.calcIntakeSpeed();
             // note that this intentionally does not scale rotational velocity
             double vx = speeds.vxMetersPerSecond * factor;
             speeds.vxMetersPerSecond = MathUtil.clamp(vx, -maxVel, maxVel);
             double vy = speeds.vyMetersPerSecond * factor;
             speeds.vyMetersPerSecond = MathUtil.clamp(vy, -maxVel, maxVel);
-            r.drive.runVelocity(speeds.times(factor));
+            r.drive.runVelocity(speeds);
         } else {
             r.drive.runVelocity(speeds);
         }

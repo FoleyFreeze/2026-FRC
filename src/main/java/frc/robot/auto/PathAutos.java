@@ -477,7 +477,13 @@ public class PathAutos {
         // drive the profile while intaking
         ParallelDeadlineGroup parallelGroup =
                 new ParallelDeadlineGroup(
-                        AutoBuilder.followPath(path1),
+                        AutoBuilder.followPath(path1)
+                                .until(() -> r.stats.dt > 0.400)
+                                .andThen(
+                                        new ConditionalCommand(
+                                                AutoBuilder.followPath(path1),
+                                                new InstantCommand(),
+                                                () -> r.stats.dt > 0.400)),
                         r.intake.smartIntake(),
                         r.shooter
                                 .pointAtHub()
@@ -916,7 +922,7 @@ public class PathAutos {
         Debouncer debouncer = new Debouncer(0.6);
         return new WaitCommand(time)
                 .raceWith(
-                        new WaitCommand(1)
+                        new WaitCommand(time)
                                 .andThen(
                                         new InstantCommand(() -> debouncer.calculate(false))
                                                 .andThen(
@@ -930,7 +936,7 @@ public class PathAutos {
                                                                                         && r.spindexter
                                                                                                         .inputs
                                                                                                         .laserCanStatus
-                                                                                                != -1
+                                                                                                == 0
                                                                                         && !r.shooter
                                                                                                 .ballShotEdge)))));
     }
@@ -943,5 +949,14 @@ public class PathAutos {
         } else {
             return false;
         }
+    }
+
+    private Command robotShake() {
+        ShooterCommands.Thing<Rotation2d> rotationThing = new ShooterCommands.Thing<>();
+        Command captureThing =
+                new InstantCommand(() -> rotationThing.accept(r.drive.getRotation()));
+        DriveCommands.joystickDriveAtAngle(r.drive, () -> 0, () -> 0, rotationThing);
+
+        return null;
     }
 }

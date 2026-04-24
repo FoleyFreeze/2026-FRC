@@ -22,6 +22,7 @@ public class StatsSubsystem extends SubsystemBase {
 
     double prevtime;
     double prevTurretAngle = 0;
+    public double dt = 0;
 
     double[] prevWheelDist = new double[4];
 
@@ -35,7 +36,7 @@ public class StatsSubsystem extends SubsystemBase {
         boolean isEnabled = DriverStation.isEnabled();
 
         double time = Timer.getTimestamp();
-        double dt = time - prevtime;
+        dt = time - prevtime;
         prevtime = time;
         Logger.recordOutput("dt", dt);
 

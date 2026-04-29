@@ -453,7 +453,9 @@ public class PathAutos {
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(new InstantCommand(r.intake::extend, r.intake))
-                        .raceWith(new WaitCommand(initialShootWait).andThen(r.blineAutos.dynamicWait()))
+                        .raceWith(
+                                new WaitCommand(initialShootWait)
+                                        .andThen(r.blineAutos.dynamicWait()))
                         .finallyDo(
                                 () -> {
                                     r.shooter.stopAll().execute();

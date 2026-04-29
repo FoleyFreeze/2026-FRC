@@ -116,16 +116,16 @@ public class RobotContainer {
 
         waitChooser = new LoggedDashboardChooser<Double>("AutonWait");
         waitChooser.addDefaultOption("0.0", 0.0);
-        waitChooser.addDefaultOption("0.5", 0.5);
-        waitChooser.addDefaultOption("1.0", 1.0);
-        waitChooser.addDefaultOption("1.5", 1.5);
-        waitChooser.addDefaultOption("2.0", 2.0);
-        waitChooser.addDefaultOption("2.5", 2.5);
-        waitChooser.addDefaultOption("3.0", 3.0);
-        waitChooser.addDefaultOption("3.5", 3.5);
-        waitChooser.addDefaultOption("4.0", 4.0);
-        waitChooser.addDefaultOption("4.5", 4.5);
-        waitChooser.addDefaultOption("5.0", 5.0);
+        waitChooser.addOption("0.5", 0.5);
+        waitChooser.addOption("1.0", 1.0);
+        waitChooser.addOption("1.5", 1.5);
+        waitChooser.addOption("2.0", 2.0);
+        waitChooser.addOption("2.5", 2.5);
+        waitChooser.addOption("3.0", 3.0);
+        waitChooser.addOption("3.5", 3.5);
+        waitChooser.addOption("4.0", 4.0);
+        waitChooser.addOption("4.5", 4.5);
+        waitChooser.addOption("5.0", 5.0);
         autoChooser = new LoggedDashboardChooser<>("Auto Choices");
         // Set up auto routines
         blineAutos.buildAutos(autoChooser);

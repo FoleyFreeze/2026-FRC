@@ -446,6 +446,9 @@ public class PathAutos {
         double secondShootTime = 10;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
+
+        sequence.addCommands(r.blineAutos.dynamicWait());
+
         // first drop the intake as fast as possible
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)

@@ -552,4 +552,24 @@ public class DriveCommands {
             return value;
         }
     }
+
+    public static double shakeOmega(boolean doIt, Rotation2d robotAngle) {
+        final Debouncer shakeDebounce = new Debouncer(0.3, DebounceType.kRising);
+        final ShooterCommands.Thing<Rotation2d> angleThing = new ShooterCommands.Thing<>();
+
+        if (shakeDebounce.calculate(doIt)) {
+            double delta = (Timer.getFPGATimestamp() % (shakeFreq * 2)) - shakeFreq;
+            Rotation2d setpoint;
+            if (delta > 0) {
+                setpoint = angleThing.get().plus(shakeMag);
+            } else {
+                setpoint = angleThing.get().minus(shakeMag);
+            }
+
+            return MathUtil.angleModulus(setpoint.minus(robotAngle).getRadians()) * ANGLE_KP;
+        } else {
+            angleThing.accept(robotAngle);
+            return 0;
+        }
+    }
 }

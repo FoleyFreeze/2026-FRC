@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.FieldConstants;
 import frc.robot.RobotContainer;
+import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
@@ -103,12 +104,16 @@ public class BlineAutos {
     public void runDynamicVel(ChassisSpeeds speeds) {
         if (useDynamicVel) {
             double maxVel = 1.0;
-            double factor = 1; // r.intake.calcIntakeSpeed();
+            double factor = 0.5; // r.intake.calcIntakeSpeed();
             // note that this intentionally does not scale rotational velocity
             double vx = speeds.vxMetersPerSecond * factor;
             speeds.vxMetersPerSecond = MathUtil.clamp(vx, -maxVel, maxVel);
             double vy = speeds.vyMetersPerSecond * factor;
             speeds.vyMetersPerSecond = MathUtil.clamp(vy, -maxVel, maxVel);
+
+            boolean shake = Math.abs(speeds.omegaRadiansPerSecond) < 0.5;
+            speeds.omegaRadiansPerSecond += DriveCommands.shakeOmega(shake, r.drive.getRotation());
+
             r.drive.runVelocity(speeds);
         } else {
             r.drive.runVelocity(speeds);

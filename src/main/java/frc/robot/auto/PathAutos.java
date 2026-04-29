@@ -516,8 +516,12 @@ public class PathAutos {
                                     r.intake.stopIntake().initialize();
                                 })
                         .alongWith(
-                                AutoBuilder.pathfindToPoseFlipped(
-                                        nextPathStart, moveAndShootLimits)));
+                                AutoBuilder.pathfindToPoseFlipped(nextPathStart, moveAndShootLimits)
+                                        .andThen(
+                                                robotShake()
+                                                        .raceWith(
+                                                                waitForTimeOrNoBalls(
+                                                                        firstShootTime)))));
         sequence.addCommands(r.intake.fastDrop());
 
         try {
@@ -923,7 +927,7 @@ public class PathAutos {
         Debouncer debouncer = new Debouncer(0.6);
         return new WaitCommand(time)
                 .raceWith(
-                        new WaitCommand(time)
+                        new WaitCommand(1.0)
                                 .andThen(
                                         new InstantCommand(() -> debouncer.calculate(false))
                                                 .andThen(

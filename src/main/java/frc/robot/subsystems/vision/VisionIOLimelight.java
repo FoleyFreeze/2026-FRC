@@ -107,7 +107,7 @@ public class VisionIOLimelight implements VisionIO {
 
         // throttle fps when robot is disabled to reduce limelight temps
         if (throttleDebouce.calculate(DriverStation.isDisabled())) {
-            LimelightHelpers.SetThrottle(name, 100);
+            LimelightHelpers.SetThrottle(name, 30);
         } else {
             LimelightHelpers.SetThrottle(name, 0);
         }

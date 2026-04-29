@@ -67,13 +67,12 @@ public class BlineAutos {
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible
-
-        sequence.addCommands(dynamicWait());
-
+        // shoot preload
+        // wait any extra time
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(new InstantCommand(r.intake::extend, r.intake))
-                        .withTimeout(initialShootWait)
+                        .raceWith(new WaitCommand(initialShootWait).andThen(dynamicWait()))
                         .finallyDo(
                                 () -> {
                                     r.shooter.stopAll().execute();

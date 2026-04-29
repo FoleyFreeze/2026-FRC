@@ -447,13 +447,13 @@ public class PathAutos {
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
 
-        sequence.addCommands(r.blineAutos.dynamicWait());
-
         // first drop the intake as fast as possible
+        // shoot the preload
+        // also wait any additional time
         sequence.addCommands(
                 ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
                         .alongWith(new InstantCommand(r.intake::extend, r.intake))
-                        .withTimeout(initialShootWait)
+                        .raceWith(new WaitCommand(initialShootWait).andThen(r.blineAutos.dynamicWait()))
                         .finallyDo(
                                 () -> {
                                     r.shooter.stopAll().execute();

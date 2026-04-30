@@ -287,7 +287,7 @@ public class ModuleIOTalonFX implements ModuleIO {
                     case Voltage -> velocityVoltageRequest
                             .withVelocity(velocityRotPerSec)
                             // was 36 : 60
-                            .withAcceleration(Led.isGather || Led.isShoot ? 30 : 50)
+                            .withAcceleration(Led.isGather || Led.isShoot ? 30 : 60)
                             .withOverrideBrakeDurNeutral(brakeMode);
                     case TorqueCurrentFOC -> velocityTorqueCurrentRequest.withVelocity(
                             velocityRotPerSec);

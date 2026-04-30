@@ -122,12 +122,16 @@ public class ShooterIOHardware implements ShooterIO {
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
         cfg.MotionMagic.MotionMagicAcceleration = 180;
         cfg.MotionMagic.MotionMagicJerk = 1000;
+        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        cfg.CurrentLimits.SupplyCurrentLimit = 50;
         wheel.getConfigurator().apply(cfg);
 
         wheel2 = new TalonFX(13, TunerConstants.kCANBus);
         cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        cfg.CurrentLimits.SupplyCurrentLimit = 50;
         wheel2.getConfigurator().apply(cfg);
         wheel2.setControl(new Follower(12, MotorAlignmentValue.Opposed));
 

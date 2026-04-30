@@ -115,7 +115,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        driveConfig.CurrentLimits.SupplyCurrentLimit = 60;
+        driveConfig.CurrentLimits.SupplyCurrentLimit = 50; // 60
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveConfig.MotionMagic.MotionMagicAcceleration = 0;
         driveConfig.MotorOutput.Inverted =
@@ -286,7 +286,8 @@ public class ModuleIOTalonFX implements ModuleIO {
                         // abusing led state to determine if we want full power drive or not
                     case Voltage -> velocityVoltageRequest
                             .withVelocity(velocityRotPerSec)
-                            .withAcceleration(Led.isGather || Led.isShoot ? 36 : 60)
+                            // was 36 : 60
+                            .withAcceleration(Led.isGather || Led.isShoot ? 30 : 50)
                             .withOverrideBrakeDurNeutral(brakeMode);
                     case TorqueCurrentFOC -> velocityTorqueCurrentRequest.withVelocity(
                             velocityRotPerSec);

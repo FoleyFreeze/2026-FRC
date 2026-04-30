@@ -83,6 +83,8 @@ public class SpindexterIOHardware implements SpindexterIO {
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -100;
         cfg.MotionMagic.MotionMagicAcceleration = 180;
         cfg.MotionMagic.MotionMagicJerk = 1000;
+        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        cfg.CurrentLimits.SupplyCurrentLimit = 50;
         gate.getConfigurator().apply(cfg);
 
         positionSpin = spin.getPosition();

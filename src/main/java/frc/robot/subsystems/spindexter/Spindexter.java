@@ -141,6 +141,7 @@ public class Spindexter extends SubsystemBase {
         double gateSetpoint = Math.sqrt(shotEqGateSpeed * shotEqGateSpeed * 0.333);
         gateSet.setDouble(gateSetpoint);
 
+        Logger.recordOutput("Spindexter/GateSetpoint", gateSetpoint);
         io.gateSpeed(gateSetpoint);
         if (r.shooter.wontMiss(r.drive.getPose(), spinLatch)
                 && r.drive.wontMiss(r.shooter, spinLatch)) {

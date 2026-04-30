@@ -115,28 +115,17 @@ public class PathAutos {
         double initialShootWait = 2.5;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
-        // first drop the intake as fast as possible
-        sequence.addCommands(
-                ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
-                        .alongWith(new InstantCommand(r.intake::extend, r.intake))
-                        .withTimeout(initialShootWait)
-                        .finallyDo(
-                                () -> {
-                                    r.shooter.stopAll().execute();
-                                    r.spindexter.stop().execute();
-                                    r.intake.extendToAvoidNet();
-                                    r.intake.stopIntake().initialize();
-                                }));
 
-        // drive the profile while intaking
+        // drive the profile while shooting
         ParallelDeadlineGroup parallelGroup =
                 new ParallelDeadlineGroup(
-                        AutoBuilder.followPath(depotPath), r.shooter.pointAtHub());
+                        AutoBuilder.followPath(depotPath), 
+                        ShooterCommands.smartShoot(r, FieldConstants.Hub.center).beforeStarting(new WaitCommand(1).alongWith(r.shooter.pointAtHub())));
         sequence.addCommands(parallelGroup);
 
-        Pose2d preDepotPose = new Pose2d(0.71, 4.7, new Rotation2d());
-        Pose2d depotPose = new Pose2d(0.71, 7.0, new Rotation2d());
-        Pose2d postDepotPose = new Pose2d(0.68, 7.5, new Rotation2d());
+        Pose2d preDepotPose = new Pose2d(0.52, 4.7, new Rotation2d());
+        Pose2d depotPose = new Pose2d(0.52, 7.0, new Rotation2d());
+        Pose2d postDepotPose = new Pose2d(0.6, 7.69, new Rotation2d());
         Pose2d finalShootPose = new Pose2d(1.67, 6.77, new Rotation2d());
 
         // back up slightly

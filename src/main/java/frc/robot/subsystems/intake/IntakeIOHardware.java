@@ -85,6 +85,10 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.MotionMagic.MotionMagicJerk = 0;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
         cfg.CurrentLimits.StatorCurrentLimit = 60;
+        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        cfg.CurrentLimits.SupplyCurrentLimit = 25;
+        cfg.CurrentLimits.SupplyCurrentLowerLimit = 0;
+        cfg.CurrentLimits.SupplyCurrentLowerTime = 0;
         wheelL.getConfigurator().apply(cfg);
 
         wheelR = new TalonFX(16, TunerConstants.kCANBus);
@@ -95,6 +99,10 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -60;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
         cfg.CurrentLimits.StatorCurrentLimit = 60;
+        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        cfg.CurrentLimits.SupplyCurrentLimit = 25;
+        cfg.CurrentLimits.SupplyCurrentLowerLimit = 0;
+        cfg.CurrentLimits.SupplyCurrentLowerTime = 0;
         wheelR.getConfigurator().apply(cfg);
         wheelR.setControl(new Follower(3, MotorAlignmentValue.Opposed));
 

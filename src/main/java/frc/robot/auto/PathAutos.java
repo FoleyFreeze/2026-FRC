@@ -504,7 +504,8 @@ public class PathAutos {
         sequence.addCommands(parallelGroup);
 
         // shoot the balls while potentially moving
-
+        // TODO: have only one waitForTime/NoBalls
+        // add a PID to angle after, end when +/- 3-5 deg or so
         PathConstraints moveAndShootLimits = new PathConstraints(0.5, 0.5, 1, 1);
         sequence.addCommands(
                 new ConditionalCommand(
@@ -957,10 +958,13 @@ public class PathAutos {
 
     public Command robotShake() {
         ShooterCommands.Thing<Rotation2d> rotationThing = new ShooterCommands.Thing<>();
-        Command captureThing =
-                new InstantCommand(() -> rotationThing.accept(r.drive.getRotation()));
         Rotation2d extra = Rotation2d.fromDegrees(5);
 
+        // capture the initial robot rotation when the shake beings
+        Command captureThing =
+                new InstantCommand(() -> rotationThing.accept(r.drive.getRotation()));
+
+        // shake back and forth at 10Hz
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         sequence.addCommands(
                 DriveCommands.joystickDriveAtAngle(
@@ -971,6 +975,15 @@ public class PathAutos {
                                 r.drive, () -> 0, () -> 0, () -> rotationThing.get().minus(extra))
                         .withTimeout(0.1));
 
-        return sequence.repeatedly().beforeStarting(captureThing);
+        // realign back to 0 deg
+        Command alignCmd =
+                DriveCommands.joystickDriveAtAngle(
+                                r.drive, () -> 0, () -> 0, () -> rotationThing.get())
+                        .withTimeout(0.1);
+
+        ConditionalCommand cond =
+                new ConditionalCommand(sequence, alignCmd, () -> r.spindexter.noBallsDebouncedFast);
+
+        return cond.repeatedly().beforeStarting(captureThing);
     }
 }

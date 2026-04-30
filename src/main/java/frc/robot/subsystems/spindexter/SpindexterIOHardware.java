@@ -87,14 +87,14 @@ public class SpindexterIOHardware implements SpindexterIO {
 
         positionSpin = spin.getPosition();
         voltageSpin = spin.getMotorVoltage();
-        currentSpin = spin.getStatorCurrent();
+        currentSpin = spin.getTorqueCurrent();
         tempSpin = spin.getDeviceTemp();
         angularVelocitySpin = spin.getVelocity();
         supplyCurrentSpin = spin.getSupplyCurrent();
 
         positionGate = gate.getPosition();
         voltageGate = gate.getMotorVoltage();
-        currentGate = gate.getStatorCurrent();
+        currentGate = gate.getTorqueCurrent();
         tempGate = gate.getDeviceTemp();
         angularVelocityGate = gate.getVelocity();
         supplyCurrentGate = gate.getSupplyCurrent();

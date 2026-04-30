@@ -13,13 +13,15 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Spindexter extends SubsystemBase {
     RobotContainer r;
 
     public static final boolean isDisabled = false;
+
+    public boolean noBallsDebounced;
+    public boolean noBallsDebouncedFast;
 
     double unjam = -0.7;
     double spinPower = 0.7;
@@ -64,12 +66,20 @@ public class Spindexter extends SubsystemBase {
         spinSet.getDouble(0);
     }
 
+    Debouncer noBallsDebounce = new Debouncer(0.6, DebounceType.kRising);
+    Debouncer noBallsDebounceFast = new Debouncer(0.2, DebounceType.kRising);
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Spindexter", inputs);
 
-        noBallsInSpindexerDebounced();
+        boolean balls = noBallsInSpindexer();
+        noBallsDebounced = noBallsDebounce.calculate(balls);
+        noBallsDebouncedFast = noBallsDebounceFast.calculate(balls);
+
+        Logger.recordOutput("Spindexter/noBallsDebounced", noBallsDebounced);
+        Logger.recordOutput("Spindexter/noBallsDebouncedFast", noBallsDebouncedFast);
     }
 
     public Command spin() {
@@ -154,12 +164,5 @@ public class Spindexter extends SubsystemBase {
     public boolean noBallsInSpindexer() {
         return inputs.laserCanDistmm > 350 && inputs.laserCanStatus == 0
                 || inputs.laserCanStatus == 2;
-    }
-
-    Debouncer noBallsDebounce = new Debouncer(0.6, DebounceType.kRising);
-
-    @AutoLogOutput(key = "Spindexter/noBallsDebounced")
-    public boolean noBallsInSpindexerDebounced() {
-        return noBallsDebounce.calculate(noBallsInSpindexer());
     }
 }

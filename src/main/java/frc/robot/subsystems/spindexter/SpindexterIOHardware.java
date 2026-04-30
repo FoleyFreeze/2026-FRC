@@ -70,6 +70,8 @@ public class SpindexterIOHardware implements SpindexterIO {
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -120;
         cfg.MotionMagic.MotionMagicAcceleration = 380;
         cfg.MotionMagic.MotionMagicJerk = 2500;
+        cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        cfg.CurrentLimits.SupplyCurrentLimit = 60;
         spin.getConfigurator().apply(cfg);
 
         gate = new TalonFX(17, TunerConstants.kCANBus);

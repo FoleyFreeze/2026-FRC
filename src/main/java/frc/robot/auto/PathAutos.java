@@ -112,7 +112,7 @@ public class PathAutos {
     }
 
     private Command buildJustDepot() {
-        double initialShootWait = 3.0;
+        double initialShootWait = 2.5;
 
         SequentialCommandGroup sequence = new SequentialCommandGroup();
         // first drop the intake as fast as possible
@@ -134,9 +134,9 @@ public class PathAutos {
                         AutoBuilder.followPath(depotPath), r.shooter.pointAtHub());
         sequence.addCommands(parallelGroup);
 
-        Pose2d preDepotPose = new Pose2d(0.74, 4.7, new Rotation2d());
-        Pose2d depotPose = new Pose2d(0.74, 7.0, new Rotation2d());
-        Pose2d postDepotPose = new Pose2d(0.70, 7.5, new Rotation2d());
+        Pose2d preDepotPose = new Pose2d(0.71, 4.7, new Rotation2d());
+        Pose2d depotPose = new Pose2d(0.71, 7.0, new Rotation2d());
+        Pose2d postDepotPose = new Pose2d(0.68, 7.5, new Rotation2d());
         Pose2d finalShootPose = new Pose2d(1.67, 6.77, new Rotation2d());
 
         // back up slightly
@@ -174,7 +174,7 @@ public class PathAutos {
                                 () -> FieldConstants.flipIfRed(postDepotPose),
                                 2,
                                 () -> FieldConstants.flipIfRed(Rotation2d.kCCW_90deg))
-                        .alongWith(r.intake.smartIntake()));
+                        .raceWith(r.intake.smartIntake()));
 
         // backup and shoot
         sequence.addCommands(

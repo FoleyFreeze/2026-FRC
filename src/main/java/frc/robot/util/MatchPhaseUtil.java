@@ -77,7 +77,7 @@ public class MatchPhaseUtil {
         double robotTime = Timer.getTimestamp();
 
         if (matchTime == lastMatchTime) {
-            remainingTime += robotTime - lastRobotTime;
+            remainingTime -= robotTime - lastRobotTime;
         } else {
             remainingTime = matchTime;
         }

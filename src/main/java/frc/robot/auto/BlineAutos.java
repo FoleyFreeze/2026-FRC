@@ -109,8 +109,10 @@ public class BlineAutos {
             double maxVel = 1.0;
             double factor = r.intake.calcIntakeSpeed();
             // note that this intentionally does not scale rotational velocity
-            speeds.vxMetersPerSecond = MathUtil.clamp(speeds.vxMetersPerSecond, -maxVel, maxVel) * factor;
-            speeds.vyMetersPerSecond = MathUtil.clamp(speeds.vyMetersPerSecond, -maxVel, maxVel) * factor;
+            speeds.vxMetersPerSecond =
+                    MathUtil.clamp(speeds.vxMetersPerSecond, -maxVel, maxVel) * factor;
+            speeds.vyMetersPerSecond =
+                    MathUtil.clamp(speeds.vyMetersPerSecond, -maxVel, maxVel) * factor;
 
             boolean shake = Math.abs(speeds.omegaRadiansPerSecond) < 0.5;
             speeds.omegaRadiansPerSecond += DriveCommands.shakeOmega(shake, r.drive.getRotation());

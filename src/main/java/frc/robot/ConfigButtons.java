@@ -56,7 +56,7 @@ public class ConfigButtons {
         r.intake.setDefaultCommand(r.intake.stopIntake());
         r.led.setDefaultCommand(r.led.setLEDMode(LED_MODES.BREATHE_BLUE));
 
-        //temp for color testing
+        // temp for color testing
         controller.a().whileTrue(r.led.setLEDMode(LED_MODES.PURPLE));
 
         // drive while shooting

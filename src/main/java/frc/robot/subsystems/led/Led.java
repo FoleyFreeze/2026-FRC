@@ -34,7 +34,7 @@ public class Led extends SubsystemBase {
 
     public enum LED_MODES {
         OFF(LEDPattern.solid(Color.kBlack)),
-        PURPLE(LEDPattern.solid(Color.kPurple)),
+        PURPLE(LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.1), Seconds.of(0.1)),
         BLUE(LEDPattern.solid(Color.kBlue)),
         GREEN(LEDPattern.solid(Color.kGreen)),
         BLINK_GREEN(LEDPattern.solid(Color.kGreen).blink(Seconds.of(0.4), Seconds.of(0.1))),
@@ -104,9 +104,9 @@ public class Led extends SubsystemBase {
                 new RunCommand(
                                 () -> {
                                     LED_MODES mode = modeIn;
-                                    if(brownOut){
+                                    if (brownOut) {
                                         mode = LED_MODES.RED;
-                                    }else if (isGather && !isShoot) {
+                                    } else if (isGather && !isShoot) {
                                         mode = LED_MODES.BLINK_GREEN;
                                     } else if (isShoot && !isGather) {
                                         if (r.shooter.missReason == MissReason.NONE

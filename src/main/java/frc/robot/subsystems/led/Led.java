@@ -4,8 +4,8 @@ import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLED.ColorOrder;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -35,8 +35,14 @@ public class Led extends SubsystemBase {
 
     public enum LED_MODES {
         OFF(LEDPattern.solid(Color.kBlack)),
-        RAPID_BLINK_PURPLE(LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.1), Seconds.of(0.1))), //some may notice this is in fact yellow, a color that is not purple
-        BLUE(LEDPattern.solid(Color.kBlue)), 
+        RAPID_BLINK_PURPLE(
+                LEDPattern.solid(Color.kYellow)
+                        .blink(
+                                Seconds.of(0.1),
+                                Seconds.of(
+                                        0.1))), // some may notice this is in fact yellow, a color
+        // that is not purple
+        BLUE(LEDPattern.solid(Color.kBlue)),
         GREEN(LEDPattern.solid(Color.kGreen)),
         BLINK_GREEN(LEDPattern.solid(Color.kGreen).blink(Seconds.of(0.4), Seconds.of(0.1))),
         RED(LEDPattern.solid(Color.kRed)),
@@ -81,14 +87,16 @@ public class Led extends SubsystemBase {
     }
 
     Debouncer brownOutDebounce = new Debouncer(4, DebounceType.kFalling);
-    //LinearFilter voltThreshFilt = LinearFilter.singlePoleIIR(5, 0.02);
+    LinearFilter voltThreshFilt = LinearFilter.singlePoleIIR(5, 0.02);
 
     @Override
     public void periodic() {
         brownOut = brownOutDebounce.calculate(RobotController.isBrownedOut());
         Logger.recordOutput("BrownedOut", brownOut);
 
-        //voltThreshFilt.calculate(RobotController.getBatteryVoltage());
+        double voltUnderThresh =
+                voltThreshFilt.calculate(RobotController.getBatteryVoltage() < 7.0 ? 1 : 0);
+        Logger.recordOutput("voltThreshFilt", voltUnderThresh);
 
         double ballCount = 0;
         for (int i = 0; i < r.fuelVision.inputs.fuelData.length; i++) {

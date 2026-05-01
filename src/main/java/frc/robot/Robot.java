@@ -95,7 +95,7 @@ public class Robot extends LoggedRobot {
         }
         CommandScheduler.getInstance().setPeriod(0.1);
 
-        RobotController.setBrownoutVoltage(6.0);
+        RobotController.setBrownoutVoltage(6.5);
 
         // Start AdvantageKit logger
         LoggedPowerDistribution.getInstance(1, ModuleType.kRev);

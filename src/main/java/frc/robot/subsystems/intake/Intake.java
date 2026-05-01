@@ -81,6 +81,7 @@ public class Intake extends SubsystemBase {
         calcInputBallsFromCurrent();
 
         calcInputBallRateFromRPM();
+        Logger.recordOutput("Intake/VelMultiplier", calcIntakeSpeed());
     }
 
     public void calcInputBallRateFromRPM() {
@@ -272,6 +273,6 @@ public class Intake extends SubsystemBase {
         if (Constants.currentMode == Mode.SIM) return 1;
 
         // return a 0-1 value based on how hard the intake is working at gathering
-        return MathUtil.inverseInterpolate(500, 0, filtRpmDiff);
+        return 1 - MathUtil.inverseInterpolate(0, 500, filtRpmDiff);
     }
 }

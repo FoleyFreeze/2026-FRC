@@ -119,8 +119,10 @@ public class PathAutos {
         // drive the profile while shooting
         ParallelDeadlineGroup parallelGroup =
                 new ParallelDeadlineGroup(
-                        AutoBuilder.followPath(depotPath), 
-                        ShooterCommands.smartShoot(r, FieldConstants.Hub.center).beforeStarting(new WaitCommand(1).alongWith(r.shooter.pointAtHub())));
+                        AutoBuilder.followPath(depotPath),
+                        ShooterCommands.smartShoot(r, FieldConstants.Hub.center)
+                                .beforeStarting(
+                                        new WaitCommand(1).alongWith(r.shooter.pointAtHub())));
         sequence.addCommands(parallelGroup);
 
         Pose2d preDepotPose = new Pose2d(0.52, 4.7, new Rotation2d());

@@ -107,12 +107,10 @@ public class BlineAutos {
     public void runDynamicVel(ChassisSpeeds speeds) {
         if (useDynamicVel) {
             double maxVel = 1.0;
-            double factor = 0.5; // r.intake.calcIntakeSpeed();
+            double factor = r.intake.calcIntakeSpeed();
             // note that this intentionally does not scale rotational velocity
-            double vx = speeds.vxMetersPerSecond * factor;
-            speeds.vxMetersPerSecond = MathUtil.clamp(vx, -maxVel, maxVel);
-            double vy = speeds.vyMetersPerSecond * factor;
-            speeds.vyMetersPerSecond = MathUtil.clamp(vy, -maxVel, maxVel);
+            speeds.vxMetersPerSecond = MathUtil.clamp(speeds.vxMetersPerSecond, -maxVel, maxVel) * factor;
+            speeds.vyMetersPerSecond = MathUtil.clamp(speeds.vyMetersPerSecond, -maxVel, maxVel) * factor;
 
             boolean shake = Math.abs(speeds.omegaRadiansPerSecond) < 0.5;
             speeds.omegaRadiansPerSecond += DriveCommands.shakeOmega(shake, r.drive.getRotation());

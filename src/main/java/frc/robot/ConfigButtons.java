@@ -56,6 +56,9 @@ public class ConfigButtons {
         r.intake.setDefaultCommand(r.intake.stopIntake());
         r.led.setDefaultCommand(r.led.setLEDMode(LED_MODES.BREATHE_BLUE));
 
+        //temp for color testing
+        controller.a().whileTrue(r.led.setLEDMode(LED_MODES.PURPLE));
+
         // drive while shooting
         final double shootXyReduce = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);
         final double shootZReduce = Math.pow(0.45, 1.0 / DriveCommands.thetaExpo);

@@ -3,11 +3,14 @@ package frc.robot.subsystems.led;
 import static edu.wpi.first.units.Units.Percent;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLED.ColorOrder;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.AddressableLEDBufferView;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -27,9 +30,11 @@ public class Led extends SubsystemBase {
 
     public static boolean isShoot;
     public static boolean isGather;
+    public static boolean brownOut;
 
     public enum LED_MODES {
         OFF(LEDPattern.solid(Color.kBlack)),
+        PURPLE(LEDPattern.solid(Color.kPurple)),
         BLUE(LEDPattern.solid(Color.kBlue)),
         GREEN(LEDPattern.solid(Color.kGreen)),
         BLINK_GREEN(LEDPattern.solid(Color.kGreen).blink(Seconds.of(0.4), Seconds.of(0.1))),
@@ -74,8 +79,13 @@ public class Led extends SubsystemBase {
         leds.start();
     }
 
+    Debouncer brownOutDebounce = new Debouncer(4, DebounceType.kFalling);
+
     @Override
     public void periodic() {
+        brownOut = brownOutDebounce.calculate(RobotController.isBrownedOut());
+        Logger.recordOutput("BrownedOut", brownOut);
+
         double ballCount = 0;
         for (int i = 0; i < r.fuelVision.inputs.fuelData.length; i++) {
             ballCount += r.fuelVision.inputs.fuelData[i].amount;
@@ -94,7 +104,9 @@ public class Led extends SubsystemBase {
                 new RunCommand(
                                 () -> {
                                     LED_MODES mode = modeIn;
-                                    if (isGather && !isShoot) {
+                                    if(brownOut){
+                                        mode = LED_MODES.RED;
+                                    }else if (isGather && !isShoot) {
                                         mode = LED_MODES.BLINK_GREEN;
                                     } else if (isShoot && !isGather) {
                                         if (r.shooter.missReason == MissReason.NONE

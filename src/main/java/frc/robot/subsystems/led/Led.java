@@ -94,6 +94,7 @@ public class Led extends SubsystemBase {
         brownOut = brownOutDebounce.calculate(RobotController.isBrownedOut());
         Logger.recordOutput("BrownedOut", brownOut);
 
+        //TODO: pick a threshold for this and also light the leds
         double voltUnderThresh =
                 voltThreshFilt.calculate(RobotController.getBatteryVoltage() < 7.0 ? 1 : 0);
         Logger.recordOutput("voltThreshFilt", voltUnderThresh);

@@ -57,8 +57,11 @@ public class ConfigButtons {
         r.led.setDefaultCommand(r.led.setLEDMode(LED_MODES.BREATHE_BLUE));
 
         // drive while shooting
-        final double shootXyReduce = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);
-        final double shootZReduce = Math.pow(0.45, 1.0 / DriveCommands.thetaExpo);
+        // final double shootXyReduce = Math.pow(0.7, 1.0 / DriveCommands.xyExpo);
+        // final double shootZReduce = Math.pow(0.45, 1.0 / DriveCommands.thetaExpo);
+        final double shootXyReduce = Math.pow(0.5, 1.0 / DriveCommands.xyExpo);
+        final double shootZReduce = Math.pow(0.35, 1.0 / DriveCommands.thetaExpo);
+        
         controller
                 .rightTrigger()
                 .or(controller.rightBumper())

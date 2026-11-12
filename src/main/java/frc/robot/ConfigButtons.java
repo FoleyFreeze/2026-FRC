@@ -61,7 +61,7 @@ public class ConfigButtons {
         // final double shootZReduce = Math.pow(0.45, 1.0 / DriveCommands.thetaExpo);
         final double shootXyReduce = Math.pow(0.5, 1.0 / DriveCommands.xyExpo);
         final double shootZReduce = Math.pow(0.35, 1.0 / DriveCommands.thetaExpo);
-        
+
         controller
                 .rightTrigger()
                 .or(controller.rightBumper())

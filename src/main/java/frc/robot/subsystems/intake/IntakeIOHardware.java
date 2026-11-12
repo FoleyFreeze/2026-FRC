@@ -81,7 +81,7 @@ public class IntakeIOHardware implements IntakeIO {
         cfg.Slot0.kV = 0.01;
         cfg.TorqueCurrent.PeakForwardTorqueCurrent = 60;
         cfg.TorqueCurrent.PeakReverseTorqueCurrent = -60;
-        cfg.MotionMagic.MotionMagicAcceleration = 400;
+        cfg.MotionMagic.MotionMagicAcceleration = 100;
         cfg.MotionMagic.MotionMagicJerk = 0;
         cfg.CurrentLimits.StatorCurrentLimitEnable = true;
         cfg.CurrentLimits.StatorCurrentLimit = 60;
@@ -109,7 +109,8 @@ public class IntakeIOHardware implements IntakeIO {
         intakeAbsEnc = new CANcoder(2, TunerConstants.kCANBus);
         var encCfg = new CANcoderConfiguration();
         encCfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        encCfg.MagnetSensor.MagnetOffset = -0.19; // -0.51; // -0.67; changed because chain slipped
+        encCfg.MagnetSensor.MagnetOffset =
+                -0.117; // -0.19; // -0.51; // -0.67; changed because chain slipped
         encCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.7;
         intakeAbsEnc.getConfigurator().apply(encCfg);
 
